@@ -32,9 +32,6 @@ namespace nsp {
                     if (sptr->on_connected() < 0) {
                         throw std::logic_error("user terminated connection.");
                     }
-                } catch (std::bad_weak_ptr &e) {
-                    sptr->close();
-                    return;
                 } catch (...) {
                     sptr->close();
                     return;
