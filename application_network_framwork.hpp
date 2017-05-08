@@ -6,9 +6,8 @@
 #include <mutex>
 
 #include "network_handler.h"
-
 #include "serialize.hpp"
-
+#include "log.h"
 #include "old.hpp"
 
 namespace nsp {
@@ -34,7 +33,6 @@ namespace nsp {
                         throw std::logic_error("user terminated connection.");
                     }
                 } catch (std::bad_weak_ptr &e) {
-                    //loerr << "failed to accept remote connection." << e.what();
                     sptr->close();
                     return;
                 } catch (...) {

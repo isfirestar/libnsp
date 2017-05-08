@@ -18,8 +18,14 @@ enum log__targets {
 };
 
 __extern__
-void log__write(const char *module, enum log__levels level, enum log__targets target, const char *format, ...);
+void log__write(const char *module, enum log__levels level, int target, const char *format, ...);
 __extern__
-void log__save(const char *module, enum log__levels level, enum log__targets target, const char *format, ...);
+void log__save(const char *module, enum log__levels level, int target, const char *format, ...);
+
+/* 最大允许指定日志模块名称长度 */
+#define  LOG_MODULE_NAME_LEN   (128)
+
+/* 最大允许单次日志写入数据长度 */
+#define  MAXIMUM_LOG_BUFFER_SIZE  (2048)
 
 #endif
