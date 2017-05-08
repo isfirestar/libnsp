@@ -11,7 +11,7 @@
 #include <memory>
 
 #include "endpoint.h"
-#include "nisdef.h"
+#include "icom/nisdef.h"
 
 namespace nsp {
     namespace tcpip {

@@ -2,7 +2,7 @@
 #define NSP_PROTODEF_HEADER_20160614
 
 #include "toolkit.h"
-#include "nisdef.h"
+#include "icom/nisdef.h"
 
 namespace nsp {
     namespace proto {

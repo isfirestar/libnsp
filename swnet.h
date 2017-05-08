@@ -5,9 +5,10 @@
 #include <unordered_map>
 #include <mutex>
 
+#include "icom/nisdef.h"
+
 #include "singleton.hpp"
 #include "network_handler.h"
-#include "nisdef.h"
 #include "os_util.hpp"
 
 #define NSP_DECLARE_INTERFACE(_Ret, _Routine, _Arg, _Par) \
