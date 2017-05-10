@@ -7,6 +7,7 @@
 #include "os_util.hpp"
 #include "swnet.h"
 #include "icom/posix_string.h"
+#include "exception.hpp"
 
 namespace nsp {
 	namespace tcpip {
@@ -139,9 +140,13 @@ namespace nsp {
 
 		endpoint::endpoint( const char *ipstr, const port_t po ) {
 			char epstr[128];
-			posix__sprintf( epstr, cchof( epstr ), "%s:%u", ipstr, po );
+			if ( 0 == strlen( ipstr ) ) {
+				posix__sprintf( epstr, cchof( epstr ), "0.0.0.0:%u", po );
+			} else {
+				posix__sprintf( epstr, cchof( epstr ), "%s:%u", ipstr, po );
+			}
 			if ( endpoint::build( epstr, *this ) < 0 ) {
-				throw std::exception( "failed build endpoint." );
+				throw toolkit::base_exception( "failed build endpoint." );
 			}
 		}
 

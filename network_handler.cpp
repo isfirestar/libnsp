@@ -65,7 +65,7 @@ namespace nsp {
         }
 
         int obtcp::create() {
-            return create(endpoint("", 0));
+            return create(endpoint("0.0.0.0", 0));
         }
 
         std::weak_ptr<obtcp> obtcp::attach() {
@@ -252,7 +252,7 @@ namespace nsp {
         }
 
         int obudp::create(const int flag) {
-            return create(endpoint("", 0), flag);
+            return create(endpoint("0.0.0.0", 0), flag);
         }
 
         int obudp::create(const endpoint &ep, const int flag) {
