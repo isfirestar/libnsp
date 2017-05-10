@@ -153,10 +153,6 @@ namespace nsp {
 		uint64_t gettick();
 		uint64_t clock_gettime();
 
-		// 字符编码的转换例程
-		int ench_utf8_to_gb2312( char *utf8, int srclen, char *gb2312, int dstlen );
-		int ench_gb2312_to_utf8( char *gb2312, int srclen, char *utf8, int dstlen );
-
 		// 动态库加载例程 gcc -ldl
 		void *dlopen( const char *file );
 		void* dlsym( void* handle, const char* symbol );

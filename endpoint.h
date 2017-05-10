@@ -3,6 +3,8 @@
 #include <string>
 #include <cstdint>
 
+#include "icom/posix_types.h"
+
 #if !defined MAXIMUM_IPV4_STRLEN
 #define MAXIMUM_IPV4_STRLEN     (0x10)
 #endif // !MAXIMUM_IPV4_STRLEN
@@ -45,7 +47,7 @@ namespace nsp {
             const char *ipv4() const;
             const u32_ipv4_t ipv4_uint32() const;
             void ipv4(const u32_ipv4_t uint32_address);
-            void ipv4(const std::string &ipstr); // 因为已经有 uint32 参数的函数, 必须避免出现 const char * 的重载
+            void ipv4(const std::string &ipstr); // 因为已经有 uint32 参数的函数, 必须避免出现 const char * 的重载, 函数失败则保留原有的IP地址串
             void ipv4(const char *ipstr, int cpcch);
             const port_t port() const;
             void port(const port_t po);
@@ -56,11 +58,14 @@ namespace nsp {
             // 释义: 为什么不提供 epstr 作为参数的 endpoint 构造函数
             // epstr 的解析不一定能成功, 如果提供构造函数, 将没有任何机会返回异常, 最多只能抛出异常, 增加了客户代码捕获异常的复杂度
             static int build(const std::string &epstr, endpoint &ep);
+			static int build( const char *ipstr, uint16_t port, endpoint &ep );
             static endpoint boardcast(const port_t po);
 
-        private:
+        public:
             static int parse_ep(const std::string & epstr, std::string &ipv4, port_t &port);
-
+			static int parse_domain( const std::string &domain, std::string &ipv4 );
+			static posix__boolean_t is_effective_ipv4( const std::string &ipstr );
+			static posix__boolean_t is_effective_port( const std::string &portstr, uint16_t &port );
         private:
             char ipstr_[MAXIMUM_IPV4_STRLEN];
             port_t port_;

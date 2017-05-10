@@ -224,7 +224,7 @@ namespace nsp {
                         try {
                             char *init_buff = new char[cb_];
                             bzero(init_buff, cb_);
-                            if (posix_fwrite(fd, init_buff, sizeof (init_buff)) < 0) {
+                            if (posix__write_file(fd, init_buff, sizeof (init_buff)) < 0) {
                                 ::close(fd);
                                 delete []init_buff;
                                 return -1;

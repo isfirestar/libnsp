@@ -171,85 +171,17 @@ namespace nsp {
             return output;
         }
 
-        int is_digit_str(const std::string &str) {
+        posix__boolean_t is_digit_str(const std::string &str) {
             std::size_t len = str.length();
             if (0 == len) {
-                return -1;
+                return posix__false;
             }
             for (std::size_t i = 0; i < len; i++) {
                 if (!isdigit(str[i])) {
-                    return -1;
+                    return posix__false;
                 }
             }
-            return 0;
-        }
-
-        int is_effective_ipv4str(const std::string &ipstr) {
-            static const std::string delim = ".";
-
-            if (0 == ipstr.length()) {
-                return -1;
-            }
-
-            if (0 == toolkit::posix_strcasecmp(ipstr.c_str(), "localhost")) {
-                return 0;
-            }
-
-            std::string value[4];
-            std::size_t loc = 0, offset = 0;
-
-            int i = 0;
-            while ((loc = ipstr.find_first_of(delim, offset)) != std::string::npos) {
-                if (i == 3) {
-                    return -1;
-                }
-
-                value[i] = ipstr.substr(offset, loc - offset);
-                offset = loc + 1;
-                i++;
-            }
-            if (3 == i) {
-                value[3] = ipstr.substr(offset);
-            } else {
-                return -1;
-            }
-
-            //对4个value进行判断
-            for (int i = 0; i < 4; i++) {
-                //全数字校验
-                if (is_digit_str(value[i]) < 0) {
-                    return -1;
-                }
-
-                // 每个节的越界判断
-                char* endptr;
-                auto n_value = strtol(value[i].c_str(), &endptr, 10);
-                if (n_value > 255) {
-                    return -1;
-                }
-            }
-            return 0;
-        }
-
-        int is_valid_portstr(const std::string &portstr, uint16_t &port) {
-            // 全数字校验
-            if (is_digit_str(portstr) < 0) {
-                return -1;
-            }
-
-            // 如果不是指定端口为0(使用随机端口), 第0个字节必须是1-9, 不能是0
-            if (0x30 == portstr[0] && portstr.size() > 1) {
-                return -1;
-            }
-
-            // 越界判断
-            char* endptr;
-            auto n_port = strtol(portstr.c_str(), &endptr, 10);
-            if (n_port >= MAXIMU_TCPIP_PORT_NUMBER) {
-                return -1;
-            }
-            port = (uint16_t) n_port;
-            return 0;
+            return posix__true;
         }
 
         uint32_t ipv4_touint(const char *ipv4str, int method) {

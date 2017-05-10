@@ -56,9 +56,6 @@ namespace nsp {
                 if (nsp::toolkit::singleton<swnet>::instance()->tcp_create(shared_from_this(), ipstr.size() > 0 ? ipstr.c_str() : nullptr, ep.port()) < 0) {
                     return -1;
                 }
-            } catch (std::bad_weak_ptr &e) {
-                //loerr << "obtcp must be a shared_ptr object." << e.what();
-                return -1;
             } catch (...) {
                 return -1;
             }
@@ -90,8 +87,6 @@ namespace nsp {
                 local_.port(actport);
 
                 return std::weak_ptr<obtcp>(sptr);
-            } catch (std::bad_weak_ptr &e) {
-                //loerr << "failed to attach tcp object to swnet." << e.what();
             } catch (...) {
                 ;
             }
@@ -272,9 +267,6 @@ namespace nsp {
                 if (toolkit::singleton<swnet>::instance()->udp_create(shared_from_this(), ipstr.size() > 0 ? ipstr.c_str() : nullptr, port, flag) < 0) {
                     return -1;
                 }
-            } catch (std::bad_weak_ptr &e) {
-                //loerr << "failed to create udp object." << e.what();
-                return -1;
             } catch (...) {
                 return -1;
             }

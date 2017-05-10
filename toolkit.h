@@ -2,8 +2,10 @@
 #define TOOLKIT_HEADER_02160613
 
 #include "icom/compiler.h"
+#include "icom/posix_types.h"
 
 #include <vector>
+#include <string>
 
 namespace nsp {
 	namespace toolkit {
@@ -45,9 +47,7 @@ namespace nsp {
         template<class T>
         T *posix_strtok(T *s, const T *, T **save);
 
-        int is_digit_str(const std::string &str);
-        int is_effective_ipv4str(const std::string &ipstr);
-        int is_valid_portstr(const std::string &portstr, uint16_t &port);
+        posix__boolean_t is_digit_str(const std::string &str);
         uint32_t ipv4_touint(const char *ipv4str, int method);
         char *ipv4_tostring(uint32_t ipv4Integer, char * ipv4TextString, uint32_t lengthOfTextCch);
 
