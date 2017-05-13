@@ -9,8 +9,8 @@
 
 #include "toolkit.h"
 
-#define MAXIMUM_VECTOR_ITEM_COUNT   (50000)  // vector 最多5万个元素
-#define MAXIMUM_STRING_CHARACTER_COUNT  (100000) // string 最多10万个字节
+// #define MAXIMUM_VECTOR_ITEM_COUNT   (50000)  // vector 最多5万个元素
+// #define MAXIMUM_STRING_CHARACTER_COUNT  (100000) // string 最多10万个字节
 
 namespace nsp {
     namespace proto {
@@ -126,7 +126,7 @@ namespace nsp {
                 proto_crt_t<uint32_t> element_count;
                 stream_pos = element_count.build(stream_pos, cb);
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
-                if (!stream_pos || element_count > MAXIMUM_VECTOR_ITEM_COUNT) return nullptr;
+                // if (!stream_pos || element_count > MAXIMUM_VECTOR_ITEM_COUNT) return nullptr;
                 for (uint32_t i = 0; i < element_count; i++) {
                     T item;
                     stream_pos = item.build(stream_pos, cb);
@@ -173,7 +173,7 @@ namespace nsp {
                 proto_crt_t<uint32_t> element_count;
                 stream_pos = element_count.build(stream_pos, cb);
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
-                if (!stream_pos || element_count > MAXIMUM_STRING_CHARACTER_COUNT) return nullptr;
+                // if (!stream_pos || element_count > MAXIMUM_STRING_CHARACTER_COUNT) return nullptr;
                 int acquire_cb = sizeof ( T) * element_count;
                 if (cb < acquire_cb) return nullptr;
                 try {
