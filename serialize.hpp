@@ -9,8 +9,31 @@
 
 #include "toolkit.h"
 
-// #define MAXIMUM_VECTOR_ITEM_COUNT   (50000)  // vector 最多5万个元素
-// #define MAXIMUM_STRING_CHARACTER_COUNT  (100000) // string 最多10万个字节
+#if USE_SAFE_VECTOR_SIZE
+#define MAXIMUM_VECTOR_ITEM_COUNT   (50000)  // vector 最多5万个元素
+#define MAXIMUM_STRING_CHARACTER_COUNT  (100000) // string 最多10万个字节
+
+#if !defined SAFE_VECTOR_SIZE_CHECKING
+#define SAFE_VECTOR_SIZE_CHECKING(size)	(size < MAXIMUM_VECTOR_ITEM_COUNT)
+#endif // !SAFE_SIZE_CHECKING
+
+#if !defined SAFE_STRING_SIZE_CHECKING
+#define SAFE_STRING_SIZE_CHECKING(size) (size < MAXIMUM_STRING_CHARACTER_COUNT)
+#endif // !SAFE_STRING_SIZE_CHECKING
+
+#else
+
+#if !defined SAFE_VECTOR_SIZE_CHECKING
+#define SAFE_VECTOR_SIZE_CHECKING(size)	(1)
+#endif // !SAFE_SIZE_CHECKING
+
+#if !defined SAFE_STRING_SIZE_CHECKING
+#define SAFE_STRING_SIZE_CHECKING(size)	(1)
+#endif // !SAFE_STRING_SIZE_CHECKING
+
+#endif // USE_SAFE_VECTOR_SIZE
+
+
 
 namespace nsp {
     namespace proto {
@@ -126,7 +149,8 @@ namespace nsp {
                 proto_crt_t<uint32_t> element_count;
                 stream_pos = element_count.build(stream_pos, cb);
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
-                // if (!stream_pos || element_count > MAXIMUM_VECTOR_ITEM_COUNT) return nullptr;
+				if ( !stream_pos ) return nullptr;
+				if ( !SAFE_VECTOR_SIZE_CHECKING( element_count ) ) return nullptr;
                 for (uint32_t i = 0; i < element_count; i++) {
                     T item;
                     stream_pos = item.build(stream_pos, cb);
@@ -173,7 +197,8 @@ namespace nsp {
                 proto_crt_t<uint32_t> element_count;
                 stream_pos = element_count.build(stream_pos, cb);
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
-                // if (!stream_pos || element_count > MAXIMUM_STRING_CHARACTER_COUNT) return nullptr;
+                if ( !stream_pos ) return nullptr;
+				if ( !SAFE_STRING_SIZE_CHECKING( element_count ) ) return nullptr;
                 int acquire_cb = sizeof ( T) * element_count;
                 if (cb < acquire_cb) return nullptr;
                 try {

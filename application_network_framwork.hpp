@@ -18,7 +18,6 @@ namespace nsp {
             tcp_application_service(HTCPLINK lnk) = delete; // 作为监听对象， 不存在使用链接构造这一说法
 
             // 下层不再需要关注链接建立的任何细节, 这个虚函数到此终止
-
             virtual void on_accepted(HTCPLINK lnk) override final {
 
                 std::shared_ptr<T> sptr = std::make_shared<T>(lnk);
@@ -45,7 +44,6 @@ namespace nsp {
             }
 
             // 作为监听对象, 一定不会出现收到实际数据包的情况
-
             virtual void on_recvdata(const std::string &data) override final {
                 abort();
             }
@@ -79,7 +77,6 @@ namespace nsp {
             }
 
             // 客户端关闭后通知服务端
-
             void on_client_closed(const HTCPLINK lnk) {
                 std::lock_guard < decltype(client_locker_) > guard(client_locker_);
                 auto iter = client_set_.find(lnk);
@@ -142,7 +139,6 @@ namespace nsp {
             }
 
             // 按链接查找一个客户端
-
             int search_client_by_link(const HTCPLINK lnk, std::shared_ptr<T> &client) const {
                 std::lock_guard < decltype(client_locker_) > guard(client_locker_);
                 auto iter = client_set_.find(lnk);
@@ -180,7 +176,6 @@ namespace nsp {
 
             // 如果使用 proto::proto_interface 的流化和反流化模型， 则可以直接使用这样的对象进行发包操作
             // 这种操作是框架最推荐的
-
             int psend(const proto::proto_interface *package) {
                 if (!package) return -1;
                 return obtcp::send(package->length(), [&] (void *buffer, int cb) ->int {
@@ -193,7 +188,6 @@ namespace nsp {
             }
         protected:
             // 如果服务端还在， 则通知服务端,有客户链接断开， 同时允许继续重写下行
-
             virtual void on_closed(HTCPLINK previous) override final {
                 auto sptr = tcp_application_server_.lock();
                 if (sptr) {
@@ -205,9 +199,10 @@ namespace nsp {
                 on_disconnected(previous);
             }
 
+			// 客户端对象收到连接请求， 肯定是严重错误
             virtual void on_accepted(HTCPLINK lnk) override final {
                 abort();
-            } // 客户端对象收到连接请求， 肯定是严重错误
+            } 
 
             virtual void on_disconnected(const HTCPLINK previous) {
             }

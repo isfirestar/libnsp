@@ -48,6 +48,8 @@ const char *posix__getpedir();
 __extern__
 const char *posix__getpename();
 __extern__
+const char *posix__getelfname();
+__extern__
 const char *posix__gettmpdir();
 __extern__
 int posix__isdir(const char *const file);
@@ -60,7 +62,8 @@ int posix__isdir(const char *const file);
 __extern__
 int posix__getpriority(int *priority);
 
-/* linux 提供 5,0,-5,-10 四个内置档次的优先级
+/* 调整进程优先级
+ * linux 提供 5,0,-5,-10 四个内置档次的优先级
  * win32 对应 IDLE_PRIORITY_CLASS NORMAL_PRIORITY_CLASS HIGH_PRIORITY_CLASS REALTIME_PRIORITY_CLASS 四个内置档次的优先级
  *  */
 __extern__
@@ -96,11 +99,11 @@ __extern__
 void posix__syslog(const char *const logmsg );
 
 /* 编码格式转换 
-	from_encode/to_encode 支持列表:
-	utf-8
-	gb2312
-	unicode
-*/
+ * from_encode/to_encode 支持列表:
+ * utf-8
+ * gb2312
+ * unicode
+ */
 __extern__
 int posix__iconv(const char *from_encode, const char *to_encode, char **from, size_t from_bytes, char **to, size_t *to_bytes);
 

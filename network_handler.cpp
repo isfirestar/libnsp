@@ -162,7 +162,6 @@ namespace nsp {
         }
 
         // ·¢ËÍÀý³Ì
-
         int obtcp::send(int cb, const std::function<int( void *, int) > &fill) {
             if (cb <= 0 || INVALID_HTCPLINK == lnk_ || !fill) {
                 return -1;
