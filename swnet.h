@@ -16,9 +16,9 @@
                                 typedef _Ret (STD_CALL *_Routine_Type)_Arg; \
                                 _Ret r = _DefaultRet; \
                                 static void *f = nullptr; \
-								if (!f) { \
-									nsp::os::dlsym( shared_library_, #_Routine ); \
-								} \
+                                                                if (!f) { \
+                                                                        f = nsp::os::dlsym( shared_library_, #_Routine ); \
+                                                                } \
                                 if (f) { \
                                         r = ((_Routine_Type)f)_Par; \
                                 } \
@@ -30,9 +30,9 @@
                                 typedef int (STD_CALL *_Routine_Type)_Arg; \
                                 int r = -1; \
                                 static void *f = nullptr; \
-								if (!f) { \
-									nsp::os::dlsym( shared_library_, #_Routine ); \
-								} \
+                                                                if (!f) { \
+                                                                        f = nsp::os::dlsym( shared_library_, #_Routine ); \
+                                                                } \
                                 if (f) { \
                                         r = ((_Routine_Type)f)_Par; \
                                 } \
@@ -43,9 +43,9 @@
                         void _Routine _Arg { \
                                 typedef void (STD_CALL *_Routine_Type)_Arg; \
                                 static void *f = nullptr; \
-								if (!f) { \
-									f = nsp::os::dlsym( shared_library_, #_Routine ); \
-								} \
+                                                                if (!f) { \
+                                                                        f = nsp::os::dlsym( shared_library_, #_Routine ); \
+                                                                } \
                                 if (f) { \
                                         ((_Routine_Type)f)_Par; \
                                 } \
@@ -55,7 +55,7 @@ namespace nsp {
     namespace tcpip {
 
         class swnet {
-			// dl
+            // dl
             void *shared_library_ = nullptr;
 
             // TCP
@@ -77,8 +77,8 @@ namespace nsp {
             swnet();
             ~swnet();
 
-			//io
-			static void STD_CALL tcp_io(const nis_event_t *pParam1, const void *pParam2);
+            //io
+            static void STD_CALL tcp_io(const nis_event_t *pParam1, const void *pParam2);
             static void STD_CALL udp_io(const nis_event_t *pParam1, const void *pParam2);
 
         public:
@@ -110,14 +110,14 @@ namespace nsp {
             NSP_DECLARE_COMM_INTERFACE(nis_ctxsize, (HLNK lnk), (lnk));
             NSP_DECLARE_COMM_INTERFACE(nis_getver, (swnet_version_t *version), (version));
             NSP_DECLARE_COMM_INTERFACE(nis_gethost, (const char *name, uint32_t *ipv4), (name, ipv4)); /*可用于域名解析，获取首个解析IP地址, 该地址将在过程内部被转为小端*/
-            
+
         public:
-			// TCP
+            // TCP
             int tcp_create(std::shared_ptr<obtcp> object, const char *ipstr, const port_t port);
             int tcp_attach(HTCPLINK lnk, const std::shared_ptr<obtcp> &object);
             void tcp_detach(HTCPLINK lnk);
 
-			// UDP
+            // UDP
             int udp_create(std::shared_ptr<obudp> object, const char* ipstr, const port_t port, int flag = UDP_FLAG_NONE);
             void udp_detach(HUDPLINK lnk);
         };
