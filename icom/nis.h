@@ -23,7 +23,7 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) tcp_init();
 interface_format(void) tcp_uninit();
-interface_format(HTCPLINK) tcp_create(tcp_io_callback_t f_usr, const char* l_ipstr, uint16_t l_port);
+interface_format(HTCPLINK) tcp_create(tcp_io_callback_t user_callback, const char* l_ipstr, uint16_t l_port);
 interface_format(int) tcp_settst(HTCPLINK lnk, const tst_t *tst);
 interface_format(int) tcp_gettst(HTCPLINK lnk, tst_t *tst);
 interface_format(void) tcp_destroy(HTCPLINK lnk);
@@ -39,7 +39,7 @@ interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, in
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) udp_init();
 interface_format(void) udp_uninit();
-interface_format(HUDPLINK) udp_create(udp_io_callback_t f_usr, const char* l_ipstr, uint16_t l_port, int flag);
+interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* l_ipstr, uint16_t l_port, int flag);
 interface_format(void) udp_destroy(HUDPLINK lnk);
 interface_format(int) udp_write(HUDPLINK lnk, int cb, nis_sender_maker_t maker, void *par, const char* r_ipstr, uint16_t r_port);
 interface_format(int) udp_getaddr(HUDPLINK lnk, uint32_t *ipv4, uint16_t *port_output);
@@ -60,9 +60,9 @@ interface_format(int) udp_write_grp(HUDPLINK lnk, packet_grp_t *grp);
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
  对象相关/全局采样 部分
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-interface_format(int) nis_setctx(HLNK lnk, const void * usrctx, int cbusrctx);
-interface_format(int) nis_getctx(HLNK lnk, void * usrctx, int *cbusrctx/*opt*/);
-interface_format(void *) nis_refctx(HLNK lnk, int *cbusrctx);
+interface_format(int) nis_setctx(HLNK lnk, const void * user_context, int user_context_size);
+interface_format(int) nis_getctx(HLNK lnk, void * user_context, int *user_context_size/*opt*/);
+interface_format(void *) nis_refctx(HLNK lnk, int *user_context_size);
 interface_format(int) nis_ctxsize(HLNK lnk);
 interface_format(int) nis_getver(swnet_version_t *version);
 interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); /*可用于域名解析，获取首个解析IP地址, 该地址将在过程内部被转为小端*/

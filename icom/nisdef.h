@@ -95,19 +95,19 @@ typedef nis_callback_t udp_io_callback_t;
 /* 私有协议模板(PPT, private protocol template) 支持
 
         协议解析模板 tcp_ppt_parser_t
-                @dat	数据流
-                @cb		数据流长度
-                @cbusr	用户部分的长度(除去协议长度后)
+                @data               数据流
+                @cb                 数据流长度
+                @user_data_size   用户部分的长度(除去协议长度后)
 
         协议构建模板 tcp_ppt_builder_t
-                @dat	构建协议的数据流
-                @cb		构建协议的数据字节长度
+                @data               构建协议的数据流
+                @cb                 构建协议的数据字节长度
 
         私有协议模板的操作返回<0, 将会使下级网络流程失败中止
  */
 
-typedef int( STD_CALL *tcp_ppt_parser_t)(void *dat, int cb, int *cbusr);
-typedef int( STD_CALL *tcp_ppt_builder_t)(void *dat, int cb);
+typedef int( STD_CALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
+typedef int( STD_CALL *tcp_ppt_builder_t)(void *data, int cb);
 
 typedef struct _TCP_STREAM_TEMPLATE {
     tcp_ppt_parser_t parser_;

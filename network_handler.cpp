@@ -168,8 +168,8 @@ namespace nsp {
             }
 
             return toolkit::singleton<swnet>::instance()->tcp_write(lnk_, cb, [] (void *data, int cb, void *par)->int {
-                const std::function<int( void *, int) > *usr_fill = (const std::function<int( void *, int) > *)par;
-                return ( *usr_fill)(data, cb);
+                const std::function<int( void *, int) > *user_fill = (const std::function<int( void *, int) > *)par;
+                return ( *user_fill)(data, cb);
             }, (void *) &fill);
         }
 

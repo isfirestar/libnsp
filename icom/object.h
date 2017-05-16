@@ -16,7 +16,7 @@ void objinit();
 __extern__
 void objuninit();
 __extern__
-objhld_t objallo(int cbusr, objinitfn_t initializer, objuninitfn_t unloader, void *initctx, unsigned int cbctx);
+objhld_t objallo(int user_data_size, objinitfn_t initializer, objuninitfn_t unloader, void *initctx, unsigned int cbctx);
 __extern__
 void *objrefr(objhld_t hld);
 __extern__
