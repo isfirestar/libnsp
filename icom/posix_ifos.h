@@ -7,9 +7,9 @@
 
 /* ifos-ps */
 __extern__
-int posix__gettid();
+long posix__gettid();
 __extern__
-int posix__getpid();
+long posix__getpid();
 /*
  * posix__sleep 过程在 linux 无法精确到毫秒， 如果需要精确到毫秒， 则使用 waitable_handle 的超时机制
  */
@@ -37,6 +37,8 @@ __extern__
 int posix__rm(const char *const target);
 __extern__
 void posix__close(int fd);
+__extern__
+int posix__fflush(int fd);
 
 /* 获取当前执行文件完整路径 */
 __extern__

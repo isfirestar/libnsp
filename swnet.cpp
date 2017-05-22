@@ -59,7 +59,7 @@ namespace nsp {
             shared_library_ = os::dlopen("nshost.dll");
 #else
             shared_library_ = os::dlopen("nshost.so");
-			if (!shared_library_) {
+            if (!shared_library_) {
                 printf(dlerror());
                 throw std::exception();
             }

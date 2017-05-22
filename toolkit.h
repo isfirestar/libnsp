@@ -8,26 +8,27 @@
 #include <string>
 
 namespace nsp {
-	namespace toolkit {
+    namespace toolkit {
 
-		// 将 @n 提升到下一个2的正整次幂
-		// 如果正数 @n 不是 2 的正整次幂，只需找到其最高的有效位1所在的位置（从1开始计数）pos，然后1 << pos即可将k向上取整为2的正整次幂
-		template<class T>
-		inline T roundup_powerof_2( T n ) {
-			if ( is_powerof_2( n ) ) {
-				return n;
-			}
-			// 至少保证 2 的 1 次幂
-			if ( 0 == n ) {
-				return 2;
-			}
-			uint32_t position = 0;
-			for ( int i = n; i != 0; i >>= 1 ) {
-				position++;
-			}
-			return static_cast< T >( ( T ) 1 << position );
-		}
-        
+        // 将 @n 提升到下一个2的正整次幂
+        // 如果正数 @n 不是 2 的正整次幂，只需找到其最高的有效位1所在的位置（从1开始计数）pos，然后1 << pos即可将k向上取整为2的正整次幂
+
+        template<class T>
+        inline T roundup_powerof_2(T n) {
+            if (is_powerof_2(n)) {
+                return n;
+            }
+            // 至少保证 2 的 1 次幂
+            if (0 == n) {
+                return 2;
+            }
+            uint32_t position = 0;
+            for (int i = n; i != 0; i >>= 1) {
+                position++;
+            }
+            return static_cast<T> ((T) 1 << position);
+        }
+
         template<class T>
         T *posix_strcpy(T *target, std::size_t cch, const T *src);
         template<class T>
@@ -136,6 +137,7 @@ namespace nsp {
         int decrypt(const std::string &crypt, const char *key, std::string &out);
 
         // HEX字符串转整型, "1234ABCD" 转换为 0x1234ABCD， 注意高低位结构
+
         template<class T>
         int strtohex(const std::basic_string<char> &strhex, T &int_hex) {
             // 输出初始值
@@ -178,11 +180,11 @@ namespace nsp {
         // base64 编解码
         int base64_encode(const char *input, int cb, std::string &output);
         int base64_encode(const std::string &input, std::string &output);
-		int base64_decode( const std::string &input, std::string &output );
+        int base64_decode(const std::string &input, std::string &output);
 
-		// 浮点转换
-		unsigned short float2fixed( float fFloat );
-		float fixed2float( unsigned short uFixed );
+        // 浮点转换
+        unsigned short float2fixed(float fFloat);
+        float fixed2float(unsigned short uFixed);
 
     } // toolkit
 } // nsp

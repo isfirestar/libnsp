@@ -23,52 +23,52 @@ namespace nsp {
 
         template<>
         char *posix_strcpy<char>(char *target, std::size_t cch, const char *src) {
-			return ::posix__strcpy( target, cch, src );
+            return ::posix__strcpy(target, cch, src);
         }
 
         template<>
         wchar_t *posix_strcpy<wchar_t>(wchar_t *target, std::size_t cch, const wchar_t *src) {
-			return ::posix__wcscpy( target, cch, src );
+            return ::posix__wcscpy(target, cch, src);
         }
 
         template<>
         char *posix_strdup<char>(const char *src) {
-			return ::posix__strdup( src );
+            return ::posix__strdup(src);
         }
 
         template<>
         wchar_t *posix_strdup<wchar_t>(const wchar_t *src) {
-			return ::posix__wcsdup( src );
+            return ::posix__wcsdup(src);
         }
 
         template<>
         char *posix_strncpy<char>(char *target, std::size_t cch, const char *src, std::size_t cnt) {
-			return ::posix__strncpy( target, cch, src, cnt );
+            return ::posix__strncpy(target, cch, src, cnt);
         }
 
         template<>
         wchar_t *posix_strncpy<wchar_t>(wchar_t *target, std::size_t cch, const wchar_t *src, std::size_t cnt) {
-			return ::posix__wcsncpy( target, cch, src, cnt );
+            return ::posix__wcsncpy(target, cch, src, cnt);
         }
 
         template<>
         char *posix_strcat<char>(char *target, std::size_t cch, const char *src) {
-			return ::posix__strcat( target, cch, src );
+            return ::posix__strcat(target, cch, src);
         }
 
         template<>
         wchar_t *posix_strcat<wchar_t>(wchar_t *target, std::size_t cch, const wchar_t *src) {
-			return ::posix__wcscat( target, cch, src );
+            return ::posix__wcscat(target, cch, src);
         }
 
         template<>
         char *posix_strrev<char>(char *src) {
-			return ::posix__strrev( src );
+            return ::posix__strrev(src);
         }
 
         template<>
         wchar_t *posix_strrev<wchar_t>(wchar_t *src) {
-			return ::posix__wcsrev( src );
+            return ::posix__wcsrev(src);
         }
 
         template<>
@@ -91,17 +91,17 @@ namespace nsp {
 
         template<>
         int posix_vsprintf<char>(char *const target, std::size_t cch, const char *format, va_list ap) {
-			return ::posix__vsprintf( target, cch, format, ap );
+            return ::posix__vsprintf(target, cch, format, ap);
         }
 
         template<>
         int posix_vsprintf<wchar_t>(wchar_t *const target, std::size_t cch, const wchar_t *format, va_list ap) {
-			return ::posix__vswprintf( target, cch, format, ap );
+            return ::posix__vswprintf(target, cch, format, ap);
         }
 
         template<>
         int posix_strcasecmp<char>(const char *s1, const char *s2) {
-			return ::posix__strcasecmp( s1, s2 );
+            return ::posix__strcasecmp(s1, s2);
         }
 
         template<>
@@ -115,12 +115,12 @@ namespace nsp {
 
         template<>
         char *posix_strtok<char>(char *s, const char *delim, char **save_ptr) {
-			return ::posix__strtok( s, delim, save_ptr );
+            return ::posix__strtok(s, delim, save_ptr);
         }
 
         template<>
         wchar_t *posix_strtok<wchar_t>(wchar_t *s, const wchar_t *delim, wchar_t **save_ptr) {
-			return ::posix__wcstok( s, delim, save_ptr );
+            return ::posix__wcstok(s, delim, save_ptr);
         }
 
         template<>
@@ -185,11 +185,11 @@ namespace nsp {
         }
 
         uint32_t ipv4_touint(const char *ipv4str, int method) {
-			return ::posix__ipv4tou( ipv4str, static_cast<enum byte_order_t>(method) );
+            return ::posix__ipv4tou(ipv4str, static_cast<enum byte_order_t> (method));
         }
 
         char *ipv4_tostring(uint32_t ipv4Integer, char * ipv4TextString, uint32_t lengthOfTextCch) {
-			return ::posix__ipv4tos( ipv4Integer, ipv4TextString, lengthOfTextCch );
+            return ::posix__ipv4tos(ipv4Integer, ipv4TextString, lengthOfTextCch);
         }
 
         template<>
@@ -233,7 +233,7 @@ namespace nsp {
 #if _WIN32
             ::posix__sprintf(tmp, cchof(tmp), "%I64u", d);
 #else
-			::posix__sprintf(tmp, cchof(tmp), "%llu", d);
+            ::posix__sprintf(tmp, cchof(tmp), "%llu", d);
 #endif
             return std::string().assign(tmp);
         }
@@ -244,7 +244,7 @@ namespace nsp {
 #if _WIN32
             ::posix__sprintf(tmp, cchof(tmp), "%I64d", d);
 #else
-			::posix__sprintf(tmp, cchof(tmp), "%lld", d);
+            ::posix__sprintf(tmp, cchof(tmp), "%lld", d);
 #endif
             return std::string().assign(tmp);
         }
@@ -266,6 +266,7 @@ namespace nsp {
         }
 
         // greatest common divisor
+
         int gcd(int a, int b) {
             if (a < b) {
                 int temp = a;
@@ -276,6 +277,7 @@ namespace nsp {
         }
 
         // Least common multiple
+
         double lcm(int a, int b) {
             return (double) ((double) a * b) / gcd(a, b);
         }
@@ -287,7 +289,7 @@ namespace nsp {
         double rad2deg(double radian) {
             return radian * 360 / (2 * PI);
         }
-        
+
         /*计算离散傅立叶变换*/
         int dispersed_fourier_transform(int dir, int m, double *x1, double *y1) {
             long i, k;
@@ -296,7 +298,7 @@ namespace nsp {
             double *x2 = nullptr;
             double *y2 = nullptr;
             int retval = 0;
-            
+
             try {
                 x2 = new double[m];
                 y2 = new double[m];
@@ -327,7 +329,7 @@ namespace nsp {
                         y1[i] = y2[i];
                     }
                 }
-            }catch(...){
+            } catch (...) {
                 retval = -1;
             }
 
@@ -338,10 +340,12 @@ namespace nsp {
                 delete []y2;
             }
 
-            return retval;;
+            return retval;
+            ;
         }
 
         // 按分隔符切割子串, 实现 strtok 的功能
+
         template<>
         std::size_t slicing_symbol_string(const std::basic_string<char> &source, const char symbol, std::vector<std::basic_string<char>> &vct_substr) {
             std::basic_string<char> tmp;
@@ -409,6 +413,7 @@ namespace nsp {
         }
 
         // 去除左右空格
+
         template<>
         int trim(const std::basic_string<char> &src, std::basic_string<char> &dst) {
             try {
@@ -440,6 +445,7 @@ namespace nsp {
         }
 
         // 保留原串，取出左右空格后返回新串
+
         template<>
         std::basic_string<char> trim_copy(const std::basic_string<char> &src) {
             std::basic_string<char> dst;
@@ -457,7 +463,7 @@ namespace nsp {
         }
 
         int random(const int range_min, const int range_max) {
-			return ::posix__random(range_min, range_max);
+            return ::posix__random(range_min, range_max);
         }
 
         template<class T>
@@ -465,7 +471,7 @@ namespace nsp {
             if ((key.size() < 16) || ((key.size() % 8) != 0)) {
                 MD5_CTX ctx;
                 unsigned char disgest[16];
-				::MD5__Init( &ctx );
+                ::MD5__Init(&ctx);
                 ::MD5__Update(&ctx, (const unsigned char *) key.data(), (int) key.size());
                 ::MD5__Final(&ctx, disgest);
                 key.clear();
@@ -649,9 +655,9 @@ namespace nsp {
             return decrypt(crypt, std::string(key, strlen(key)), out);
         }
 
-		uint32_t crc32(uint32_t crc, const unsigned char *block, uint32_t cb ) {
-			return ::crc32( crc, block, cb );
-		}
+        uint32_t crc32(uint32_t crc, const unsigned char *block, uint32_t cb) {
+            return ::crc32(crc, block, cb);
+        }
 
         template<>
         void md5<unsigned char>(const unsigned char *input, int inputlen, unsigned char digest[16]) {
@@ -660,7 +666,7 @@ namespace nsp {
             }
 
             MD5_CTX ctx;
-			::MD5__Init( &ctx );
+            ::MD5__Init(&ctx);
             ::MD5__Update(&ctx, input, inputlen);
             ::MD5__Final(&ctx, (unsigned char *) &digest[0]);
         }
@@ -672,34 +678,34 @@ namespace nsp {
             }
 
             MD5_CTX ctx;
-			::MD5__Init( &ctx );
-            ::MD5__Update(&ctx, (const uint8_t *)input, inputlen);
+            ::MD5__Init(&ctx);
+            ::MD5__Update(&ctx, (const uint8_t *) input, inputlen);
             ::MD5__Final(&ctx, (unsigned char *) &digest[0]);
         }
 
         int base64_encode(const char *input, int input_cb, std::string &output) {
-			int outcb;
-			if ( ::base64__encode( input, input_cb, NULL, &outcb ) < 0 ) {
-				return -1;
-			}
+            int outcb;
+            if (::base64__encode(input, input_cb, NULL, &outcb) < 0) {
+                return -1;
+            }
 
-			if ( outcb <= 0 ) {
-				return -1;
-			}
+            if (outcb <= 0) {
+                return -1;
+            }
 
-			try {
-				char *temp_output = new char[outcb];
-				if ( ::base64__encode( input, input_cb, temp_output, &outcb ) < 0 ) {
-					delete[]temp_output;
-					return -1;
-				}
+            try {
+                char *temp_output = new char[outcb];
+                if (::base64__encode(input, input_cb, temp_output, &outcb) < 0) {
+                    delete[]temp_output;
+                    return -1;
+                }
 
-				output.assign( temp_output, outcb );
-				return 0;
-			} catch ( ... ) {
-				return -1;
-			}
-			return 0;
+                output.assign(temp_output, outcb);
+                return 0;
+            } catch (...) {
+                return -1;
+            }
+            return 0;
         }
 
         int base64_encode(const std::string &input, std::string &output) {
@@ -707,96 +713,97 @@ namespace nsp {
         }
 
         int base64_decode(const std::string &input, std::string &output) {
-			int outcb;
-			if ( ::base64__decode( input.c_str(), input.size(), NULL, &outcb ) < 0 ) {
-				return -1;
-			}
+            int outcb;
+            if (::base64__decode(input.c_str(), input.size(), NULL, &outcb) < 0) {
+                return -1;
+            }
 
-			try {
-				char *temp_output = new char[outcb];
-				if ( ::base64__decode( input.c_str(), input.size(), temp_output, &outcb ) < 0 ) {
-					delete[]temp_output;
-					return -1;
-				}
+            try {
+                char *temp_output = new char[outcb];
+                if (::base64__decode(input.c_str(), input.size(), temp_output, &outcb) < 0) {
+                    delete[]temp_output;
+                    return -1;
+                }
 
-				output.assign( temp_output, outcb );
-				return 0;
-			} catch ( ... ) {
-				return -1;
-			}
-			return 0;
+                output.assign(temp_output, outcb);
+                return 0;
+            } catch (...) {
+                return -1;
+            }
+            return 0;
         }
 
-		/////////////////////////////////////////// 浮点和 fixed point 的定向转换 ///////////////////////////////
-		typedef struct {
-			uint16_t u_spare_ : 3;   // 对齐
-			uint16_t u_sign_ : 12;
-			int16_t  sign_ : 1;
-		}fixed_bit_t;
+        /////////////////////////////////////////// 浮点和 fixed point 的定向转换 ///////////////////////////////
 
-		typedef union {
-			uint16_t		fixed_;
-			fixed_bit_t     fixed_bit_;
-		}fixed_t;
+        typedef struct {
+            uint16_t u_spare_ : 3; // 对齐
+            uint16_t u_sign_ : 12;
+            int16_t sign_ : 1;
+        } fixed_bit_t;
 
-		typedef struct {
-			uint32_t  u_significand : 23; // 有效数据段
-			int       exponent_ : 8;  // 运算指数
-			int       sign_ : 1; // 符号位
-		}float_bit_t;
+        typedef union {
+            uint16_t fixed_;
+            fixed_bit_t fixed_bit_;
+        } fixed_t;
 
-		typedef union {
-			float			as_float_;
-			float_bit_t		as_float_bits_;
-			unsigned int	as_uint_;
-		}float_t;
+        typedef struct {
+            uint32_t u_significand : 23; // 有效数据段
+            int exponent_ : 8; // 运算指数
+            int sign_ : 1; // 符号位
+        } float_bit_t;
 
-		unsigned short float2fixed( float fFloat ) {
-			float_t         parser;
-			unsigned int	float_as_integer;
-			int				sign;
-			int				exponent;
-			int				significand;
+        typedef union {
+            float as_float_;
+            float_bit_t as_float_bits_;
+            unsigned int as_uint_;
+        } float_t;
 
-			parser.as_float_ = fFloat;
-			float_as_integer = parser.as_uint_;
+        unsigned short float2fixed(float fFloat) {
+            float_t parser;
+            unsigned int float_as_integer;
+            int sign;
+            int exponent;
+            int significand;
 
-			sign = ( int ) float_as_integer < 0;
-			exponent = ( ( float_as_integer & 0x7fffffff ) >> 23 ) - 0x7f;
-			significand = ( float_as_integer & 0x7fffff ) + 0x800000;
+            parser.as_float_ = fFloat;
+            float_as_integer = parser.as_uint_;
 
-			// float的significand表示1~2之间的数，expoent=0x7f表示指数0
-			// 指数溢出
-			assert( ( exponent >= -12 ) && ( exponent <= 0 ) );
+            sign = (int) float_as_integer < 0;
+            exponent = ((float_as_integer & 0x7fffffff) >> 23) - 0x7f;
+            significand = (float_as_integer & 0x7fffff) + 0x800000;
 
-			significand >>= ( 8 - exponent );
-			significand &= 0xfffff8;   // 清除低3位
+            // float的significand表示1~2之间的数，expoent=0x7f表示指数0
+            // 指数溢出
+            assert((exponent >= -12) && (exponent <= 0));
 
-			if ( sign == 0 ) {
-				return ( unsigned short ) significand;
-			} else {
-				return ( unsigned short ) significand | 0x8000;
-			}
-		}
+            significand >>= (8 - exponent);
+            significand &= 0xfffff8; // 清除低3位
 
-		float fixed2float( unsigned short uFixed ) {
-			float_t			parser;
-			int				sign;
-			int				exponent;
-			int				significand;
+            if (sign == 0) {
+                return (unsigned short) significand;
+            } else {
+                return (unsigned short) significand | 0x8000;
+            }
+        }
 
-			sign = ( short ) uFixed < 0;
-			exponent = 0x7f;
-			significand = ( uFixed & 0x7fff ) << 8;
+        float fixed2float(unsigned short uFixed) {
+            float_t parser;
+            int sign;
+            int exponent;
+            int significand;
 
-			while ( ( significand & 0x800000 ) == 0 ) {
-				significand <<= 1;
-				exponent--;
-			}
-			significand -= 0x800000;
-			parser.as_uint_ = ( sign << 31 ) | ( exponent << 23 ) | significand;
-			return parser.as_float_;
-		}
+            sign = (short) uFixed < 0;
+            exponent = 0x7f;
+            significand = (uFixed & 0x7fff) << 8;
+
+            while ((significand & 0x800000) == 0) {
+                significand <<= 1;
+                exponent--;
+            }
+            significand -= 0x800000;
+            parser.as_uint_ = (sign << 31) | (exponent << 23) | significand;
+            return parser.as_float_;
+        }
 
     } // toolkit
 } // nsp

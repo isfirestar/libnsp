@@ -26,9 +26,13 @@ typedef struct {
 #if _WIN32
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
             posix__pthread_t name ={ .pid_ = NULL }
+#define POSIX_PTHREAD_TYPE_INIT  { .pid_ = NULL }
 #else
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
             posix__pthread_t name ={ .pid_ = 0, .attr_ = { 0 } }
+
+#define POSIX_PTHREAD_TYPE_INIT \
+            {.detached_ = posix__false, .pid_ = 0, .attr_ = { 0 } }
 #endif
 
 typedef struct {

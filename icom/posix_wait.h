@@ -55,6 +55,8 @@ int posix__sig_waitable_handle(posix__waitable_handle_t *waiter);
  */
 __extern__
 void posix__block_waitable_handle(posix__waitable_handle_t *waiter);
+__extern__
+void posix__reset_waitable_handle(posix__waitable_handle_t *waiter);
 
 #define DECLARE_SYNC_WAITER(name)   \
     struct __waitable_handle name; \
