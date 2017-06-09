@@ -26,6 +26,12 @@ namespace nsp {
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
                         object->on_closed();
                     });
+                    break;
+                case EVT_DEBUG_LOG:
+                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
+                        object->on_debug_output(tcp_dat->e.DebugLog.logstr);
+                    });
+                    break;
                 default:
                     break;
             }
@@ -47,6 +53,11 @@ namespace nsp {
                 case EVT_CLOSED:
                     toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&] (const std::shared_ptr<obudp> &object) {
                         object->on_closed();
+                    });
+                    break;
+                case EVT_DEBUG_LOG:
+                     toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&] (const std::shared_ptr<obudp> &object) {
+                        object->on_debug_output(udp_dat->e.DebugLog.logstr);
                     });
                     break;
                 default:

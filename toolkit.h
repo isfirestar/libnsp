@@ -3,6 +3,7 @@
 
 #include "icom/compiler.h"
 #include "icom/posix_types.h"
+#include "icom/posix_string.h"
 
 #include <vector>
 #include <string>

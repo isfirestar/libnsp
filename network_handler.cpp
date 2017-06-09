@@ -205,8 +205,15 @@ namespace nsp {
                 on_closed(previous);
             }
         }
+        
+        void obtcp::on_debug_output(const char *info){
+            on_lowlevel_debug(info);
+        }
 
         void obtcp::on_recvdata(const std::string &pkt) {
+        }
+        
+        void obtcp::on_lowlevel_debug(const char *info){
         }
 
         void obtcp::on_recvdata(const char *data, const int cb) {
@@ -334,6 +341,13 @@ namespace nsp {
                 toolkit::singleton<swnet>::instance()->udp_detach(previous);
                 on_closed(previous);
             }
+        }
+        
+        void obudp::on_debug_output(const char *info){
+            on_lowlevel_debug(info);
+        }
+        
+        void obudp::on_lowlevel_debug(const char *info){
         }
 
         void obudp::setlnk(const HUDPLINK lnk) {

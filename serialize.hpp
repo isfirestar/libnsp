@@ -10,8 +10,8 @@
 #include "toolkit.h"
 
 #if USE_SAFE_VECTOR_SIZE
-#define MAXIMUM_VECTOR_ITEM_COUNT   (50000)  // vector 最多5万个元素
-#define MAXIMUM_STRING_CHARACTER_COUNT  (100000) // string 最多10万个字节
+#define MAXIMUM_VECTOR_ITEM_COUNT   (50000)  // vector
+#define MAXIMUM_STRING_CHARACTER_COUNT  (100000) // string
 
 #if !defined SAFE_VECTOR_SIZE_CHECKING
 #define SAFE_VECTOR_SIZE_CHECKING(size)	(size < MAXIMUM_VECTOR_ITEM_COUNT)
@@ -226,7 +226,6 @@ namespace nsp {
         };
 
 #if 0
-
         template<class T, uint32_t N, template <class> class proto_container = proto_crt_t>
         struct proto_array_t : public proto_interface {
 

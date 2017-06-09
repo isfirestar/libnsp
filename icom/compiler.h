@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <math.h>
+#include <stddef.h>
 
 #if !defined STDCALL
 #if _WIN32
