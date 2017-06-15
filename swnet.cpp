@@ -12,10 +12,12 @@ namespace nsp {
             tcp_data_t *tcp_dat = (tcp_data_t *) data;
 
             switch (tcp_evt->Event) {
-                case EVT_RECEIVEDATA:
+                case EVT_RECEIVEDATA:{
+                    int tid = os::gettid();
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
                         object->on_recvdata(tcp_dat->e.Packet.Data, tcp_dat->e.Packet.Size);
                     });
+                }
                     break;
                 case EVT_TCP_ACCEPTED:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {

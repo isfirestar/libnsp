@@ -234,7 +234,7 @@ int posix__pmkdir(const char *const dir) {
                 retval = -1;
                 break;
             }
-            posix__strncpy(node->dir, cchof(node->dir), dir, p_next_dir_symb - pos->dir);
+            posix__strncpy(node->dir, (uint32_t)(cchof(node->dir)), dir, (uint32_t)(p_next_dir_symb - pos->dir));
             list_add(&node->link, &stack);
         }
     }
@@ -349,7 +349,7 @@ const char *posix__getpedir() {
     if (!p) {
         return NULL;
     }
-    posix__strncpy(dir, cchof(dir), fullpath, p - fullpath);
+	posix__strncpy( dir, ( uint32_t ) ( cchof( dir ) ), fullpath, ( uint32_t ) ( p - fullpath ) );
     return dir;
 }
 
@@ -602,7 +602,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
         return -EAGAIN;
     }
 
-    return MultiByteToWideChar(CP_ACP, 0, *from, -1, (LPWSTR) * to, *output_bytes);
+    return MultiByteToWideChar(CP_ACP, 0, *from, -1, (LPWSTR) * to, (int)*output_bytes);
 #else
     int retval;
     iconv_t cd;
@@ -638,7 +638,7 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
         return -EAGAIN;
     }
 
-    return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, *output_bytes, NULL, FALSE);
+    return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, (int)*output_bytes, NULL, FALSE);
 #else
     return -1;
 #endif

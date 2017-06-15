@@ -260,7 +260,7 @@ void *log__asnyc_proc(void *argv) {
             posix__pthread_mutex_unlock(&__log_async_lock);
 
             if (node) {
-                log__printf(node->module_, node->target_, &node->logst_, node->logstr_, strlen(node->logstr_));
+                log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int)strlen(node->logstr_));
                 free(node);
             }
         } while (node);
@@ -301,9 +301,9 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     va_end(ap);
 
     if (!module) {
-        log__printf(posix__getpename(), target, &currst, logstr, strlen(logstr));
+        log__printf(posix__getpename(), target, &currst, logstr, (int)strlen(logstr));
     } else {
-        log__printf(module, target, &currst, logstr, strlen(logstr));
+        log__printf(module, target, &currst, logstr, (int)strlen(logstr));
     }
 }
 

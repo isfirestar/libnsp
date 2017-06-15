@@ -365,7 +365,7 @@ int DES__encrypt(const char* input, size_t cb, const char * key, char* output) {
         length -= 8;
     }
 
-    return ( cb - length);
+    return (int)( cb - length);
 }
 
 int DES__decrypt(const char* input, size_t cb, const char key[8], char* output) {
@@ -395,5 +395,5 @@ int DES__decrypt(const char* input, size_t cb, const char key[8], char* output) 
         length -= 8;
     }
 
-    return ( cb - length);
+    return (int)( cb - length);
 }
