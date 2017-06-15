@@ -109,7 +109,7 @@ namespace nsp {
 		template<class T>
 		int rmdir_s( const std::basic_string<T> &dir ); // dir 传入不带最后的'/'
 
-		int gettid();
+		long gettid();
 		int getpid();
 
 		int getnpros();

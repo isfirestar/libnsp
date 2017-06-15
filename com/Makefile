@@ -1,5 +1,5 @@
 TARGET=libnsp.a
-CFLAGS+=-Wall -I ../../libnsp/icom
+CFLAGS+=-Wall -I ../icom
 LDFLAGS=
 
 ifeq ($(DEBUG_SYMBOLS),TRUE)
@@ -15,12 +15,9 @@ all:$(TARGET)
 
 $(TARGET):$(OBJS)
 	$(AR) rcs $@ $^
-	mv $(TARGET) ../
 %.d:%.c
 	$(CC) $(CFLAGS) -c $< -o $@ 
 clean:
 	$(RM) $(OBJS) ../$(TARGET)
 
 .PHONY:clean all
-
-include ../Makefile.rule

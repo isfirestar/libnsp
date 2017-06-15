@@ -123,7 +123,7 @@ namespace nsp {
             return ::posix__rm(dir.c_str());
         }
 
-        int gettid() {
+        long gettid() {
             return ::posix__gettid();
         }
 
