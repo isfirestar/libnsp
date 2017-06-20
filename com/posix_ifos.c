@@ -743,3 +743,30 @@ int posix__random(const int range_min, const int range_max) {
 
     return u;
 }
+
+uint64_t posix__get_filesize( const char *path ) {
+	uint64_t filesize = ( uint64_t ) ( -1 );
+#if _WIN32
+	LARGE_INTEGER size;
+	HANDLE fd;
+
+	fd = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (fd == INVALID_HANDLE_VALUE){
+		return filesize;
+	}
+	if (GetFileSizeEx(fd, &size)){
+		filesize = size.HighPart;
+		filesize <<= 32;
+		filesize |= size.LowPart;
+                CloseHandle(fd);
+	}
+#else
+    struct stat statbuff;  
+    if(stat(path, &statbuff) < 0){
+        return filesize;
+    }else{
+        filesize = statbuff.st_size;
+    }  
+#endif
+    return filesize;  
+}

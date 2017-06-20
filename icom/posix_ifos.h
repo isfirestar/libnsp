@@ -123,5 +123,8 @@ int posix__read_file(int fd, char *buffer, int size);
 __extern__
 int posix__random(const int range_min, const int range_max);
 
+__extern__
+uint64_t posix__get_filesize(const char *path);
+
 #endif /* POSIX_IFOS_H */
 
