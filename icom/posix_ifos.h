@@ -115,6 +115,10 @@ __extern__
 int posix__write_file(int fd, const char *buffer, int size);
 __extern__
 int posix__read_file(int fd, char *buffer, int size);
+__extern__
+uint64_t posix__get_filesize(const char *path);
+__extern__
+int posix__seek_file_offset(int fd, uint64_t offset);
 
 /*  Generate random numbers in the half-closed interval
  *  [range_min, range_max). In other words,
@@ -122,9 +126,6 @@ int posix__read_file(int fd, char *buffer, int size);
  */
 __extern__
 int posix__random(const int range_min, const int range_max);
-
-__extern__
-uint64_t posix__get_filesize(const char *path);
 
 #endif /* POSIX_IFOS_H */
 

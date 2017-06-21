@@ -758,7 +758,7 @@ uint64_t posix__get_filesize( const char *path ) {
 		filesize = size.HighPart;
 		filesize <<= 32;
 		filesize |= size.LowPart;
-                CloseHandle(fd);
+        CloseHandle(fd);
 	}
 #else
     struct stat statbuff;  
@@ -769,4 +769,21 @@ uint64_t posix__get_filesize( const char *path ) {
     }  
 #endif
     return filesize;  
+}
+
+int posix__seek_file_offset(int fd, uint64_t offset) {
+#if _WIN32
+    LARGE_INTEGER move, pointer;
+    move.QuadPart = offset;
+    if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)){
+        return -1;
+    }
+#else
+    __off_t newoff;
+    newoff = lseek(fd, (__off_t) offset, SEEK_SET);
+    if (newoff != offset) {
+        return -1;
+    }
+#endif
+    return 0;
 }
