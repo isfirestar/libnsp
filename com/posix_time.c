@@ -54,7 +54,7 @@ uint64_t posix__gettick() {
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ( ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    return ( (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 #endif
 }
 
