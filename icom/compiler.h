@@ -116,7 +116,7 @@
         ((condition) ? (0) : (-1))
 #endif
 
-#if WIN32
+#if _WIN32
 
 #if !defined smp_mb
 #define smp_mb() do {__asm { mfence } } while( 0 )
@@ -168,7 +168,7 @@
  * - return 32..1 to indicate bit 31..0 most significant bit set
  * - return 0 to indicate no bits set
  */
-#if WIN32
+#if _WIN32
 
 __static_inline_function(int) fls(int x) {
     int position;

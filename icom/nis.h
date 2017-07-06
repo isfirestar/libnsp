@@ -49,7 +49,7 @@ interface_format(int) udp_getopt(HUDPLINK lnk, int level, int opt, char *val, in
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
   UDP GRP 过程定义部分																				
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-#if WIN32
+#if _WIN32
 interface_format(int) udp_initialize_grp(HUDPLINK lnk, packet_grp_t *grp);
 interface_format(void) udp_release_grp(packet_grp_t *grp);
 interface_format(int) udp_raise_grp(HUDPLINK lnk, const char *r_ipstr, uint16_t r_port);

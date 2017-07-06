@@ -22,7 +22,7 @@ typedef uint32_t HTCPLINK;
 typedef int32_t HUDPLINK;
 
 #if !defined STD_CALL
-#if WIN32
+#if _WIN32
 #define STD_CALL __stdcall
 #else
 #define STD_CALL
