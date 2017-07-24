@@ -79,7 +79,7 @@ int posix__setpriority_realtime();
 
 /* 获取CPU核心数量 */
 __extern__
-int posix__getnpros();
+int posix__getnprocs();
 
 /* 获取系统内存信息 */
 typedef struct {

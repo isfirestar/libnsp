@@ -17,22 +17,21 @@ namespace nsp {
         namespace xlog {
             /////////////////////// loex ///////////////////////
 
-            loex::loex(enum log__levels level) : level_(level)
-            {
-				posix__strcpy( module_, cchof( module_ ), "nsp" );
+            loex::loex(enum log__levels level) : level_(level) {
+                posix__strcpy(module_, cchof(module_), "nsp");
                 str_[0] = 0;
             }
 
-			loex::loex( const char *module, enum log__levels level ) : level_(level) {
-				if ( module ) {
-					posix__strcpy( module_, cchof( module_ ), module );
-				}
-				str_[0] = 0;
-			}
+            loex::loex(const char *module, enum log__levels level) : level_(level) {
+                if (module) {
+                    posix__strcpy(module_, cchof(module_), module);
+                }
+                str_[0] = 0;
+            }
 
             loex::~loex() {
                 if (0 != str_[0]) { // 以此限制设置日志分片的对象，析构阶段不会真实调用日志输出
-					log__write( module_, level_, kLogTarget_Filesystem | kLogTarget_Stdout, "%s", str_ );
+                    log__write(module_, level_, kLogTarget_Filesystem | kLogTarget_Stdout, "%s", str_);
                 }
             }
 
@@ -74,7 +73,7 @@ namespace nsp {
 #if _WIN32
                 ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%I64d", str_, n);
 #else
-				::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%lld", str_, n);
+                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%lld", str_, n);
 #endif
                 return *this;
             }
@@ -83,7 +82,7 @@ namespace nsp {
 #if _WIN32
                 ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%I64u", str_, n);
 #else
-				::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%llu", str_, n);
+                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%llu", str_, n);
 #endif
                 return *this;
             }

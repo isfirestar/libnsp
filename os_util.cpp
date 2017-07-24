@@ -135,8 +135,8 @@ namespace nsp {
             return ::posix__getpid();
         }
 
-        int getnpros() {
-            return ::posix__getnpros();
+        int getnprocs() {
+            return ::posix__getnprocs();
         }
 
         int getsysmem(uint64_t &total, uint64_t &free, uint64_t &total_swap, uint64_t &free_swap) {

@@ -116,7 +116,7 @@ namespace nsp {
 		long gettid();
 		int getpid();
 
-		int getnpros();
+		int getnprocs();
 
 		int getsysmem( uint64_t &total, uint64_t &free, uint64_t &total_swap, uint64_t &free_swap);
 

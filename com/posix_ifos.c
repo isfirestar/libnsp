@@ -482,7 +482,7 @@ int posix__setpriority_realtime() {
 #endif
 }
 
-int posix__getnpros() {
+int posix__getnprocs() {
 #if _WIN32
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
