@@ -130,7 +130,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
 
 static
 log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module) {
-    char name[128], path[MAXPATH];
+    char name[128], path[512];
     int retval;
     struct list_head *pos;
     log__file_describe_t *file;

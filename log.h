@@ -64,7 +64,7 @@ namespace nsp {
                 //std::streamsize strsize_;
                 static void log_environment_init();
             public:
-				loex( const char *module, enum log__levels level );
+                loex( const char *module, enum log__levels level );
                 loex(enum log__levels level);
                 ~loex();
                 loex(const loex &) = delete;

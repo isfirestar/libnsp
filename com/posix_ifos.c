@@ -179,7 +179,7 @@ int posix__mkdir(const char *const dir) {
     return -1;
 #else
     if (dir) {
-        return mkdir(dir, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
+        return mkdir(dir, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH);
     }
     return -1;
 #endif

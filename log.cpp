@@ -31,91 +31,91 @@ namespace nsp {
 
             loex::~loex() {
                 if (0 != str_[0]) { // 以此限制设置日志分片的对象，析构阶段不会真实调用日志输出
-                    log__write(module_, level_, kLogTarget_Filesystem | kLogTarget_Stdout, "%s", str_);
+                    ::log__save(module_, level_, kLogTarget_Filesystem | kLogTarget_Stdout, "%s", str_);
                 }
             }
 
             loex &loex::operator<<(const wchar_t *str) {
                 if (str) {
-                    ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%ws", str_, str);
+                    ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%ws", str);
                 }
                 return *this;
             }
 
             loex &loex::operator<<(const char *str) {
                 if (str) {
-                    ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%s", str_, str);
+                    ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%s", str);
                 }
                 return *this;
             }
 
             loex &loex::operator<<(int32_t n) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%d", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%d", n);
                 return *this;
             }
 
             loex &loex::operator<<(uint32_t n) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%u", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%u", n);
                 return *this;
             }
 
             loex &loex::operator<<(int16_t n) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%d", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%d", n);
                 return *this;
             }
 
             loex &loex::operator<<(uint16_t n) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%u", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%u", n);
                 return *this;
             }
 
             loex &loex::operator<<(int64_t n) {
 #if _WIN32
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%I64d", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%I64d", n);
 #else
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%lld", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%lld", n);
 #endif
                 return *this;
             }
 
             loex &loex::operator<<(uint64_t n) {
 #if _WIN32
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%I64u", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%I64u", n);
 #else
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%llu", str_, n);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%llu", n);
 #endif
                 return *this;
             }
 
             loex &loex::operator<<(const std::basic_string<char> &str) {
                 if (str.size() > 0) {
-                    ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%s", str_, str.c_str());
+                    ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%s", str.c_str());
                 }
                 return *this;
             }
 
             loex &loex::operator<<(void *ptr) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%p", str_, ptr);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%p", ptr);
                 return *this;
             }
 
             loex &loex::operator<<(void **ptr) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%p", str_, ptr);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%p", ptr);
                 return *this;
             }
 
             loex &loex::operator<<(const hex &ob) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s0x%08X", str_, ob.__auto_t);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "0x%08X", ob.__auto_t);
                 return *this;
             }
 
             loex &loex::operator<<(float f) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%g", str_, f);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%g", f);
                 return *this;
             }
 
             loex &loex::operator<<(double lf) {
-                ::posix__sprintf(str_, sizeof ( str_) - strlen(str_), "%s%g", str_, lf);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%g", lf);
                 return *this;
             }
 

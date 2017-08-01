@@ -45,6 +45,8 @@ interface_format(int) udp_write(HUDPLINK lnk, int cb, nis_sender_maker_t maker, 
 interface_format(int) udp_getaddr(HUDPLINK lnk, uint32_t *ipv4, uint16_t *port_output);
 interface_format(int) udp_setopt(HUDPLINK lnk, int level, int opt, const char *val, int len);
 interface_format(int) udp_getopt(HUDPLINK lnk, int level, int opt, char *val, int *len);
+interface_format(int) udp_joingrp(HUDPLINK lnk, const char *g_ipstr, uint16_t g_port);
+interface_format(int) udp_dropgrp(HUDPLINK lnk);
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
   UDP GRP 过程定义部分																				
