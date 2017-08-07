@@ -16,7 +16,6 @@ namespace nsp {
     namespace toolkit {
         namespace xlog {
             /////////////////////// loex ///////////////////////
-
             loex::loex(enum log__levels level) : level_(level) {
                 posix__strcpy(module_, cchof(module_), "nsp");
                 str_[0] = 0;
@@ -105,7 +104,7 @@ namespace nsp {
             }
 
             loex &loex::operator<<(const hex &ob) {
-                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "0x%08X", ob.__auto_t);
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%08X", ob.__auto_t);
                 return *this;
             }
 
