@@ -18,7 +18,7 @@ char *posix__trim(char *src) {
         return NULL;
     }
 
-    cb = (int)strlen(src);
+    cb = (int) strlen(src);
     p = src;
     target = src;
 
@@ -30,7 +30,7 @@ char *posix__trim(char *src) {
         posix__strncpy(target, cb, p, (cb - (p - src)));
     }
 
-    cb = (int)strlen(target);
+    cb = (int) strlen(target);
     p = &target[cb - 1];
     while ((*p == '\r' || *p == '\n' || *p == ' ') && (p >= target)) p--;
 
@@ -109,7 +109,7 @@ wchar_t *posix__wcsncpy(wchar_t *target, uint32_t cch, const wchar_t *src, uint3
     assert(target);
     assert(src);
     assert(cch > 0);
-    
+
     cpyoff = 0;
 
     while ((cpyoff < cnt) && (src[cpyoff] != 0)) {

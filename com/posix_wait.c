@@ -195,7 +195,7 @@ void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
 #endif
 }
 
-void posix__reset_waitable_handle(posix__waitable_handle_t *waiter){
+void posix__reset_waitable_handle(posix__waitable_handle_t *waiter) {
     posix__block_waitable_handle(waiter);
 }
 

@@ -53,7 +53,7 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) {
     if (!Tmp) {
         return 0;
     }
-    posix__strcpy(Tmp, (int)(sourceTextLengtchCch + 1), ipv4str);
+    posix__strcpy(Tmp, (int) (sourceTextLengtchCch + 1), ipv4str);
 #if _WIN32
     nextToken = NULL;
     while (NULL != (p = strtok_s(nextToken ? NULL : Tmp, ".", &nextToken)) && i < 4) {

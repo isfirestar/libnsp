@@ -409,6 +409,18 @@ int posix__isdir(const char *const file) {
         return -1;
     }
 
+    /* 如果符号链接目标是一个目录， 同样会解释为一个目录， 而不是 __S_IFLNK
+     * __S_IFLNK 仅针对指向文件的符号链接
+     * 使用符号链接目录的相对路径同样可以正常open文件
+     * 例如： 
+     * /home/Julie/escape/configs -> /etc
+     * int fd = open("/home/Julie/escape/configs/passwd", O_RDONLY); 可以正常打开文件
+     * 
+     * shell 中查找所有符号链接的命令:
+     * find . -type l
+     * 删除所有的符号链接
+     * find . -type l | xargs rm
+    */
     if (st.st_mode & __S_IFDIR) {
         return 1;
     }

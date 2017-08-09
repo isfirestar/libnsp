@@ -54,25 +54,25 @@ uint64_t posix__gettick() {
 #else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ( (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    return ( (uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
 #endif
 }
 
 uint64_t posix__clock_epoch() {
 #if _WIN32
-	SYSTEMTIME local_time;
-	FILETIME file_time;
-	GetLocalTime( &local_time );
-	if ( SystemTimeToFileTime( &local_time, &file_time ) ) {
-		return ( uint64_t ) ( ( uint64_t ) file_time.dwHighDateTime << 32 | file_time.dwLowDateTime );
-	}
+    SYSTEMTIME local_time;
+    FILETIME file_time;
+    GetLocalTime(&local_time);
+    if (SystemTimeToFileTime(&local_time, &file_time)) {
+        return (uint64_t) ((uint64_t) file_time.dwHighDateTime << 32 | file_time.dwLowDateTime);
+    }
 #else
     struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) > 0){
-        return ( (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    if (clock_gettime(CLOCK_REALTIME, &ts) > 0) {
+        return ( (uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
     }
 #endif
-	return 0;
+    return 0;
 }
 
 uint64_t posix__clock_gettime() {
