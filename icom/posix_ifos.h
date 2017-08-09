@@ -127,5 +127,21 @@ int posix__seek_file_offset(int fd, uint64_t offset);
 __extern__
 int posix__random(const int range_min, const int range_max);
 
+/* CREAT/OPEN file with normal priority access, file descriptor output by @*descriptor when function return 0 */
+/* open existing */
+__extern__
+int posix__file_open(const char *path, void *descriptor);
+/* open always */
+__extern__
+int posix__file_open_always(const char *path, void *descriptor);
+/* create new */
+__extern__
+int posix__file_create(const char *path, void *descriptor);
+/* create always */
+__extern__
+int posix__file_create_always(const char *path, void *descriptor);
+
+
+
 #endif /* POSIX_IFOS_H */
 

@@ -234,7 +234,7 @@ int posix__pmkdir(const char *const dir) {
                 retval = -1;
                 break;
             }
-            posix__strncpy(node->dir, (uint32_t)(cchof(node->dir)), dir, (uint32_t)(p_next_dir_symb - pos->dir));
+            posix__strncpy(node->dir, (uint32_t) (cchof(node->dir)), dir, (uint32_t) (p_next_dir_symb - pos->dir));
             list_add(&node->link, &stack);
         }
     }
@@ -296,12 +296,12 @@ void posix__close(int fd) {
 #endif
 }
 
-int posix__fflush(int fd){
+int posix__fflush(int fd) {
     if (fd < 0) {
         return EINVAL;
     }
 #if _WIN32
-    return convert_boolean_condition_to_retval(FlushFileBuffers((HANDLE)fd));
+    return convert_boolean_condition_to_retval(FlushFileBuffers((HANDLE) fd));
 #else
     return fdatasync(fd);
 #endif
@@ -349,7 +349,7 @@ const char *posix__getpedir() {
     if (!p) {
         return NULL;
     }
-	posix__strncpy( dir, ( uint32_t ) ( cchof( dir ) ), fullpath, ( uint32_t ) ( p - fullpath ) );
+    posix__strncpy(dir, (uint32_t) (cchof(dir)), fullpath, (uint32_t) (p - fullpath));
     return dir;
 }
 
@@ -368,7 +368,7 @@ const char *posix__getpename() {
     return &name[0];
 }
 
-const char *posix__getelfname(){
+const char *posix__getelfname() {
     return posix__getpename();
 }
 
@@ -602,7 +602,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
         return -EAGAIN;
     }
 
-    return MultiByteToWideChar(CP_ACP, 0, *from, -1, (LPWSTR) * to, (int)*output_bytes);
+    return MultiByteToWideChar(CP_ACP, 0, *from, -1, (LPWSTR) * to, (int) *output_bytes);
 #else
     int retval;
     iconv_t cd;
@@ -638,7 +638,7 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
         return -EAGAIN;
     }
 
-    return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, (int)*output_bytes, NULL, FALSE);
+    return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, (int) *output_bytes, NULL, FALSE);
 #else
     return -1;
 #endif
@@ -744,38 +744,38 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
-uint64_t posix__get_filesize( const char *path ) {
-	uint64_t filesize = ( uint64_t ) ( -1 );
+uint64_t posix__get_filesize(const char *path) {
+    uint64_t filesize = (uint64_t) (-1);
 #if _WIN32
-	LARGE_INTEGER size;
-	HANDLE fd;
+    LARGE_INTEGER size;
+    HANDLE fd;
 
-	fd = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (fd == INVALID_HANDLE_VALUE){
-		return filesize;
-	}
-	if (GetFileSizeEx(fd, &size)){
-		filesize = size.HighPart;
-		filesize <<= 32;
-		filesize |= size.LowPart;
-        CloseHandle(fd);
-	}
-#else
-    struct stat statbuff;  
-    if(stat(path, &statbuff) < 0){
+    fd = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (fd == INVALID_HANDLE_VALUE) {
         return filesize;
-    }else{
+    }
+    if (GetFileSizeEx(fd, &size)) {
+        filesize = size.HighPart;
+        filesize <<= 32;
+        filesize |= size.LowPart;
+        CloseHandle(fd);
+    }
+#else
+    struct stat statbuff;
+    if (stat(path, &statbuff) < 0) {
+        return filesize;
+    } else {
         filesize = statbuff.st_size;
-    }  
+    }
 #endif
-    return filesize;  
+    return filesize;
 }
 
 int posix__seek_file_offset(int fd, uint64_t offset) {
 #if _WIN32
     LARGE_INTEGER move, pointer;
     move.QuadPart = offset;
-    if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)){
+    if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)) {
         return -1;
     }
 #else
@@ -784,6 +784,98 @@ int posix__seek_file_offset(int fd, uint64_t offset) {
     if (newoff != offset) {
         return -1;
     }
+#endif
+    return 0;
+}
+
+int posix__file_open(const char *path, void *descriptor) {
+    if (!path || !descriptor) {
+        return -EINVAL;
+    }
+
+#if _WIN32
+    HANDLE fd
+    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (INVALID_HANDLE_VALUE == fd) {
+        return make_error_result(GetLastError());
+    }
+    *((HANDLE *) descriptor) = fd;
+#else
+    int fd;
+    fd = open(path, O_RDWR);
+    if (fd < 0) {
+        return make_error_result(errno);
+    }
+    *((int *) descriptor) = fd;
+#endif
+    return 0;
+}
+
+int posix__file_open_always(const char *path, void *descriptor) {
+    if (!path || !descriptor) {
+        return -EINVAL;
+    }
+
+#if _WIN32
+    HANDLE fd;
+    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (INVALID_HANDLE_VALUE == fd) {
+        return make_error_result(GetLastError());
+    }
+    *((HANDLE *) descriptor) = fd;
+#else
+    int fd;
+    fd = open(path, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    if (fd < 0) {
+        return make_error_result(errno);
+    }
+    *((int *) descriptor) = fd;
+#endif
+    return 0;
+}
+
+int posix__file_create(const char *path, void *descriptor) {
+    if (!path || !descriptor) {
+        return -EINVAL;
+    }
+
+#if _WIN32
+    HANDLE fd;
+    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (INVALID_HANDLE_VALUE == fd) {
+        return make_error_result(GetLastError());
+    }
+    *((HANDLE *) descriptor) = fd;
+#else
+    int fd;
+    fd = open(path, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    if (fd < 0) {
+        return make_error_result(errno);
+    }
+    *((int *) descriptor) = fd;
+#endif
+    return 0;
+}
+
+int posix__file_create_always(const char *path, void *descriptor) {
+    if (!path || !descriptor) {
+        return -EINVAL;
+    }
+
+#if _WIN32
+    HANDLE fd;
+    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (INVALID_HANDLE_VALUE == fd) {
+        return make_error_result(GetLastError());
+    }
+    *((HANDLE *) descriptor) = fd;
+#else
+    int fd;
+    fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+    if (fd < 0) {
+        return make_error_result(errno);
+    }
+    *((int *) descriptor) = fd;
 #endif
     return 0;
 }
