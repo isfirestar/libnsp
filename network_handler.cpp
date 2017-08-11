@@ -140,6 +140,37 @@ namespace nsp {
             return 0;
         }
 
+		int obtcp::connect2(const char *epstr){
+			if (INVALID_HTCPLINK == lnk_) {
+				return -1;
+			}
+
+			if (epstr) {
+				endpoint ep;
+				if (endpoint::build(epstr, ep) >= 0) {
+					return connect2(ep);
+				}
+			}
+			return -1;
+		}
+
+		int obtcp::connect2(const endpoint &ep){
+			if (INVALID_HTCPLINK == lnk_) {
+				return -1;
+			}
+
+			std::string ipstr = ep.ipv4();
+			port_t port = ep.port();
+			if (ipstr.length() <= 0 && port <= 0) {
+				return -1;
+			}
+			if (toolkit::singleton<swnet>::instance()->tcp_connect2(lnk_, ipstr.c_str(), port) < 0) {
+				return -1;
+			}
+
+			return 0;
+		}
+
         int obtcp::listen() {
             if (INVALID_HTCPLINK == lnk_) {
                 return -1;
@@ -231,11 +262,12 @@ namespace nsp {
             }
         }
 
-        int obtcp::on_connected() {
-            return 0;
+		void obtcp::on_connected() {
+			;
         }
 
         void obtcp::bind_object(const std::shared_ptr<obtcp> &object) {
+			;
         }
 
         void obtcp::setlnk(const HTCPLINK lnk) {

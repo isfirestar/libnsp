@@ -30,6 +30,8 @@ namespace nsp {
             void close();
             int connect(const char *epstr);
             int connect(const endpoint &ep);
+			int connect2(const char *epstr);
+			int connect2(const endpoint &ep);
             int listen();
             int send(int cb, const std::function<int( void *, int) > &fill);
             int send(const std::string &buffer);
@@ -53,7 +55,7 @@ namespace nsp {
             void on_closed();
             void on_debug_output(const char *info);
 
-            virtual int on_connected();
+            virtual void on_connected();
             virtual void bind_object(const std::shared_ptr<obtcp> &object);
 
         protected:

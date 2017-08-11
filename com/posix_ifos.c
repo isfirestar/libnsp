@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <iconv.h>
 #include <locale.h>
+#include <unistd.h>
 #endif
 
 static
@@ -68,21 +69,25 @@ int __posix__rmdir(const char *dir) {
 
 #else
     /* > rm -rf dir */
-    struct dirent *ptr;
-    DIR *pdir;
+    struct dirent *ent;
+    DIR *dirp;
 
-    if (!dir) return -1;
-
-    pdir = opendir(dir);
-    if (!pdir) return -1;
-
-    while (NULL != (ptr = readdir(pdir))) {
-        if (0 == posix__strcmp(ptr->d_name, ".") || 0 == posix__strcmp(ptr->d_name, "..")) {
+    if (!dir) {
+        return -EINVAL;
+    }
+    
+    dirp = opendir(dir);
+    if (!dirp) {
+        return make_error_result(errno);
+    }
+    
+    while (NULL != (ent = readdir(dirp))) {
+        if (0 == posix__strcmp(ent->d_name, ".") || 0 == posix__strcmp(ent->d_name, "..")) {
             continue;
         }
 
         char filename[260];
-        posix__sprintf(filename, cchof(filename), "%s/%s", dir, ptr->d_name);
+        posix__sprintf(filename, cchof(filename), "%s/%s", dir, ent->d_name);
 
         if (posix__isdir(filename)) {
             __posix__rmdir(filename);
@@ -94,7 +99,7 @@ int __posix__rmdir(const char *dir) {
     }
 
     remove(dir);
-    closedir(pdir);
+    closedir(dirp);
     return 0;
 #endif
 }
@@ -119,7 +124,7 @@ void posix__sleep(uint64_t ms) {
 #if _WIN32
     Sleep(MAXDWORD & ms);
 #else
-    sleep(ms / 1000);
+    usleep(ms * 1000);
 #endif
 }
 
@@ -806,8 +811,8 @@ int posix__file_open(const char *path, void *descriptor) {
     }
 
 #if _WIN32
-    HANDLE fd
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE fd;
+    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
         return make_error_result(GetLastError());
     }
@@ -830,7 +835,7 @@ int posix__file_open_always(const char *path, void *descriptor) {
 
 #if _WIN32
     HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
         return make_error_result(GetLastError());
     }
@@ -853,7 +858,7 @@ int posix__file_create(const char *path, void *descriptor) {
 
 #if _WIN32
     HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+	fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
         return make_error_result(GetLastError());
     }
@@ -876,7 +881,7 @@ int posix__file_create_always(const char *path, void *descriptor) {
 
 #if _WIN32
     HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARED_READ, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
         return make_error_result(GetLastError());
     }

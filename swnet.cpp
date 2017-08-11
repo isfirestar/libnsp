@@ -23,6 +23,11 @@ namespace nsp {
                         object->on_accepted(tcp_evt->Ln.Tcp.Link, tcp_dat->e.Accept.AcceptLink);
                     });
                     break;
+				case EVT_TCP_CONNECTED:
+					toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&](const std::shared_ptr<obtcp> &object) {
+						object->on_connected();
+					});
+					break;
                 case EVT_CLOSED:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
                         object->on_closed();

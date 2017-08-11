@@ -89,6 +89,7 @@ namespace nsp {
             NSP_DECLARE_COMM_INTERFACE(tcp_gettst, (HTCPLINK lnk, tst_t *tst), (lnk, tst));
             NSP_DECLARE_VOID_INTERFACE(tcp_destroy, (HTCPLINK lnk), (lnk));
             NSP_DECLARE_COMM_INTERFACE(tcp_connect, (HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote), (lnk, r_ipstr, port_remote));
+			NSP_DECLARE_COMM_INTERFACE(tcp_connect2, (HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote), (lnk, r_ipstr, port_remote));
             NSP_DECLARE_COMM_INTERFACE(tcp_listen, (HTCPLINK lnk, int block), (lnk, block));
             NSP_DECLARE_COMM_INTERFACE(tcp_write, (HTCPLINK lnk, int cb, nis_sender_maker_t maker, void *par), (lnk, cb, maker, par));
             NSP_DECLARE_COMM_INTERFACE(tcp_getaddr, (HTCPLINK lnk, int type, uint32_t* ipv4, uint16_t* port), (lnk, type, ipv4, port));

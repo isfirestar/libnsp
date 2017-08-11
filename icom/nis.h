@@ -28,6 +28,7 @@ interface_format(int) tcp_settst(HTCPLINK lnk, const tst_t *tst);
 interface_format(int) tcp_gettst(HTCPLINK lnk, tst_t *tst);
 interface_format(void) tcp_destroy(HTCPLINK lnk);
 interface_format(int) tcp_connect(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
+interface_format(int) tcp_connect2(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
 interface_format(int) tcp_listen(HTCPLINK lnk, int block);
 interface_format(int) tcp_write(HTCPLINK lnk, int cb, nis_sender_maker_t maker, void *par);
 interface_format(int) tcp_getaddr(HTCPLINK lnk, int type, uint32_t* ipv4, uint16_t* port);

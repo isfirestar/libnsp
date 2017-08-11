@@ -28,9 +28,6 @@ namespace nsp {
 
                 try {
                     sptr->bind_object(shared_from_this());
-                    if (sptr->on_connected() < 0) {
-                        throw std::logic_error("user terminated connection.");
-                    }
                 } catch (...) {
                     sptr->close();
                     return;
