@@ -223,7 +223,7 @@ int posix__pmkdir(const char *const dir) {
             list_del(&pos->link);
             free(pos);
         } else {
-            // 不是目录结构性错误, 一律认定为失败
+            /* 不是目录结构性错误, 一律认定为失败 */
             if (ERROR_PATH_NOT_FOUND != GetLastError()) {
                 retval = -1;
                 break;

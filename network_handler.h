@@ -30,8 +30,8 @@ namespace nsp {
             void close();
             int connect(const char *epstr);
             int connect(const endpoint &ep);
-			int connect2(const char *epstr);
-			int connect2(const endpoint &ep);
+            int connect2(const char *epstr);
+            int connect2(const endpoint &ep);
             int listen();
             int send(int cb, const std::function<int( void *, int) > &fill);
             int send(const std::string &buffer);
@@ -46,7 +46,6 @@ namespace nsp {
                 tst_.parser_ = &T::parser;
                 settst(&tst_);
             }
-
 
             void setlnk(const HTCPLINK lnk);
 

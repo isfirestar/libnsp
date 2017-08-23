@@ -357,6 +357,9 @@ namespace nsp {
                 }
                 idx_previous = ++idx_found;
             }
+            if (0 == idx_previous) {
+                return 0;
+            }
             if (source.size() != idx_previous) {
                 tmp.assign(&source[idx_previous], source.size() - idx_previous);
                 vct_substr.push_back(tmp);
@@ -374,6 +377,9 @@ namespace nsp {
                     vct_substr.push_back(tmp);
                 }
                 idx_previous = ++idx_found;
+            }
+            if (0 == idx_previous) {
+                return 0;
             }
             if (source.size() != idx_previous) {
                 tmp.assign(&source[idx_previous], source.size() - idx_previous);
