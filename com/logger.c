@@ -30,6 +30,7 @@ static const char *LOG__LEVEL_TXT[] = {
     "info",
     "warning",
     "error",
+    "fatal",
     "trace",
 };
 
@@ -294,7 +295,6 @@ void log__write(const char *module, enum log__levels level, int target, const ch
         return;
     }
 
-    memset(&currst, 0, sizeof(currst));
     posix__localtime(&currst);
 
     va_start(ap, format);
@@ -320,9 +320,6 @@ void log__save(const char *module, enum log__levels level, int target, const cha
         return;
     }
     node->target_ = target;
-    
-    /* 清零才能正确求取当前时间 */
-    memset(&node->logst_, 0, sizeof(node->logst_));
     posix__localtime(&node->logst_);
     posix__strcpy(node->module_, cchof(node->module_), module);
 

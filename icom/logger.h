@@ -7,6 +7,7 @@ enum log__levels {
     kLogLevel_Info = 0,
     kLogLevel_Warning,
     kLogLevel_Error,
+    kLogLevel_Fatal,
     kLogLevel_Trace,
     kLogLevel_Maximum,
 };
