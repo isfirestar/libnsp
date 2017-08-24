@@ -13,6 +13,7 @@ typedef struct {
     int minute;
     int second;
     int milli_second;
+    uint64_t clock_now;
 } posix__systime_t;
 
 #pragma pack(pop)

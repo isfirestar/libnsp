@@ -194,42 +194,42 @@ namespace nsp {
 
         template<>
         std::string to_string(const double d) {
-            char tmp[16];
+            char tmp[64];
             ::posix__sprintf(tmp, cchof(tmp), "%.6f", d);
             return std::string().assign(tmp);
         }
 
         template<>
         std::string to_string(const uint16_t d) {
-            char tmp[16];
+            char tmp[64];
             ::posix__sprintf(tmp, cchof(tmp), "%u", d);
             return std::string().assign(tmp);
         }
 
         template<>
         std::string to_string(const int16_t d) {
-            char tmp[16];
+            char tmp[64];
             ::posix__sprintf(tmp, cchof(tmp), "%d", d);
             return std::string().assign(tmp);
         }
 
         template<>
         std::string to_string(const uint32_t d) {
-            char tmp[16];
+            char tmp[64];
             ::posix__sprintf(tmp, cchof(tmp), "%u", d);
             return std::string().assign(tmp);
         }
 
         template<>
         std::string to_string(const int32_t d) {
-            char tmp[16];
+            char tmp[64];
             ::posix__sprintf(tmp, cchof(tmp), "%d", d);
             return std::string().assign(tmp);
         }
 
         template<>
         std::string to_string(const uint64_t d) {
-            char tmp[16];
+            char tmp[64];
 #if _WIN32
             ::posix__sprintf(tmp, cchof(tmp), "%I64u", d);
 #else
@@ -240,7 +240,7 @@ namespace nsp {
 
         template<>
         std::string to_string(const int64_t d) {
-            char tmp[16];
+            char tmp[64];
 #if _WIN32
             ::posix__sprintf(tmp, cchof(tmp), "%I64d", d);
 #else

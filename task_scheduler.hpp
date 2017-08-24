@@ -280,7 +280,7 @@ namespace nsp {
                     }
                 }
 
-                int alocnts = ((cnt > 0 && cnt < 32) ? (cnt) : (os::get_processtor_cnt()));
+                int alocnts = ((cnt > 0 && cnt < 32) ? (cnt) : (os::getnprocs()));
 
                 for (int i = 0; i < alocnts; i++) {
                     std::thread *pth = new std::thread(std::bind(&task_thread_pool::th_handler, this));

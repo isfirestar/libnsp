@@ -29,7 +29,16 @@ int posix__localtime(posix__systime_t *systime) {
 
     if (!systime) return -1;
 
-    gettimeofday(&tv_now, NULL);
+    if (0 == systime->clock_now) {
+        gettimeofday(&tv_now, NULL);
+        systime->clock_now = tv_now.tv_sec;
+        systime->clock_now *= 1000000;
+        systime->clock_now += tv_now.tv_usec;
+    }else{
+        tv_now.tv_sec = systime->clock_now / 1000000;
+        tv_now.tv_usec = systime->clock_now % 1000000;
+    }
+    
     localtime_r(&tv_now.tv_sec, &tm_now);
 
     systime->year = tm_now.tm_year + 1900;
@@ -68,7 +77,7 @@ uint64_t posix__clock_epoch() {
     }
 #else
     struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) > 0) {
+    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
         return ( (uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
     }
 #endif
