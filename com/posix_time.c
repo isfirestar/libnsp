@@ -55,7 +55,7 @@ int posix__localtime(posix__systime_t *systime) {
 #endif
     return 0;
 }
-
+    
 int posix__clock_localtime(posix__systime_t *systime) {
 
 #if _WIN32
@@ -68,7 +68,7 @@ int posix__clock_localtime(posix__systime_t *systime) {
     if (systime->clock_now == 0) return -1;
     
     fnow.dwLowDateTime = (systime->clock_now & 0xFFFFFFFF);
-    fnow.dwHighDateTime = (() systime->clock_now >> 32 ) & 0xFFFFFFFF);
+    fnow.dwHighDateTime = ((systime->clock_now >> 32 ) & 0xFFFFFFFF);
     
     FileTimeToSystemTime(&fnow, &now);
     
@@ -79,12 +79,6 @@ int posix__clock_localtime(posix__systime_t *systime) {
     systime->minute = now.wMinute;
     systime->second = now.wSecond;
     systime->milli_second = now.wMilliseconds;
-    
-    SystemTimeToFileTime(&now, &fnow);
-    
-    systime->clock_now = fnow.dwHighDateTime;
-    systime->clock_now <<= 32;
-    systime->clock_now |= fnow.dwLowDateTime;
 #else
     struct timeval tv_now;
     struct tm tm_now;
@@ -121,7 +115,11 @@ int posix__localtime_clock(posix__systime_t *systime) {
     now.wSecond = systime->second;
     now.wMilliseconds = systime->milli_second;
     
-    
+	SystemTimeToFileTime(&now, &fnow);
+
+	systime->clock_now = fnow.dwHighDateTime;
+	systime->clock_now <<= 32;
+	systime->clock_now |= fnow.dwLowDateTime;
 #else
     struct tm timem;
     time_t epoch;
@@ -143,9 +141,8 @@ int posix__localtime_clock(posix__systime_t *systime) {
     systime->clock_now = epoch; // Ãë
     systime->clock_now *= 1000000;
     systime->clock_now += (systime->milli_second * 1000); // ¾«È·µ½Î¢Ãî
-    
-    return 0;
 #endif
+	return 0;
 }
 
 uint64_t posix__gettick() {
