@@ -45,10 +45,9 @@ typedef struct {
     int line_count_;
     char module_[LOG_MODULE_NAME_LEN];
 } log__file_describe_t;
-static 
-LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
-static 
-posix__pthread_mutex_t __log_file_lock;
+
+static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
+static  posix__pthread_mutex_t __log_file_lock;
 
 typedef struct {
     struct list_head link_;
@@ -321,7 +320,11 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     }
     node->target_ = target;
     posix__localtime(&node->logst_);
-    posix__strcpy(node->module_, cchof(node->module_), module);
+    if (module) {
+        posix__strcpy(node->module_, cchof(node->module_), module);
+    }else{
+        posix__strcpy(node->module_, cchof(node->module_), posix__getpename());
+    }
 
     va_start(ap, format);
     log__format_string(level, posix__gettid(), format, ap, &node->logst_, node->logstr_, sizeof(node->logstr_));
