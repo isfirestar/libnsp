@@ -203,3 +203,26 @@ void posix__hang() {
     DECLARE_SYNC_WAITER(waiter);
     posix__waitfor_waitable_handle(&waiter, -1);
 }
+
+int posix__delay_exec(uint32_t ms) {
+#if _WIN32
+    static HANDLE timeout = NULL;
+    if (!timeout) {
+        timeout = CreateEvent(NULL, FALSE, FALSE, NULL);
+    }
+    
+    if (!timeout) {
+        return -1;
+    }
+    
+    if (WAIT_TIMEOUT != WaitForSingleObject(timeout, ms)) {
+        return -1;
+    }
+    return 0;
+#else
+    struct timeval tv;
+    tv.tv_sec = 0;
+    tv.tv_usec = ms * 1000;
+    return select(0, NULL, NULL, NULL, &tv);
+#endif
+}

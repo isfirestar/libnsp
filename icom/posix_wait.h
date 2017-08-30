@@ -70,5 +70,9 @@ void posix__reset_waitable_handle(posix__waitable_handle_t *waiter);
 __extern__
 void posix__hang();
 
+/* 高精度的固定延时执行 */
+__extern__
+int posix__delay_exec(uint32_t ms);
+
 #endif /* POSIX_WAIT_H */
 

@@ -12,8 +12,8 @@ typedef struct {
     int hour;
     int minute;
     int second;
-    int milli_second;
-    uint64_t clock_now;
+    uint64_t low; // 100ns
+    uint64_t epoch;
 } posix__systime_t;
 
 #pragma pack(pop)
@@ -22,15 +22,15 @@ typedef struct {
 __extern__
 uint64_t posix__gettick();
 
-/* 获取系统时间滴答， 100纳秒单位 */
+/* 获取系统时间滴答， 单位100纳秒 */
 __extern__
 uint64_t posix__clock_gettime();
 
-/* 获取绝对时间 1970-01-01 00:00:00 000 到函数调用流逝的毫秒数  */
+/* 获取绝对时间 1970-01-01 00:00:00 000 到函数调用的时间流逝， 单位100ns  */
 __extern__
 uint64_t posix__clock_epoch();
 
-/* 求取当前时间 */
+/* 求取当前时间, clock_now 为当前 epoch */
 __extern__
 int posix__localtime(posix__systime_t *systime);
 /* 根据 clock_now 求取年月日时分秒 */
