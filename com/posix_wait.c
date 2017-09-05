@@ -204,25 +204,35 @@ void posix__hang() {
     posix__waitfor_waitable_handle(&waiter, -1);
 }
 
-int posix__delay_exec(uint32_t ms) {
+int posix__delay_execution(uint64_t us) {
 #if _WIN32
-    static HANDLE timeout = NULL;
-    if (!timeout) {
-        timeout = CreateEvent(NULL, FALSE, FALSE, NULL);
+    typedef NTSTATUS (WINAPI * DelayExecution)(BOOL bAlertable, PLARGE_INTEGER pTimeOut);
+    static DelayExecution ZwDelayExecution = NULL;
+    static HINSTANCE inst = NULL;
+    
+    if (!ZwDelayExecution) {
+        if (!inst) {
+            inst = LoadLibraryA("ntdll.dll");
+            if (!inst) {
+                return -1;
+            }
+        }
+        ZwDelayExecution = (DelayExecution)GetProcAddress(inst, "NtDelayExecution");
+    }
+    if (ZwDelayExecution) {
+        LARGE_INTEGER TimeOut;
+        TimeOut.QuadPart = -1 * us * 10;
+        if (!NT_SCUUESS(ZwDelayExecution(FALSE, &TimeOut))) {
+            return -1;
+        }
+        return 0;
     }
     
-    if (!timeout) {
-        return -1;
-    }
-    
-    if (WAIT_TIMEOUT != WaitForSingleObject(timeout, ms)) {
-        return -1;
-    }
-    return 0;
+    return -1;
 #else
     struct timeval tv;
     tv.tv_sec = 0;
-    tv.tv_usec = ms * 1000;
+    tv.tv_usec = us;
     return select(0, NULL, NULL, NULL, &tv);
 #endif
 }

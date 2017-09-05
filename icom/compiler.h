@@ -36,6 +36,12 @@
 #endif /* defined __USE_MISC */
 #endif /* !_WIN32 */
 
+#if _WIN32
+#if !defined NT_SUCCESS
+#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
+#endif
+#endif /* _WIN32 */
+
 #if !defined __always_inline
 #if _WIN32
 #define __always_inline __forceinline

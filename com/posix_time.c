@@ -21,20 +21,19 @@ int posix__localtime(posix__systime_t *systime) {
     systime->epoch = posix__clock_epoch();
     return posix__clock_localtime(systime);
     //    gettimeofday(&tv_now, NULL);
-    //    localtime_r(&tv_now.tv_sec, &tm_now);
     return 0;
 }
 
 int posix__clock_localtime(posix__systime_t *systime) {
 #if _WIN32
     uint64_t nt_filetime = systime->epoch + NT_EPOCH_ESCAPE;
-    FILETIME file_now, local_now;
+    FILETIME file_now, local_file_now;
     file_now.dwLowDateTime = nt_filetime & 0xFFFFFFFF;
     file_now.dwHighDateTime = (nt_filetime >> 32) & 0xFFFFFFFF;
-    FileTimeToLocalFileTime(&file_now, &local_now);
+    FileTimeToLocalFileTime(&file_now, &local_file_now);
 
     SYSTEMTIME sys_now;
-    FileTimeToSystemTime(&local_now, &sys_now);
+    FileTimeToSystemTime(&local_file_now, &sys_now);
 
     systime->year = sys_now.wYear;
     systime->month = sys_now.wMonth;
@@ -47,9 +46,7 @@ int posix__clock_localtime(posix__systime_t *systime) {
     struct timeval tv_now;
     struct tm tm_now;
 
-    systime->epoch = posix__clock_epoch();
-
-    tv_now.tv_sec = systime->epoch / /* 10000000*/ET_METHOD_NTKRNL;
+    tv_now.tv_sec = systime->epoch / ET_METHOD_NTKRNL;/* 10000000*/
 
     localtime_r(&tv_now.tv_sec, &tm_now);
 
@@ -79,9 +76,9 @@ int posix__localtime_clock(posix__systime_t *systime) {
 
     SystemTimeToFileTime(&now, &fnow);
 
-    uint64_t nt_filetime = (uint64_t) ((uint64_t) fnow.dwHighDateTime << 32) | fnow.dwLowDateTime;
-    nt_filetime += systime->low;
-    systime->epoch = nt_filetime - NT_EPOCH_ESCAPE;
+    uint64_t nt_file_time = (uint64_t) ((uint64_t) fnow.dwHighDateTime << 32) | fnow.dwLowDateTime;
+    nt_file_time += systime->low;
+    systime->epoch = nt_file_time - NT_EPOCH_ESCAPE;
 #else
     struct tm timem;
     uint64_t epoch;
@@ -123,10 +120,10 @@ uint64_t posix__gettick() {
 
 uint64_t posix__clock_epoch() {
 #if _WIN32
-    SYSTEMTIME local_time;
-    FILETIME file_time;
-    GetLocalTime(&local_time);
-    if (SystemTimeToFileTime(&local_time, &file_time)) {
+    SYSTEMTIME system_time;
+    FILETIME file_time, local_file_time;
+    GetSystemTime(&system_time);
+    if (SystemTimeToFileTime(&system_time, &file_time)) {
         uint64_t epoch = (uint64_t) ((uint64_t) file_time.dwHighDateTime << 32 | file_time.dwLowDateTime);
         epoch -= NT_EPOCH_ESCAPE;
         return epoch;

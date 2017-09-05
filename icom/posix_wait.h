@@ -72,7 +72,7 @@ void posix__hang();
 
 /* 高精度的固定延时执行 */
 __extern__
-int posix__delay_exec(uint32_t ms);
+int posix__delay_execution(uint64_t us);
 
 #endif /* POSIX_WAIT_H */
 
