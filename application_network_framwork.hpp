@@ -28,6 +28,11 @@ namespace nsp {
 
                 try {
                     sptr->bind_object(shared_from_this());
+                    
+                    // 服务端有权在会话初次到达阶段拒绝连接
+                    if (sptr->on_established() < 0){
+                        throw -ENETRESET;
+                    }
                 } catch (...) {
                     sptr->close();
                     return;
@@ -182,6 +187,11 @@ namespace nsp {
 
             virtual void bind_object(const std::shared_ptr<obtcp> &object) override final {
                 tcp_application_server_ = std::static_pointer_cast< tcp_application_service<tcp_application_client < T>> >(object);
+            }
+            
+            // server 创建 session 后， 首次主动通知会话对象
+            virtual int on_established() {
+                return 0;
             }
         protected:
             // 如果服务端还在， 则通知服务端,有客户链接断开， 同时允许继续重写下行
