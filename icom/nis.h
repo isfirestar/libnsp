@@ -69,6 +69,6 @@ interface_format(void *) nis_refctx(HLNK lnk, int *user_context_size);
 interface_format(int) nis_ctxsize(HLNK lnk);
 interface_format(int) nis_getver(swnet_version_t *version);
 interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); /*可用于域名解析，获取首个解析IP地址, 该地址将在过程内部被转为小端*/
-
+interface_format(char *) nis_lgethost(char *name, int cb); /* 获取本地主机名 */
 
 #endif

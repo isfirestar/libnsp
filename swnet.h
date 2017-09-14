@@ -111,7 +111,8 @@ namespace nsp {
             NSP_DECLARE_COMM_INTERFACE(nis_ctxsize, (HLNK lnk), (lnk));
             NSP_DECLARE_COMM_INTERFACE(nis_getver, (swnet_version_t *version), (version));
             NSP_DECLARE_COMM_INTERFACE(nis_gethost, (const char *name, uint32_t *ipv4), (name, ipv4)); /*可用于域名解析，获取首个解析IP地址, 该地址将在过程内部被转为小端*/
-
+            NSP_DECLARE_INTERFACE(char *, NULL, nis_lgethost, (char *name, int cb), (name, cb));
+            
         public:
             // TCP
             int tcp_create(std::shared_ptr<obtcp> object, const char *ipstr, const port_t port);

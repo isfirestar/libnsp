@@ -25,6 +25,22 @@
 #endif /*__cplusplus */
 #endif
 
+#if !defined UINT64_STRFMT 
+#if _WIN32
+#define UINT64_STRFMT "%I64u"
+#else
+#define UINT64_STRFMT "%llu"
+#endif
+#endif
+
+#if !defined INT64_STRFMT 
+#if _WIN32
+#define INT64_STRFMT "%I64d"
+#else
+#define INT64_STRFMT "%lld"
+#endif
+#endif
+
 #if !_WIN32
 #if defined __USE_MISC
 #if !__USE_MISC
