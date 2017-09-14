@@ -121,7 +121,7 @@ uint64_t posix__gettick() {
 uint64_t posix__clock_epoch() {
 #if _WIN32
     SYSTEMTIME system_time;
-    FILETIME file_time, local_file_time;
+    FILETIME file_time;
     GetSystemTime(&system_time);
     if (SystemTimeToFileTime(&system_time, &file_time)) {
         uint64_t epoch = (uint64_t) ((uint64_t) file_time.dwHighDateTime << 32 | file_time.dwLowDateTime);

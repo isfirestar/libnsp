@@ -222,7 +222,7 @@ int posix__delay_execution(uint64_t us) {
     if (ZwDelayExecution) {
         LARGE_INTEGER TimeOut;
         TimeOut.QuadPart = -1 * us * 10;
-        if (!NT_SCUUESS(ZwDelayExecution(FALSE, &TimeOut))) {
+        if (!NT_SUCCESS(ZwDelayExecution(FALSE, &TimeOut))) {
             return -1;
         }
         return 0;
