@@ -13,26 +13,24 @@
 #include "logger.h"
 #include "clist.h"
 
-#include "posix_types.h"
+#include "compiler.h"
 #include "posix_string.h"
 #include "posix_thread.h"
 #include "posix_time.h"
 #include "posix_wait.h"
 #include "posix_ifos.h"
+#include "posix_atomic.h"
 
 
-#define  MAXIMUM_LOGFILE_LINE  (5000)
+#define  MAXIMUM_LOGFILE_LINE  		(5000)
 
-/* 最大异步日志存储数量， 达到次数量， 将无法进行异步日志存储 */
-#define MAXIMUM_LOGSAVE_COUNT       (300000)
+/* 最大异步日志存储数量， 达到次数量， 将无法进行异步日志存储 
+ * 按每个节点 2KB + 180 字节算， 进程允许最大阻塞 53.5MB 虚拟内存
+ */
+#define MAXIMUM_LOGSAVE_COUNT       (30000)
 
 static const char *LOG__LEVEL_TXT[] = {
-    "info",
-    "warning",
-    "error",
-    "fatal",
-    "trace",
-};
+    "info",    "warning",    "error",    "fatal",    "trace" };
 
 typedef struct {
     struct list_head link_;
@@ -68,6 +66,8 @@ static
 posix__pthread_t __log_async_thread = POSIX_PTHREAD_TYPE_INIT;
 static
 posix__waitable_handle_t __log_async_alert;
+static
+int __log_inited = 0;
 
 static
 int log__create_file(log__file_describe_t *file, const char *path) {
@@ -118,7 +118,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
         return -1;
     }
 #else
-    if (write(file->fd_, buf, count) < 0) {
+    if (write(file->fd_, buf, count) <= 0) {
         return -1;
     }
 #endif
@@ -135,8 +135,10 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     struct list_head *pos;
     log__file_describe_t *file;
 
-    if (!currst || !module) return NULL;
-
+    if (!currst || !module) {
+		return NULL;
+	}
+	
     file = NULL;
 
     list_for_each(pos, &__log__file_head) {
@@ -148,6 +150,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     }
 
     do {
+        /* 对象为空，说明该module模块新增 */
         if (!file) {
             if (NULL == (file = malloc(sizeof ( log__file_describe_t)))) {
                 return NULL;
@@ -166,6 +169,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
             break;
         }
 
+        /* 没有发生日期切换 且 该文件内容记载没有超过限制行数, 则直接复用该文件 */
         if (file->filest_.day == currst->day &&
                 file->filest_.month == currst->month &&
                 file->filest_.day == currst->day &&
@@ -177,6 +181,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
         log__close_file(file);
     } while (0);
 
+    /* 日志发件发生新建或任何形式的文件切换 */
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", module,
             currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
     posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR, posix__getpedir());
@@ -207,7 +212,9 @@ void log__printf(const char *module, enum log__targets target, const posix__syst
         fileptr = log__attach(currst, module);
         posix__pthread_mutex_unlock(&__log_file_lock);
         if (fileptr) {
-            log__fwrite(fileptr, logstr, cb);
+            if (log__fwrite(fileptr, logstr, cb) < 0) {
+                log__close_file(fileptr);
+            }
         }
     }
 
@@ -221,14 +228,16 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
     int pos;
     char *p;
 
-    if (level >= kLogLevel_Maximum || !currst || !format || !logstr) return NULL;
-
+    if (level >= kLogLevel_Maximum || !currst || !format || !logstr) {
+		return NULL;
+	}
+	
     p = logstr;
     pos = 0;
     pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (currst->low / 10000));
     pos += posix__sprintf(&p[pos], cch - pos, "%s ", LOG__LEVEL_TXT[level]);
     pos += posix__sprintf(&p[pos], cch - pos, "%04X # ", tid);
-    pos += posix__vsnprintf(&p[pos], cch - pos, format, ap);
+    pos += posix__sprintf(&p[pos], cch - pos, format, ap);
     pos += posix__sprintf(&p[pos], cch - pos, "%s", POSIX__EOL);
 
     return p;
@@ -271,17 +280,20 @@ void *log__asnyc_proc(void *argv) {
 
 static
 int log__init() {
-    if (0 == __log_async_thread.pid_) {
+	if ( 1 == posix__atomic_inc(&__log_inited) ) {
         posix__pthread_mutex_init(&__log_file_lock);
         posix__pthread_mutex_init(&__log_async_lock);
         posix__init_synchronous_waitable_handle(&__log_async_alert);
 
         if (posix__pthread_create(&__log_async_thread, &log__asnyc_proc, NULL) < 0) {
+            posix__pthread_mutex_release(&__log_file_lock);
             posix__pthread_mutex_release(&__log_async_lock);
             posix__uninit_waitable_handle(&__log_async_alert);
             return -1;
         }
-    }
+    }else{
+		posix__atomic_dec(&__log_inited);
+	}
     return 0;
 }
 
@@ -290,7 +302,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
     posix__systime_t currst;
 
-    if (log__init() < 0){
+    if (log__init() < 0 || !format ) {
         return;
     }
 
@@ -311,7 +323,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     va_list ap;
     log__async_node_t *node;
 
-    if (log__init() < 0){
+    if (log__init() < 0 || !format ) {
         return;
     }
 

@@ -11,8 +11,6 @@
 #include <pthread.h>
 #endif
 
-#include "posix_types.h"
-
 typedef struct {
     posix__boolean_t detached_;
 #if _WIN32
