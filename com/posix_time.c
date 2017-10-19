@@ -11,7 +11,9 @@
 // 转换为100ns
 static const uint64_t ET_METHOD_NTKRNL = ((uint64_t) ((uint64_t) 1000 * 1000 * 10));
 // NT FILETIME 到 Epoch 时间的差距， 单位100ns(NT FILETIME采用1640年记时)
-static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111902 << 32) | 3577643008); //{ .dwLowDateTime = 3577643008, .dwHighDateTime = 27111902 };
+// 使用ULL强制限制数据类型， 避免 warning: this decimal constant is unsigned only in ISO C90 警告
+static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111902ULL << 32) | 3577643008ULL); 
+//{ .dwLowDateTime = 3577643008, .dwHighDateTime = 27111902 };
 
 int posix__localtime(posix__systime_t *systime) {
     if (!systime) {
@@ -20,8 +22,6 @@ int posix__localtime(posix__systime_t *systime) {
 
     systime->epoch = posix__clock_epoch();
     return posix__clock_localtime(systime);
-    //    gettimeofday(&tv_now, NULL);
-    return 0;
 }
 
 int posix__clock_localtime(posix__systime_t *systime) {
