@@ -356,4 +356,12 @@ enum byte_order_t {
     kByteOrder_BigEndian,
 };
 
+#if !defined PAGE_SIZE
+#define PAGE_SIZE (4096)
+#endif
+
+#if !defined BYTES_PER_SECTOR
+#define BYTES_PER_SECTOR		(512)
+#endif
+
 #endif

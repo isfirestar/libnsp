@@ -260,7 +260,7 @@ int posix__pmkdir(const char *const dir) {
 
 int posix__pmkdir(const char *const dir) {
     FILE *p;
-    char command[64];
+    char command[255];
     sprintf(command, "mkdir -p %s", dir);
     p = popen(command, "r");
     if (p) {

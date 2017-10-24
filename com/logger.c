@@ -22,7 +22,7 @@
 #include "posix_atomic.h"
 
 
-#define  MAXIMUM_LOGFILE_LINE  		(5000)
+#define  MAXIMUM_LOGFILE_LINE    (5000)
 
 /* 最大异步日志存储数量， 达到次数量， 将无法进行异步日志存储 
  * 按每个节点 2KB + 180 字节算， 进程允许最大阻塞 53.5MB 虚拟内存
@@ -30,7 +30,8 @@
 #define MAXIMUM_LOGSAVE_COUNT       (30000)
 
 static const char *LOG__LEVEL_TXT[] = {
-    "info",    "warning",    "error",    "fatal",    "trace" };
+    "info", "warning", "error", "fatal", "trace"
+};
 
 typedef struct {
     struct list_head link_;
@@ -45,7 +46,7 @@ typedef struct {
 } log__file_describe_t;
 
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
-static  posix__pthread_mutex_t __log_file_lock;
+static posix__pthread_mutex_t __log_file_lock;
 
 typedef struct {
     struct list_head link_;
@@ -60,9 +61,9 @@ static
 long __log_async_save_cnt = 0;
 static
 LIST_HEAD(__log_async_head); /* list<log__async_node_t> */
-static 
+static
 posix__pthread_mutex_t __log_async_lock;
-static 
+static
 posix__pthread_t __log_async_thread = POSIX_PTHREAD_TYPE_INIT;
 static
 posix__waitable_handle_t __log_async_alert;
@@ -122,7 +123,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
         return -1;
     }
 #endif
-    
+
     /* posix__fflush(file->fd_) */
     file->line_count_++;
     return 0;
@@ -136,9 +137,9 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     log__file_describe_t *file;
 
     if (!currst || !module) {
-		return NULL;
-	}
-	
+        return NULL;
+    }
+
     file = NULL;
 
     list_for_each(pos, &__log__file_head) {
@@ -176,7 +177,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
                 file->line_count_ < MAXIMUM_LOGFILE_LINE) {
             return file;
         }
-        
+
         /* 切换日志文件， 并不回收日志对象指针，仅仅是关闭文件描述符即可 */
         log__close_file(file);
     } while (0);
@@ -229,15 +230,15 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
     char *p;
 
     if (level >= kLogLevel_Maximum || !currst || !format || !logstr) {
-		return NULL;
-	}
-	
+        return NULL;
+    }
+
     p = logstr;
     pos = 0;
     pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (currst->low / 10000));
     pos += posix__sprintf(&p[pos], cch - pos, "%s ", LOG__LEVEL_TXT[level]);
     pos += posix__sprintf(&p[pos], cch - pos, "%04X # ", tid);
-    pos += posix__sprintf(&p[pos], cch - pos, format, ap);
+    pos += posix__vsprintf(&p[pos], cch - pos, format, ap);
     pos += posix__sprintf(&p[pos], cch - pos, "%s", POSIX__EOL);
 
     return p;
@@ -269,7 +270,7 @@ void *log__asnyc_proc(void *argv) {
             posix__pthread_mutex_unlock(&__log_async_lock);
 
             if (node) {
-                log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int)strlen(node->logstr_));
+                log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
                 free(node);
             }
         } while (node);
@@ -280,7 +281,7 @@ void *log__asnyc_proc(void *argv) {
 
 static
 int log__init() {
-	if ( 1 == posix__atomic_inc(&__log_inited) ) {
+    if (1 == posix__atomic_inc(&__log_inited)) {
         posix__pthread_mutex_init(&__log_file_lock);
         posix__pthread_mutex_init(&__log_async_lock);
         posix__init_synchronous_waitable_handle(&__log_async_alert);
@@ -291,9 +292,9 @@ int log__init() {
             posix__uninit_waitable_handle(&__log_async_alert);
             return -1;
         }
-    }else{
-		posix__atomic_dec(&__log_inited);
-	}
+    } else {
+        posix__atomic_dec(&__log_inited);
+    }
     return 0;
 }
 
@@ -302,7 +303,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
     posix__systime_t currst;
 
-    if (log__init() < 0 || !format ) {
+    if (log__init() < 0 || !format) {
         return;
     }
 
@@ -313,9 +314,9 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     va_end(ap);
 
     if (!module) {
-        log__printf(posix__getpename(), target, &currst, logstr, (int)strlen(logstr));
+        log__printf(posix__getpename(), target, &currst, logstr, (int) strlen(logstr));
     } else {
-        log__printf(module, target, &currst, logstr, (int)strlen(logstr));
+        log__printf(module, target, &currst, logstr, (int) strlen(logstr));
     }
 }
 
@@ -323,7 +324,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     va_list ap;
     log__async_node_t *node;
 
-    if (log__init() < 0 || !format ) {
+    if (log__init() < 0 || !format) {
         return;
     }
 
@@ -334,12 +335,12 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     posix__localtime(&node->logst_);
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
-    }else{
+    } else {
         posix__strcpy(node->module_, cchof(node->module_), posix__getpename());
     }
 
     va_start(ap, format);
-    log__format_string(level, posix__gettid(), format, ap, &node->logst_, node->logstr_, sizeof(node->logstr_));
+    log__format_string(level, posix__gettid(), format, ap, &node->logst_, node->logstr_, sizeof (node->logstr_));
     va_end(ap);
 
     do {
