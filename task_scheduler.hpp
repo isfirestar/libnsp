@@ -13,7 +13,6 @@
 #include "os_util.hpp"
 
 /* 一套使用多种线程模型， 支持优先队列的, 模板化的任务系统 */
-
 namespace nsp {
     namespace toolkit {
 
@@ -106,7 +105,6 @@ namespace nsp {
         };
 
         // 指针目标对比的仿函数
-
         template<class T> struct pointer_compatible_compare {
         public:
 
@@ -132,7 +130,6 @@ namespace nsp {
         };
 
         // 线程模式处理优先队列任务
-
         template<class T> class priority_task_thread {
             std::priority_queue <priority_task<T> *, std::vector<priority_task<T> *>, pointer_compatible_compare <priority_task<T>>> task_que_;
             std::mutex task_locker_;
@@ -176,7 +173,6 @@ namespace nsp {
 
             // 任务优先级可交由调用线程自行指定
             // 如果不指定优先级，则行为和 task_thread 一致， 但由于最小堆和队列的插入开销， 这个类会比 task_thread 效率低
-
             int post(const std::shared_ptr<T> &tsk, const int priority = 0) {
                 try {
                     std::unique_lock < decltype(task_locker_) > guard(task_locker_);
@@ -203,7 +199,6 @@ namespace nsp {
         };
 
         // 使用线程池的任务模型
-
         template<class T> class task_thread_pool {
             std::deque<std::shared_ptr<T>> task_que_;
             std::vector<std::thread *> ths_;
@@ -289,7 +284,7 @@ namespace nsp {
                 return 0;
             }
 
-            void post(std::shared_ptr<T> &task) {
+            void post(const std::shared_ptr<T> &task) {
                 std::unique_lock < decltype(task_locker_) > guard(task_locker_);
                 task_que_.push_back(task);
                 cv_.notify_one();

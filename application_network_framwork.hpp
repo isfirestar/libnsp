@@ -56,6 +56,7 @@ namespace nsp {
         public:
 
             tcp_application_service() : obtcp() {
+				;
             }
 
             ~tcp_application_service() {
@@ -174,6 +175,7 @@ namespace nsp {
             }
 
             virtual ~tcp_application_client() {
+				;
             }
 
             // 如果使用 proto::proto_interface 的流化和反流化模型， 则可以直接使用这样的对象进行发包操作
@@ -212,6 +214,7 @@ namespace nsp {
             } 
 
             virtual void on_disconnected(const HTCPLINK previous) {
+				;
             }
         };
 

@@ -45,6 +45,7 @@ typedef struct {
     char module_[LOG_MODULE_NAME_LEN];
 } log__file_describe_t;
 
+static int __log_inited = 0;
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
 static posix__pthread_mutex_t __log_file_lock;
 
@@ -57,18 +58,15 @@ typedef struct {
     char module_[LOG_MODULE_NAME_LEN];
 } log__async_node_t;
 
-static
-long __log_async_save_cnt = 0;
-static
-LIST_HEAD(__log_async_head); /* list<log__async_node_t> */
-static
-posix__pthread_mutex_t __log_async_lock;
-static
-posix__pthread_t __log_async_thread = POSIX_PTHREAD_TYPE_INIT;
-static
-posix__waitable_handle_t __log_async_alert;
-static
-int __log_inited = 0;
+typedef struct {
+    long pendding_;
+    struct list_head items_; /* list<log__async_node_t> */
+    posix__pthread_mutex_t lock_;
+    posix__pthread_t thread_;
+    posix__waitable_handle_t alert_;
+} log__async_context_t;
+
+static log__async_context_t __log_async;
 
 static
 int log__create_file(log__file_describe_t *file, const char *path) {
@@ -87,7 +85,7 @@ int log__create_file(log__file_describe_t *file, const char *path) {
     file->fd_ = open(path, O_RDWR | O_APPEND);
     if (file->fd_ < 0) {
         if (ENOENT == errno) {
-            file->fd_ = open(path, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IROTH);
+            file->fd_ = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         }
     }
     return file->fd_;
@@ -196,6 +194,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     } else {
         /* bug fixed:
          * 如果文件创建失败, 则需要移除链表节点 */
+		posix__syslog("nsplog failed to open storage file");
         list_del(&file->link_);
         free(file);
         file = NULL;
@@ -221,6 +220,10 @@ void log__printf(const char *module, enum log__targets target, const posix__syst
 
     if (target & kLogTarget_Stdout) {
         printf("%s", logstr);
+    }
+
+    if (target & kLogTarget_Sysmesg) {
+        posix__syslog(logstr);
     }
 }
 
@@ -248,26 +251,26 @@ static
 void *log__asnyc_proc(void *argv) {
     log__async_node_t *node;
 
-    while (posix__waitfor_waitable_handle(&__log_async_alert, 10 * 1000) >= 0) {
+    while (posix__waitfor_waitable_handle(&__log_async.alert_, 10 * 1000) >= 0) {
         do {
             node = NULL;
 
-            posix__pthread_mutex_lock(&__log_async_lock);
+            posix__pthread_mutex_lock(&__log_async.lock_);
 #if _WIN32
-            if (!list_empty(&__log_async_head)) {
-                --__log_async_save_cnt;
-                node = list_first_entry(&__log_async_head, log__async_node_t, link_);
+            if (!list_empty(&__log_async.items_)) {
+                --__log_async.pendding_;
+                node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
                 if (node) {
                     list_del(&node->link_);
                 }
             }
 #else
-            if (NULL != (node = list_first_entry_or_null(&__log_async_head, log__async_node_t, link_))) {
-                --__log_async_save_cnt;
+            if (NULL != (node = list_first_entry_or_null(&__log_async.items_, log__async_node_t, link_))) {
+                --__log_async.pendding_;
                 list_del(&node->link_);
             }
 #endif
-            posix__pthread_mutex_unlock(&__log_async_lock);
+            posix__pthread_mutex_unlock(&__log_async.lock_);
 
             if (node) {
                 log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
@@ -276,20 +279,33 @@ void *log__asnyc_proc(void *argv) {
         } while (node);
     }
 
+    /* 如果异步线程退出，则可能导致 log__save 内存堆积, 因为此时无法准确进行日志记录， 因此投递系统记录 */
+    posix__syslog("nsplog asynchronous thread has been terminated.");
     return NULL;
+}
+
+static
+int log__async_init() {
+    __log_async.pendding_ = 0;
+    INIT_LIST_HEAD(&__log_async.items_);
+    posix__pthread_mutex_init(&__log_async.lock_);
+    posix__init_synchronous_waitable_handle(&__log_async.alert_);
+
+    if (posix__pthread_create(&__log_async.thread_, &log__asnyc_proc, NULL) < 0) {
+        posix__pthread_mutex_release(&__log_async.lock_);
+        posix__uninit_waitable_handle(&__log_async.alert_);
+        return -1;
+    }
+
+    return 0;
 }
 
 static
 int log__init() {
     if (1 == posix__atomic_inc(&__log_inited)) {
         posix__pthread_mutex_init(&__log_file_lock);
-        posix__pthread_mutex_init(&__log_async_lock);
-        posix__init_synchronous_waitable_handle(&__log_async_alert);
-
-        if (posix__pthread_create(&__log_async_thread, &log__asnyc_proc, NULL) < 0) {
+        if (log__async_init() < 0) {
             posix__pthread_mutex_release(&__log_file_lock);
-            posix__pthread_mutex_release(&__log_async_lock);
-            posix__uninit_waitable_handle(&__log_async_alert);
             return -1;
         }
     } else {
@@ -344,16 +360,16 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     va_end(ap);
 
     do {
-        posix__pthread_mutex_lock(&__log_async_lock);
-        if (__log_async_save_cnt < MAXIMUM_LOGSAVE_COUNT) {
-            list_add_tail(&node->link_, &__log_async_head);
-            ++__log_async_save_cnt;
+        posix__pthread_mutex_lock(&__log_async.lock_);
+        if (__log_async.pendding_ < MAXIMUM_LOGSAVE_COUNT) {
+            list_add_tail(&node->link_, &__log_async.items_);
+            ++__log_async.pendding_;
             break;
         }
 
         free(node);
     } while (0);
 
-    posix__pthread_mutex_unlock(&__log_async_lock);
-    posix__sig_waitable_handle(&__log_async_alert);
+    posix__pthread_mutex_unlock(&__log_async.lock_);
+    posix__sig_waitable_handle(&__log_async.alert_);
 }

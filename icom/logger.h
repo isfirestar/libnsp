@@ -15,6 +15,7 @@ enum log__levels {
 enum log__targets {
     kLogTarget_Filesystem = 1,
     kLogTarget_Stdout = 2,
+	kLogTarget_Sysmesg = 4,
 };
 
 __extern__

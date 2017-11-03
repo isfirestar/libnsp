@@ -3,8 +3,6 @@
 #include <string>
 #include <cstdint>
 
-#include "icom/posix_types.h"
-
 #if !defined MAXIMUM_IPV4_STRLEN
 #define MAXIMUM_IPV4_STRLEN     (0x10)
 #endif // !MAXIMUM_IPV4_STRLEN

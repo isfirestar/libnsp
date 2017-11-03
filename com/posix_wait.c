@@ -138,16 +138,18 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         posix__pthread_mutex_lock(&waiter->mutex_);
         while (!waiter->pass_) {
             retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-            /* 超时或系统调用失败，均退出循环， 系统调用成功， 则需要判定是否 pass */
+            /* 超时, 认定为系统调用成功, 且不需要判断pass, 直接退出循环 */
             if (ETIMEDOUT == retval) {
                 break;
             }
 
+			/* 系统调用失败 */
             if (0 != retval) {
                 retval = -1;
                 break;
             }
         }
+		
         /* 如果是同步对象， 则需要重置通过标记 */
         if (waiter->sync_) {
             waiter->pass_ = 0;

@@ -73,7 +73,6 @@ typedef union _ULARGE_INTEGER {
 #endif
 
 #include "icom/compiler.h"
-#include "icom/posix_types.h"
 
 namespace nsp {
 	namespace os {
