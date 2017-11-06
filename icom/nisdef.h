@@ -10,11 +10,11 @@
 #endif
 
 /* 前置网络协议层及其长度 */
-#define MTU       (1460)   
-#define ETHERNET_P_SIZE                                         (14)   /*网络层14个字节 */
-#define IP_P_SIZE      (20)   /* IP层20个字节 */
-#define UDP_P_SIZE      (8)   /* UDP层8个字节 */
-#define TCP_P_SIZE      (20)   /* TCP层20个字节 */
+#define MTU       			(1500)   
+#define ETHERNET_P_SIZE     (14)   /*网络层14个字节 */
+#define IP_P_SIZE      		(20)   /* IP层20个字节 */
+#define UDP_P_SIZE      	(8)   /* UDP层8个字节 */
+#define TCP_P_SIZE      	(20)   /* TCP层20个字节 */
 
 /* 下层句柄定义 */
 typedef uint32_t HLNK;
