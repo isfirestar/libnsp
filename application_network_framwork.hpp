@@ -183,7 +183,10 @@ namespace nsp {
             int psend(const proto::proto_interface *package) {
                 if (!package) return -1;
                 return obtcp::send(package->length(), [&] (void *buffer, int cb) ->int {
-                    return ( package->serialize((unsigned char *) buffer) < 0) ? -1 : 0;
+					if (!package->serialize((unsigned char *) buffer)) {
+						return -1;
+					}
+					return 0;
                 });
             }
 

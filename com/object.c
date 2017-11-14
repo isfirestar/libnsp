@@ -159,7 +159,7 @@ void objuninit() {
 objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, void *initctx, unsigned int cbctx) {
     object_t *obj;
 
-    if (0 == user_size || !initializer || !unloader) {
+    if (0 == user_size) {
         return -1;
     }
 
@@ -177,10 +177,12 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     obj->unloader_ = unloader;
     memset(obj->user_data_, 0, obj->user_size_);
 
-    if (obj->initializer_(obj->user_data_, initctx, cbctx) < 0) {
-        obj->unloader_(-1, obj->user_data_);
-        free(obj);
-        return -1;
+    if (obj->initializer_) {
+        if (obj->initializer_(obj->user_data_, initctx, cbctx) < 0) {
+            obj->unloader_(-1, obj->user_data_);
+            free(obj);
+            return -1;
+        }
     }
 
     return objtabinst(obj);
