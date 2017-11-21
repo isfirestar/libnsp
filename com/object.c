@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #if _WIN32
 #include <windows.h>
@@ -10,7 +11,7 @@
 
 #include "object.h"
 
-#define OBJ_HASHTABLE_SIZE   (339)
+#define OBJ_HASHTABLE_SIZE   (39)
 
 #define OBJSTAT_NORMAL    (0)
 #define OBJSTAT_CLOSEWAIT   (1)
@@ -82,34 +83,50 @@ int objtabinst(object_t *obj) {
 
 static
 void objtabrmve(object_t *obj) {
-    object_t *found;
+	object_t *cursor, *target;
 
     if (!obj) {
         return;
     }
 
-    LOCK(&g_objmgr.locker_);
-    found = HLD_ROOT(obj->hld_);
-    if (found) {
-        if (found == obj) {
-            g_objmgr.object_hash_table_[obj->hld_ % OBJ_HASHTABLE_SIZE] = obj->next_hash_clash_;
-        } else {
-            while (found->next_hash_clash_) {
-                if (found->next_hash_clash_ == obj) {
-                    found->next_hash_clash_ = obj->next_hash_clash_;
-                    break;
-                }
-                found = found->next_hash_clash_;
-            }
-        }
-    }
+	cursor = NULL;
+	target = NULL;
+
+	do {
+		LOCK(&g_objmgr.locker_);
+		cursor = HLD_ROOT(obj->hld_);
+		if ( !cursor ) {
+			break;
+		}
+
+		if ( cursor == obj ) {
+			 g_objmgr.object_hash_table_[obj->hld_ % OBJ_HASHTABLE_SIZE] = obj->next_hash_clash_;
+			 target = obj;
+			 break;
+		}
+
+		while ( cursor->next_hash_clash_ ) {
+			if ( cursor->next_hash_clash_ == obj ) {
+				cursor->next_hash_clash_ = obj->next_hash_clash_;
+				target = obj;
+				break;
+			}
+			cursor = cursor->next_hash_clash_;
+		}
+	} while ( 0 );
+            
     UNLOCK(&g_objmgr.locker_);
 
-    if (obj->unloader_) {
-        obj->unloader_(obj->hld_, obj->user_data_);
-    }
-
-    free(obj);
+	/* we must ensure that the deleted target is in the management sequence
+		 otherwise, @obj maybe a wildpointer, @free operation may take application crash.
+		 in this exception case,we will throw a assert fail*/
+	assert( target );
+	if ( target ) {
+		if ( target->unloader_ ) {
+			target->unloader_( target->hld_, target->user_data_ );
+		}
+		free( target );
+	}
 }
 
 static
@@ -195,6 +212,7 @@ void *objrefr(objhld_t hld) {
     LOCK(&g_objmgr.locker_);
     obj = objtabsrch(hld);
     if (obj) {
+		/* object status CLOSE_WAIT will be ignore for @objrefr operation */
         if (OBJSTAT_NORMAL == obj->stat_) {
             obj->refcnt_++;
             user_data = (char *) obj->user_data_;
@@ -211,12 +229,16 @@ void objdefr(objhld_t hld) {
     LOCK(&g_objmgr.locker_);
     obj = objtabsrch(hld);
     if (obj) {
-        if (0 == obj->refcnt_) {
-            abort();
-        } else {
-            obj->refcnt_--;
+		/* int normal, ref count must be greater than zero.
+			otherwise, we will throw a assert fail*/
+		assert( obj->refcnt_ > 0 );
+		if (obj->refcnt_ > 0 ) {
+           /* if this object is waitting for close and ref count decrease equal to zero, 
+				close it */
+			if ( ( 0 == --obj->refcnt_ ) && ( OBJSTAT_CLOSEWAIT == obj->stat_ ) ) {
+				rmv = 1;
+			}
         }
-        rmv = ((OBJSTAT_CLOSEWAIT == obj->stat_ && 0 == obj->refcnt_) ? 1 : 0);
     }
     UNLOCK(&g_objmgr.locker_);
 
@@ -232,11 +254,17 @@ void objclos(objhld_t hld) {
     LOCK(&g_objmgr.locker_);
     obj = objtabsrch(hld);
     if (obj) {
-        if (obj->refcnt_ > 0) {
-            obj->stat_ = OBJSTAT_CLOSEWAIT;
-        } else {
-            rmv = 1;
-        }
+		/* this object is already in CLOSE_WAIT status , 
+			maybe trying an "double close" operation, do nothing*/
+		if ( OBJSTAT_CLOSEWAIT == obj->stat_ ) {
+			;
+		} else {
+			if ( obj->refcnt_ > 0 ) {
+				obj->stat_ = OBJSTAT_CLOSEWAIT;
+			} else {
+				rmv = 1;
+			}
+		}
     }
     UNLOCK(&g_objmgr.locker_);
 
