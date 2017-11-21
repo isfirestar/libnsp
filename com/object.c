@@ -229,7 +229,7 @@ void objdefr(objhld_t hld) {
     LOCK(&g_objmgr.locker_);
     obj = objtabsrch(hld);
     if (obj) {
-		/* int normal, ref count must be greater than zero.
+		/* in normal, ref count must be greater than zero.
 			otherwise, we will throw a assert fail*/
 		assert( obj->refcnt_ > 0 );
 		if (obj->refcnt_ > 0 ) {
