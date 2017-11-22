@@ -11,7 +11,7 @@
 
 #include "object.h"
 
-#define OBJ_HASHTABLE_SIZE   (39)
+#define OBJ_HASHTABLE_SIZE   (399)
 
 #define OBJSTAT_NORMAL    (0)
 #define OBJSTAT_CLOSEWAIT   (1)
