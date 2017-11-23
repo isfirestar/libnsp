@@ -1,15 +1,14 @@
 #if !defined BASEOBJECT_H
 #define BASEOBJECT_H
 
-#if !defined OBJHLD_TYPEDEF
-#define OBJHLD_TYPEDEF
-typedef long objhld_t;
-#endif
-
 #include "compiler.h"
 
+typedef int64_t objhld_t;
+
+#define INVALID_OBJHLD		((objhld_t)(-1))
+
 typedef int( *objinitfn_t)(void *udata, void *ctx, int ctxcb);
-typedef void( *objuninitfn_t)(int hld, void *udata);
+typedef void( *objuninitfn_t)(objhld_t hld, void *udata);
 
 __extern__
 void objinit();

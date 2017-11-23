@@ -17,9 +17,9 @@
 #define TCP_P_SIZE      	(20)   /* TCP层20个字节 */
 
 /* 下层句柄定义 */
-typedef uint32_t HLNK;
-typedef uint32_t HTCPLINK;
-typedef int32_t HUDPLINK;
+typedef uint64_t HLNK;
+typedef uint64_t HTCPLINK;
+typedef int64_t HUDPLINK;
 
 #if !defined STD_CALL
 #if _WIN32
@@ -34,9 +34,6 @@ typedef bool nis_boolean_t;
 #else
 typedef int nis_boolean_t;
 #endif
-
-#define nis_true    (1)
-#define nis_false   (0)
 
 #define interface_format(_Ty) STD_C_FORMAT _Ty STD_CALL
 

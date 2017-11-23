@@ -59,7 +59,7 @@ struct {
 #define HLD_ROOT(hld)    ((object_t *)(g_objmgr.object_hash_table_[hld % OBJ_HASHTABLE_SIZE]))
 
 static
-int objtabinst(object_t *obj) {
+objhld_t objtabinst(object_t *obj) {
     object_t * target;
 
     if (!obj || obj->next_hash_clash_) {
