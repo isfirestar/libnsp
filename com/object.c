@@ -272,11 +272,3 @@ void objclos(objhld_t hld) {
         objtabrmve(obj);
     }
 }
-
-int objentry(void *udata, void *ctx, int ctxcb) {
-    return 0;
-}
-
-void objunload(int hld, void *udata) {
-
-}

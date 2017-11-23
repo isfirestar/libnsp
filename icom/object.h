@@ -22,9 +22,5 @@ __extern__
 void objdefr(objhld_t hld);
 __extern__
 void objclos(objhld_t hld);
-__extern__
-int objentry(void *udata, void *ctx, int ctxcb);
-__extern__
-void objunload(int hld, void *udata);
 
 #endif
