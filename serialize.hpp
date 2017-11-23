@@ -33,8 +33,6 @@
 
 #endif // USE_SAFE_VECTOR_SIZE
 
-
-
 namespace nsp {
     namespace proto {
 
@@ -225,12 +223,111 @@ namespace nsp {
             }
         };
 
+		template<class T>
+		struct proto_blob_t : public proto_interface {
+			T *type_pointer_ = nullptr;
+			int count_ = 0;
+
+			proto_blob_t( const T *ptr, int count ) {
+				count_ = count;
+				type_pointer_ = new T[count_];
+				memcpy( type_pointer_, ptr, count );
+			}
+
+			proto_blob_t(int count ) {
+				count_ =count;
+				type_pointer_ = new T[count_];
+			}
+
+			proto_blob_t( const proto_blob_t<T> &lref ) {
+				if ( &lref != this ) {
+					type_pointer_ = new T[lref.count_];
+					count_ = lref.count_;
+				}
+			}
+
+			proto_blob_t( proto_blob_t<T> &&rref ) {
+				type_pointer_ = rref.type_pointer_;
+				rref.type_pointer_ = nullptr;
+				count_ = rref.count_;
+				rref.count_ = 0;
+			}
+
+			proto_blob_t<T> &operator=( const proto_blob_t<T> &lref ) {
+				if ( &lref != this ) {
+					if ( type_pointer_  && count_ > 0) {
+						delete[]type_pointer_;
+					}
+					type_pointer_ = nullptr;
+					count_ = lref.count_;
+					if ( count_ > 0 ) {
+						type_pointer_ = new T[lref.count_];
+					}
+				}
+				return *this;
+			}
+
+			proto_blob_t<T> &operator=( const proto_blob_t<T> &&rref ) {
+				type_pointer_ = rref.type_pointer_;
+				rref.type_pointer_ = nullptr;
+				count_ = rref.count_;
+				rref.count_ = 0;
+				return *this;
+			}
+
+			~proto_blob_t() {
+				if (type_pointer_ && count_ > 0 ) {
+					delete []type_pointer_;
+				}
+			}
+
+			 virtual const int length() const override {
+				 return count_ * sizeof( T );
+            }
+
+            virtual unsigned char *serialize(unsigned char *bytes) const override {
+				if ( bytes && count_ > 0) {
+					memcpy(bytes, type_pointer_, count_);
+					return bytes + count_;
+				}
+				return nullptr;
+            }
+
+            virtual const unsigned char *build(const unsigned char *bytes, int &cb) override {
+				if ( bytes && cb >= count_ && count_ > 0 ) {
+					memcpy( type_pointer_, bytes, count_ );
+					cb -= count_;
+					return bytes + count_;
+				}
+				return nullptr;
+            }
+
+			operator T *() {
+				return type_pointer_;
+			}
+
+			operator const T* ( ) const {
+				return type_pointer_;
+			}
+		};
+
 #if 0
         template<class T, uint32_t N, template <class> class proto_container = proto_crt_t>
         struct proto_array_t : public proto_interface {
 
             proto_array_t() {
+				;
             }
+			
+			proto_array_t(const proto_array_t<T,N,proto_container> &lref ) {
+				memcpy(ay_, lref.ay_, N);
+			}
+			
+			proto_array_t(const T *ptr, uint32_t n) {
+				for ( uint32_t i = 0; i < N; i++ ) {
+					ay_[i] = ptr[i];
+				}
+			}
 
             virtual const int length() const override {
                 int sum = 0;
@@ -260,7 +357,7 @@ namespace nsp {
                 return ay_[index];
             }
 
-            size_t countof() const {
+            size_t size() const {
                 return N;
             }
 
@@ -272,17 +369,8 @@ namespace nsp {
                 return &ay_[0];
             }
 
-            T *operator&() {
-                return &ay_[0];
-            }
-
-            const T *operator&() const {
-                return &ay_[0];
-            }
-
             proto_container<T> ay_[N];
         };
-
 #endif
 
     } // namespace proto
