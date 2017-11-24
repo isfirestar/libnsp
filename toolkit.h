@@ -181,6 +181,12 @@ namespace nsp {
         int base64_encode(const char *input, int cb, std::string &output);
         int base64_encode(const std::string &input, std::string &output);
         int base64_decode(const std::string &input, std::string &output);
+		
+		// VFN1/VFN1a
+		template<class T>
+		T vfn1_hash(const unsigned char *hash, int length);
+		template<class T>
+		T vfn1a_hash(const unsigned char *hash, int length);
 
         // ¸¡µã×ª»»
         unsigned short float2fixed(float fFloat);

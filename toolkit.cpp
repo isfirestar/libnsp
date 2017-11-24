@@ -7,11 +7,9 @@
 
 #include "toolkit.h"
 #include "os_util.hpp"
-#include "icom/md5.h"
+#include "icom/hash.h"
 #include "icom/posix_string.h"
 #include "icom/posix_naos.h"
-#include "icom/base64.h"
-#include "icom/crc32.h"
 #include "icom/posix_ifos.h"
 
 #if !defined MAXIMU_TCPIP_PORT_NUMBER
@@ -739,6 +737,25 @@ namespace nsp {
             return 0;
         }
 
+		template<>
+		uint32_t vfn1_hash<uint32_t>(const unsigned char *hash, int length) {
+			return vfn1_h32(hash,length);
+		}
+		
+		template<>
+		uint64_t vfn1_hash<uint64_t>(const unsigned char *hash, int length) {
+			return vfn1_h64(hash,length);
+		}
+		
+		template<>
+		uint32_t vfn1a_hash<uint32_t>(const unsigned char *hash, int length) {
+			return vfn1a_h32(hash,length);
+		}
+		
+		template<>
+		uint64_t vfn1a_hash<uint64_t>(const unsigned char *hash, int length) {
+			return vfn1a_h64(hash,length);
+		}
         /////////////////////////////////////////// 浮点和 fixed point 的定向转换 ///////////////////////////////
 
         typedef struct {
