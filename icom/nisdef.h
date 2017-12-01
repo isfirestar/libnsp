@@ -17,9 +17,9 @@
 #define TCP_P_SIZE      	(20)   /* TCP层20个字节 */
 
 /* 下层句柄定义 */
-typedef uint64_t HLNK;
-typedef uint64_t HTCPLINK;
-typedef int64_t HUDPLINK;
+typedef uint32_t HLNK;
+typedef uint32_t HTCPLINK;
+typedef int32_t HUDPLINK;
 
 #if !defined STD_CALL
 #if _WIN32

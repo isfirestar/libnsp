@@ -3,7 +3,7 @@
 
 #include "compiler.h"
 
-typedef int64_t objhld_t;
+typedef int32_t objhld_t;
 
 #define INVALID_OBJHLD		((objhld_t)(-1))
 
