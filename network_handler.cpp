@@ -9,6 +9,8 @@
 #include "network_handler.h"
 #include "swnet.h"
 
+#include "iocm/logger.h"
+
 namespace nsp {
     namespace tcpip {
         ///////////////////////////////////////		TCP ²¿·Ö ///////////////////////////////////////
@@ -244,7 +246,8 @@ namespace nsp {
         void obtcp::on_recvdata(const std::string &pkt) {
         }
         
-        void obtcp::on_lowlevel_debug(const char *info){
+        void obtcp::on_lowlevel_debug(const char *info) {
+            log__save("libnshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
         }
 
         void obtcp::on_recvdata(const char *data, const int cb) {
@@ -379,7 +382,8 @@ namespace nsp {
             on_lowlevel_debug(info);
         }
         
-        void obudp::on_lowlevel_debug(const char *info){
+        void obudp::on_lowlevel_debug(const char *info) {
+            log__save("libnshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
         }
 
         void obudp::setlnk(const HUDPLINK lnk) {

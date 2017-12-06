@@ -349,7 +349,7 @@ __static_inline_function(void) __write_once_size(volatile void *p, void *res, in
 #if defined PI
 #undef PI
 #endif
-#define PI ((double)3.141592653589)
+#define PI ((double)3.14159265359)
 
 enum byte_order_t {
     kByteOrder_LittleEndian = 0,
