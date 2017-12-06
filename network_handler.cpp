@@ -9,7 +9,7 @@
 #include "network_handler.h"
 #include "swnet.h"
 
-#include "iocm/logger.h"
+#include "icom/logger.h"
 
 namespace nsp {
     namespace tcpip {
@@ -244,6 +244,7 @@ namespace nsp {
         }
 
         void obtcp::on_recvdata(const std::string &pkt) {
+            ;
         }
         
         void obtcp::on_lowlevel_debug(const char *info) {
