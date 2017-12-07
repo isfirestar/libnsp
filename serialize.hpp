@@ -121,6 +121,7 @@ namespace nsp {
         struct proto_vector_t : public std::vector<T>, public proto_interface {
 
             proto_vector_t() : std::vector<T>() {
+                ;
             }
 
             virtual const int length() const override {
@@ -163,12 +164,15 @@ namespace nsp {
         struct proto_string_t : public std::basic_string<T>, public proto_interface {
 
             proto_string_t() : std::basic_string<T>() {
+                ;
             }
 
             proto_string_t(const T *str) : std::basic_string<T>(str) {
+                ;
             }
 
             proto_string_t(const std::basic_string<T> &stdstr) : std::basic_string<T>(stdstr) {
+                ;
             }
 
             virtual const int length() const override {
@@ -229,20 +233,30 @@ namespace nsp {
 			int count_ = 0;
 
 			proto_blob_t( const T *ptr, int count ) {
-				count_ = count;
-				type_pointer_ = new T[count_];
-				memcpy( type_pointer_, ptr, count );
+                if ((count > 0) && ptr) {
+    				count_ = count;
+    				type_pointer_ = new T[count_];
+    				memcpy( type_pointer_, ptr, count_ * sizeof(T) );
+                }
 			}
 
 			proto_blob_t(int count ) {
-				count_ =count;
-				type_pointer_ = new T[count_];
-			}
+				count_ = count;
+                if (count_ > 0) {
+				    type_pointer_ = new T[count_];
+                }
+            }
 
 			proto_blob_t( const proto_blob_t<T> &lref ) {
 				if ( &lref != this ) {
-					type_pointer_ = new T[lref.count_];
-					count_ = lref.count_;
+                    if (lref.type_pointer_ && (count_ > 0)) {
+                        count_ = lref.count_;
+    					type_pointer_ = new T[count_];
+                        memcpy( type_pointer_, lref.type_pointer_, count * sizeof(T) );
+                    }else{
+                        count_ = 0;
+                        type_pointer_ = nullptr;
+                    }
 				}
 			}
 
@@ -259,9 +273,11 @@ namespace nsp {
 						delete[]type_pointer_;
 					}
 					type_pointer_ = nullptr;
-					count_ = lref.count_;
-					if ( count_ > 0 ) {
-						type_pointer_ = new T[lref.count_];
+					count_ = 0;
+					if (( count_ > 0 ) && lref.type_pointer_) {
+                        count_ = lref.count_;
+						type_pointer_ = new T[count_];
+                        memcpy( type_pointer_, lref.type_pointer_, count_ * sizeof(T) );
 					}
 				}
 				return *this;

@@ -221,8 +221,32 @@ namespace nsp {
             }
         };
 
-        typedef obudp udp_application_client;
-        typedef obudp udp_application_server;
+        class udp_application_client : public obudp {
+        public:
+            udp_application_client() : obudp() {
+                ;
+            }
+
+            ~udp_application_client() {
+                ;
+            }
+
+            // 类似于 tcp, 这里也提供 psend 方法支持 proto_interface 的内置流化
+            int psend(const proto::proto_interface *package, const endpoint &ep) {
+                if (!package) {
+                    return -1;
+                }
+
+                return obudp::sendto(package->length(), [&] (void *buffer, int cb) ->int {
+                    if (!package->serialize((unsigned char *) buffer)) {
+                        return -1;
+                    }
+                    return 0;
+                }, ep);
+            }
+        };
+
+        typedef udp_application_client udp_application_server;
 
     } // namespace tcpip
 } // namespace nsp

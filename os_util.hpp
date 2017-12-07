@@ -90,8 +90,8 @@ namespace nsp {
 		std::basic_string<T> get_module_filename();
                
 #define INVAILD_FILESIZE        ((uint64_t)(~0))
-                template<class T>
-                uint64_t get_filesize(const std::basic_string<T> &path);
+        template<class T>
+        uint64_t get_filesize(const std::basic_string<T> &path);
 
 #if _WIN32
 		template<class T>
