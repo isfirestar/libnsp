@@ -57,7 +57,6 @@ typedef int nis_boolean_t;
 /* TCP 网络事件 */
 #define EVT_TCP_ACCEPTED  (0x0013)   /* 已经Accept */
 #define EVT_TCP_CONNECTED  (0x0014)   /* 已经连接成功 */
-#define EVT_TCP_DISCONNECTED            (0x0015)   /* 已经断开连接, 主要用于标记10054(远端主机主动断开)事件 */
 
 /* 获取地址信息选项 */
 #define LINK_ADDR_LOCAL   (0x0001)   /* 得到绑定本机地址端口信息 */

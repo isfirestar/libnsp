@@ -228,7 +228,12 @@ namespace nsp {
             return remote_;
         }
 
+        void obtcp::on_pre_close() {
+            ;
+        }
+
         void obtcp::on_closed(HTCPLINK previous) {
+            ;
         }
 
         void obtcp::on_closed() {
@@ -258,6 +263,7 @@ namespace nsp {
         }
 
         void obtcp::on_accepted(HTCPLINK lnk) {
+            ;
         }
 
         void obtcp::on_accepted(HTCPLINK srv, HTCPLINK client) {
@@ -368,7 +374,12 @@ namespace nsp {
             }
         }
 
+        void obudp::on_pre_close() {
+            ;
+        }
+
         void obudp::on_closed(HUDPLINK previous) {
+            ;
         }
 
         void obudp::on_closed() {

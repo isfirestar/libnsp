@@ -12,11 +12,10 @@ namespace nsp {
             tcp_data_t *tcp_dat = (tcp_data_t *) data;
 
             switch (tcp_evt->Event) {
-                case EVT_RECEIVEDATA:{
+                case EVT_RECEIVEDATA:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
                         object->on_recvdata(tcp_dat->e.Packet.Data, tcp_dat->e.Packet.Size);
                     });
-                }
                     break;
                 case EVT_TCP_ACCEPTED:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
@@ -28,6 +27,11 @@ namespace nsp {
 						object->on_connected();
 					});
 					break;
+                case EVT_PRE_CLOSE:
+                    toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&](const std::shared_ptr<obtcp> &object) {
+                        object->on_pre_close();
+                    });
+                    break;
                 case EVT_CLOSED:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
                         object->on_closed();
@@ -54,6 +58,11 @@ namespace nsp {
                         object->on_recvdata(udp_dat->e.Packet.Data, udp_dat->e.Packet.Size,
                                 udp_dat->e.Packet.RemoteAddress,
                                 udp_dat->e.Packet.RemotePort);
+                    });
+                    break;
+                case EVT_PRE_CLOSE:
+                    toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&](const std::shared_ptr<obudp> &object) {
+                        object->on_pre_close();
                     });
                     break;
                 case EVT_CLOSED:
