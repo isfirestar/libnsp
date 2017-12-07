@@ -252,7 +252,7 @@ namespace nsp {
                     if (lref.type_pointer_ && (count_ > 0)) {
                         count_ = lref.count_;
     					type_pointer_ = new T[count_];
-                        memcpy( type_pointer_, lref.type_pointer_, count * sizeof(T) );
+                        memcpy( type_pointer_, lref.type_pointer_, count_ * sizeof(T) );
                     }else{
                         count_ = 0;
                         type_pointer_ = nullptr;
