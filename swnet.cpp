@@ -104,24 +104,30 @@ namespace nsp {
             }
 
             object->setlnk(lnk);
-
-            std::lock_guard < decltype(this->lock_tcp_redirection_) > guard(lock_tcp_redirection_);
-            auto iter = tcp_object_.find(lnk);
-            if (tcp_object_.end() == iter) {
-                tcp_object_[lnk] = object;
-                return 0;
-            }
-            return -1;
+            return tcp_attach(lnk, object);
+            // std::lock_guard < decltype(this->lock_tcp_redirection_) > guard(lock_tcp_redirection_);
+            // auto iter = tcp_object_.find(lnk);
+            // if (tcp_object_.end() == iter) {
+            //     tcp_object_[lnk] = object;
+            //     return 0;
+            // }
+            // return -1;
         }
 
         int swnet::tcp_attach(HTCPLINK lnk, const std::shared_ptr<obtcp> &object) {
             std::lock_guard < decltype(lock_tcp_redirection_) > guard(lock_tcp_redirection_);
-            auto iter = tcp_object_.find(lnk);
-            if (tcp_object_.end() == iter) {
-                tcp_object_[lnk] = object;
+            // std::pair<std::unorderd_map<HTCPLINK, std::shared_ptr<obtcp>>::iterator, bool>
+            auto insr = tcp_object_.insert(std::pair<HTCPLINK, std::shared_ptr<obtcp>>(lnk,object));
+            if (insr.second) {
                 return 0;
             }
             return -1;
+            // auto iter = tcp_object_.find(lnk);
+            // if (tcp_object_.end() == iter) {
+            //     tcp_object_[lnk] = object;
+            //     return 0;
+            // }
+            // return -1;
         }
 
         void swnet::tcp_detach(HTCPLINK lnk) {
@@ -159,13 +165,20 @@ namespace nsp {
             }
 
             object->setlnk(lnk);
+
             std::lock_guard < decltype(this->lock_udp_redirection_) > guard(lock_udp_redirection_);
-            auto iter = udp_object_.find(lnk);
-            if (udp_object_.end() == iter) {
-                udp_object_[lnk] = object;
+            // std::pair<std::unorderd_map<HUDPLINK, std::shared_ptr<obudp>>::iterator, bool>
+            auto insr = udp_object_.insert(std::pair<HUDPLINK, std::shared_ptr<obudp>>(lnk,object));
+            if (insr.second) {
                 return 0;
             }
             return -1;
+            // auto iter = udp_object_.find(lnk);
+            // if (udp_object_.end() == iter) {
+            //     udp_object_[lnk] = object;
+            //     return 0;
+            // }
+            // return -1;
         }
 
         void swnet::udp_detach(HUDPLINK lnk) {

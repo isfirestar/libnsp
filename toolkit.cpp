@@ -417,7 +417,6 @@ namespace nsp {
         }
 
         // È¥³ı×óÓÒ¿Õ¸ñ
-
         template<>
         int trim(const std::basic_string<char> &src, std::basic_string<char> &dst) {
             try {
