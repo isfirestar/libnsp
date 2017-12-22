@@ -12,7 +12,7 @@
 
 #include "os_util.hpp"
 
-/* Ò»Ì×Ê¹ÓÃ¶àÖÖÏß³ÌÄ£ĞÍ£¬ Ö§³ÖÓÅÏÈ¶ÓÁĞµÄ, Ä£°å»¯µÄÈÎÎñÏµÍ³ */
+/* ä¸€å¥—ä½¿ç”¨å¤šç§çº¿ç¨‹æ¨¡å‹ï¼Œ æ”¯æŒä¼˜å…ˆé˜Ÿåˆ—çš„, æ¨¡æ¿åŒ–çš„ä»»åŠ¡ç³»ç»Ÿ */
 namespace nsp {
     namespace toolkit {
 
@@ -75,7 +75,7 @@ namespace nsp {
             }
         };
 
-        // ´øÓÅÏÈ¼¶µÄÈÎÎñÄ£°å
+        // å¸¦ä¼˜å…ˆçº§çš„ä»»åŠ¡æ¨¡æ¿
 
         template<class T> class priority_task {
         public:
@@ -104,7 +104,7 @@ namespace nsp {
             std::shared_ptr<T> task_;
         };
 
-        // Ö¸ÕëÄ¿±ê¶Ô±ÈµÄ·Âº¯Êı
+        // æŒ‡é’ˆç›®æ ‡å¯¹æ¯”çš„ä»¿å‡½æ•°
         template<class T> struct pointer_compatible_compare {
         public:
 
@@ -129,7 +129,7 @@ namespace nsp {
             }
         };
 
-        // Ïß³ÌÄ£Ê½´¦ÀíÓÅÏÈ¶ÓÁĞÈÎÎñ
+        // çº¿ç¨‹æ¨¡å¼å¤„ç†ä¼˜å…ˆé˜Ÿåˆ—ä»»åŠ¡
         template<class T> class priority_task_thread {
             std::priority_queue <priority_task<T> *, std::vector<priority_task<T> *>, pointer_compatible_compare <priority_task<T>>> task_que_;
             std::mutex task_locker_;
@@ -171,8 +171,8 @@ namespace nsp {
                 }
             }
 
-            // ÈÎÎñÓÅÏÈ¼¶¿É½»ÓÉµ÷ÓÃÏß³Ì×ÔĞĞÖ¸¶¨
-            // Èç¹û²»Ö¸¶¨ÓÅÏÈ¼¶£¬ÔòĞĞÎªºÍ task_thread Ò»ÖÂ£¬ µ«ÓÉÓÚ×îĞ¡¶ÑºÍ¶ÓÁĞµÄ²åÈë¿ªÏú£¬ Õâ¸öÀà»á±È task_thread Ğ§ÂÊµÍ
+            // ä»»åŠ¡ä¼˜å…ˆçº§å¯äº¤ç”±è°ƒç”¨çº¿ç¨‹è‡ªè¡ŒæŒ‡å®š
+            // å¦‚æœä¸æŒ‡å®šä¼˜å…ˆçº§ï¼Œåˆ™è¡Œä¸ºå’Œ task_thread ä¸€è‡´ï¼Œ ä½†ç”±äºæœ€å°å †å’Œé˜Ÿåˆ—çš„æ’å…¥å¼€é”€ï¼Œ è¿™ä¸ªç±»ä¼šæ¯” task_thread æ•ˆç‡ä½
             int post(const std::shared_ptr<T> &tsk, const int priority = 0) {
                 try {
                     std::unique_lock < decltype(task_locker_) > guard(task_locker_);
@@ -198,7 +198,7 @@ namespace nsp {
             }
         };
 
-        // Ê¹ÓÃÏß³Ì³ØµÄÈÎÎñÄ£ĞÍ
+        // ä½¿ç”¨çº¿ç¨‹æ± çš„ä»»åŠ¡æ¨¡å‹
         template<class T> class task_thread_pool {
             std::deque<std::shared_ptr<T>> task_que_;
             std::vector<std::thread *> ths_;
@@ -220,7 +220,7 @@ namespace nsp {
                             cv_.wait(guard);
                             if (join_ > 0) return;
                         }
-                        obj = std::move(task_que_.front()); // ÕâÀï²»Ö±½Ó½ÓÒıÓÃ£¬¿½±´Ò»´Î£¬Òò´Ë¿ÉÒÔ½« shared_ptr µ¯³ö
+                        obj = std::move(task_que_.front()); // è¿™é‡Œä¸ç›´æ¥æ¥å¼•ç”¨ï¼Œæ‹·è´ä¸€æ¬¡ï¼Œå› æ­¤å¯ä»¥å°† shared_ptr å¼¹å‡º
                         task_que_.pop_front();
                     }
                     if (obj) obj->on_task();
@@ -240,7 +240,7 @@ namespace nsp {
 
             virtual ~task_thread_pool() {
                 join();
-                // ×ÊÔ´ÇåÀí
+                // èµ„æºæ¸…ç†
                 std::unique_lock < decltype(task_locker_) > guard(task_locker_);
                 task_que_.clear();
             }
@@ -291,7 +291,7 @@ namespace nsp {
             }
         };
 
-        // Ê¹ÓÃÏß³Ì³Ø, ´øÈÎÎñÓÅÏÈ¼¶µÄÈÎÎñÄ£ĞÍ
+        // ä½¿ç”¨çº¿ç¨‹æ± , å¸¦ä»»åŠ¡ä¼˜å…ˆçº§çš„ä»»åŠ¡æ¨¡å‹
 
         template<class T> class priority_task_thread_pool {
             std::priority_queue <priority_task<T> *, std::vector<priority_task<T> *>, pointer_compatible_compare <priority_task<T>>> priority_task_que_;
@@ -326,8 +326,8 @@ namespace nsp {
             priority_task_thread_pool() : task_thread_pool<T>() {
             }
 
-            // ÕâÀïĞèÒª×¢ÒâÒ»ÏÂ, Èç¹ûÖ±½ÓÊ¹ÓÃ¸¸Àà´øCNT²ÎÊıµÄ¹¹Ôì£¬ ÔòÒòÎªthis»¹Ã»ÓĞ¹¹ÔìÍê³É£¬ ËùÒÔÏß³Ì´´½¨µÄĞéº¯Êıpool_handler²»»á×ßµ½×ÓÀà
-            // ÔÚ¹¹Ôìº¯ÊıÌåÄÚ½øĞĞ allocate µ÷ÓÃ£¬ ¿ÉÒÔÈÃĞéº¯ÊıÉúĞ§
+            // è¿™é‡Œéœ€è¦æ³¨æ„ä¸€ä¸‹, å¦‚æœç›´æ¥ä½¿ç”¨çˆ¶ç±»å¸¦CNTå‚æ•°çš„æ„é€ ï¼Œ åˆ™å› ä¸ºthisè¿˜æ²¡æœ‰æ„é€ å®Œæˆï¼Œ æ‰€ä»¥çº¿ç¨‹åˆ›å»ºçš„è™šå‡½æ•°pool_handlerä¸ä¼šèµ°åˆ°å­ç±»
+            // åœ¨æ„é€ å‡½æ•°ä½“å†…è¿›è¡Œ allocate è°ƒç”¨ï¼Œ å¯ä»¥è®©è™šå‡½æ•°ç”Ÿæ•ˆ
 
             priority_task_thread_pool(const int thcnt)// : task_thread_pool<T>( thcnt )
             {
@@ -337,7 +337,7 @@ namespace nsp {
             ~priority_task_thread_pool() {
                 join();
 
-                // ÇåÀíÎ´¾öÇëÇó
+                // æ¸…ç†æœªå†³è¯·æ±‚
                 std::lock_guard < decltype(task_locker_) > guard(task_locker_);
                 while (!priority_task_que_.empty()) {
                     priority_task<T> *ptr = priority_task_que_.top();

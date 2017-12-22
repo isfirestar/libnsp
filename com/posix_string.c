@@ -86,7 +86,7 @@ char *posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt) 
 
     cpyoff = 0;
 
-    /* µ½´ï¿½±´Ö¸¶¨³¤¶È || src ´ïµ½¸ÜÁã*/
+    /* åˆ°è¾¾æ‹·è´æŒ‡å®šé•¿åº¦ || src è¾¾åˆ°æ é›¶*/
     while ((src[cpyoff] != 0) && (cpyoff < cnt)) {
         assert(cpyoff < cch - 1);
         target[cpyoff] = src[cpyoff];
@@ -102,7 +102,7 @@ wchar_t *posix__wcsncpy(wchar_t *target, uint32_t cch, const wchar_t *src, uint3
     errno_t e = wcsncpy_s(target, cch, src, cnt);
     return ( (0 == e) ? target : NULL);
 #else
-    /* GBU µÄ strncpy ´¦Àí¿½±´ºó×Ô¶¯×·¼Ó¸ÜÁã×ÜÊÇ´æÔÚÎÊÌâ£¬ glibc ÓÖ²»Ö§³Ö strlcpy£¬ Òò´ËÕâÀï²ÉÓÃ×Ô¶¨ÒåµÄ·Ç°²È«²Ù×÷  */
+    /* GBU çš„ strncpy å¤„ç†æ‹·è´åè‡ªåŠ¨è¿½åŠ æ é›¶æ€»æ˜¯å­˜åœ¨é—®é¢˜ï¼Œ glibc åˆä¸æ”¯æŒ strlcpyï¼Œ å› æ­¤è¿™é‡Œé‡‡ç”¨è‡ªå®šä¹‰çš„éå®‰å…¨æ“ä½œ  */
     /* return wcsncpy(target, src, cnt); */
     uint32_t cpyoff;
 
@@ -148,8 +148,8 @@ char *posix__strcpy(char *target, uint32_t cch, const char *src) {
     e = strcpy_s(target, cch, src);
     return ( (0 == e) ? target : NULL);
 #else
-    /* ·ÅÆúÊ¹ÓÃ ISO-C µÄ²¿·Ö²»°²È«×Ö·û´¦Àíº¯Êı
-     * ·ÂÎ¢ÈíµÄ¸ã·¨£¬Ä£Äâ°²È«×Ö·û´®¿½±´º¯Êı
+    /* æ”¾å¼ƒä½¿ç”¨ ISO-C çš„éƒ¨åˆ†ä¸å®‰å…¨å­—ç¬¦å¤„ç†å‡½æ•°
+     * ä»¿å¾®è½¯çš„ææ³•ï¼Œæ¨¡æ‹Ÿå®‰å…¨å­—ç¬¦ä¸²æ‹·è´å‡½æ•°
             return strcpy(target, src);
      *  */
     uint32_t cpyoff;
@@ -178,7 +178,7 @@ wchar_t *posix__wcscpy(wchar_t *target, uint32_t cch, const wchar_t *src) {
     wcscpy_s(target, cch, src);
     return target;
 #else
-    /* ÒòÎª°²È«ÎÊÌâÆúÓÃ ISO-c µÄ´«Í³×Ö·û¿½±´º¯Êı
+    /* å› ä¸ºå®‰å…¨é—®é¢˜å¼ƒç”¨ ISO-c çš„ä¼ ç»Ÿå­—ç¬¦æ‹·è´å‡½æ•°
      * return wcscpy(target, src); */
     uint32_t cpyoff;
 
@@ -203,7 +203,7 @@ char *posix__strdup(const char *src) {
 #if _WIN32
     return _strdup(src);
 #else
-    /* -D_POSIX_C_SOURCE >= 200809L ¼û man*/
+    /* -D_POSIX_C_SOURCE >= 200809L è§ man*/
     return strdup(src);
 #endif
 }
@@ -212,7 +212,7 @@ wchar_t *posix__wcsdup(const wchar_t *src) {
 #if _WIN32
     return _wcsdup(src);
 #else
-    /* -D_POSIX_C_SOURCE >= 200809L ¼û man*/
+    /* -D_POSIX_C_SOURCE >= 200809L è§ man*/
     return wcsdup(src);
 #endif
 }
@@ -222,7 +222,7 @@ char *posix__strcat(char *target, uint32_t cch, const char *src) {
     errno_t e = strcat_s(target, cch, src);
     return ( (0 == e) ? target : NULL);
 #else
-    /* ÒòÎª°²È«ÎÊÌâÆúÓÃ ISO-c µÄ´«Í³×Ö·û¿½±´º¯Êı */
+    /* å› ä¸ºå®‰å…¨é—®é¢˜å¼ƒç”¨ ISO-c çš„ä¼ ç»Ÿå­—ç¬¦æ‹·è´å‡½æ•° */
     uint32_t cpyoff = 0, from_offset;
 
     assert(target);
@@ -250,7 +250,7 @@ wchar_t *posix__wcscat(wchar_t *target, uint32_t cch, const wchar_t *src) {
     errno_t e = wcscat_s(target, cch, src);
     return ( (0 == e) ? target : NULL);
 #else
-    /* ÒòÎª°²È«ÎÊÌâÆúÓÃ ISO-c µÄ´«Í³×Ö·û¿½±´º¯Êı */
+    /* å› ä¸ºå®‰å…¨é—®é¢˜å¼ƒç”¨ ISO-c çš„ä¼ ç»Ÿå­—ç¬¦æ‹·è´å‡½æ•° */
     uint32_t copy_offset = 0, from_offset = 0;
 
     assert(target);
@@ -277,7 +277,7 @@ char *posix__strrev(char *src) {
     if (!src) return NULL;
     return _strrev(src);
 #else
-    /* hÖ¸ÏòsµÄÍ·²¿ */
+    /* hæŒ‡å‘sçš„å¤´éƒ¨ */
     char* h = src;
     char* t = src;
     char ch;
@@ -286,19 +286,19 @@ char *posix__strrev(char *src) {
         return NULL;
     }
 
-    /* tÖ¸ÏòsµÄÎ²²¿ */
+    /* tæŒ‡å‘sçš„å°¾éƒ¨ */
     while (*t++) {
         ;
     };
 
-    t--; /* Óët++µÖÏû */
-    t--; /* »ØÌø¹ı½áÊø·û'\0' */
+    t--; /* ä¸t++æŠµæ¶ˆ */
+    t--; /* å›è·³è¿‡ç»“æŸç¬¦'\0' */
 
-    /* µ±hºÍtÎ´ÖØºÏÊ±£¬½»»»ËüÃÇËùÖ¸ÏòµÄ×Ö·û */
+    /* å½“hå’Œtæœªé‡åˆæ—¶ï¼Œäº¤æ¢å®ƒä»¬æ‰€æŒ‡å‘çš„å­—ç¬¦ */
     while (h < t) {
         ch = *h;
-        *h++ = *t; /* hÏòÎ²²¿ÒÆ¶¯ */
-        *t-- = ch; /* tÏòÍ·²¿ÒÆ¶¯ */
+        *h++ = *t; /* hå‘å°¾éƒ¨ç§»åŠ¨ */
+        *t-- = ch; /* tå‘å¤´éƒ¨ç§»åŠ¨ */
     }
     return ( src);
 #endif
@@ -308,22 +308,22 @@ wchar_t *posix__wcsrev(wchar_t *src) {
 #if _WIN32
     return _wcsrev(src);
 #else
-    /* hÖ¸ÏòsµÄÍ·²¿ */
+    /* hæŒ‡å‘sçš„å¤´éƒ¨ */
     wchar_t* h = src;
     wchar_t* t = src;
     wchar_t ch;
 
-    /* tÖ¸ÏòsµÄÎ²²¿ */
+    /* tæŒ‡å‘sçš„å°¾éƒ¨ */
     while (*t++) {
     };
-    t--; /* Óët++µÖÏû */
-    t--; /* »ØÌø¹ı½áÊø·û'\0' */
+    t--; /* ä¸t++æŠµæ¶ˆ */
+    t--; /* å›è·³è¿‡ç»“æŸç¬¦'\0' */
 
-    /* µ±hºÍtÎ´ÖØºÏÊ±£¬½»»»ËüÃÇËùÖ¸ÏòµÄ×Ö·û */
+    /* å½“hå’Œtæœªé‡åˆæ—¶ï¼Œäº¤æ¢å®ƒä»¬æ‰€æŒ‡å‘çš„å­—ç¬¦ */
     while (h < t) {
         ch = *h;
-        *h++ = *t; /* hÏòÎ²²¿ÒÆ¶¯ */
-        *t-- = ch; /* tÏòÍ·²¿ÒÆ¶¯ */
+        *h++ = *t; /* hå‘å°¾éƒ¨ç§»åŠ¨ */
+        *t-- = ch; /* tå‘å¤´éƒ¨ç§»åŠ¨ */
     }
     return ( src);
 #endif

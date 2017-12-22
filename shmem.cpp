@@ -138,11 +138,11 @@ namespace nsp {
 
             cb_ = cb;
 #if _WIN32
-            // È·¶¨¹²ÏíÃû×Ö
+            // ç¡®å®šå…±äº«åå­—
             char shared_name[MAX_PATH];
             toolkit::posix_strcpy(shared_name, cchof(shared_name), "Global\\nspshm_");
             if (file) {
-                // ²»¶ÔÖ¸¶¨Ãû×ÖµÄÓ³Éä×÷ID´¦Àí
+                // ä¸å¯¹æŒ‡å®šåå­—çš„æ˜ å°„ä½œIDå¤„ç†
                 auto symb = ::strrchr(file, '\\');
                 if (!symb) {
                     toolkit::posix_strcat(shared_name, cchof(shared_name), file);
@@ -260,13 +260,13 @@ namespace nsp {
 
             cb_ = cb;
 #if _WIN32
-            // ´ò¿ª½×¶Î£¬ ¹²ÏíÃû±ØĞëÖ¸¶¨
+            // æ‰“å¼€é˜¶æ®µï¼Œ å…±äº«åå¿…é¡»æŒ‡å®š
             if ((INVALID_HANDLE_VALUE != mapping_) || !file) {
                 return -1;
             }
             toolkit::posix_strcpy(file_, cchof(file_), file);
 
-            // ´ò¿ª¹²Ïí½Ú
+            // æ‰“å¼€å…±äº«èŠ‚
             mapping_ = OpenFileMappingA(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, file_);
             if (INVALID_HANDLE_VALUE == mapping_) {
                 return -1;

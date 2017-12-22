@@ -200,7 +200,7 @@ struct dir_stack_node {
 
 int posix__pmkdir(const char *const dir) {
     struct list_head stack;
-    struct dir_stack_node *node; /* ²»ÔÊĞíÊ¹ÓÃÕ»¶ÔÏó */
+    struct dir_stack_node *node; /* ä¸å…è®¸ä½¿ç”¨æ ˆå¯¹è±¡ */
     struct dir_stack_node *pos;
     char *p_next_dir_symb;
     int retval;
@@ -224,7 +224,7 @@ int posix__pmkdir(const char *const dir) {
             list_del(&pos->link);
             free(pos);
         } else {
-            /* ²»ÊÇÄ¿Â¼½á¹¹ĞÔ´íÎó, Ò»ÂÉÈÏ¶¨ÎªÊ§°Ü */
+            /* ä¸æ˜¯ç›®å½•ç»“æ„æ€§é”™è¯¯, ä¸€å¾‹è®¤å®šä¸ºå¤±è´¥ */
             if (ERROR_PATH_NOT_FOUND != GetLastError()) {
                 retval = -1;
                 break;
@@ -245,8 +245,8 @@ int posix__pmkdir(const char *const dir) {
         }
     }
 
-    /* ·µ»ØÇ°£¬ ±ØĞë±£Ö¤ËùÓĞµÄÄÚ´æ±»ÇåÀí 
-            ÎŞÂÛÇ°ÖÃ²Ù×÷ÊÇ·ñ³É¹¦ */
+    /* è¿”å›å‰ï¼Œ å¿…é¡»ä¿è¯æ‰€æœ‰çš„å†…å­˜è¢«æ¸…ç† 
+            æ— è®ºå‰ç½®æ“ä½œæ˜¯å¦æˆåŠŸ */
     while (!list_empty(&stack)) {
         pos = list_first_entry(&stack, struct dir_stack_node, link);
         if (posix__mkdir(pos->dir)) {
@@ -415,16 +415,16 @@ int posix__isdir(const char *const file) {
         return -1;
     }
 
-    /* Èç¹û·ûºÅÁ´½ÓÄ¿±êÊÇÒ»¸öÄ¿Â¼£¬ Í¬Ñù»á½âÊÍÎªÒ»¸öÄ¿Â¼£¬ ¶ø²»ÊÇ __S_IFLNK
-     * __S_IFLNK ½öÕë¶ÔÖ¸ÏòÎÄ¼şµÄ·ûºÅÁ´½Ó
-     * Ê¹ÓÃ·ûºÅÁ´½ÓÄ¿Â¼µÄÏà¶ÔÂ·¾¶Í¬Ñù¿ÉÒÔÕı³£openÎÄ¼ş
-     * ÀıÈç£º 
+    /* å¦‚æœç¬¦å·é“¾æ¥ç›®æ ‡æ˜¯ä¸€ä¸ªç›®å½•ï¼Œ åŒæ ·ä¼šè§£é‡Šä¸ºä¸€ä¸ªç›®å½•ï¼Œ è€Œä¸æ˜¯ __S_IFLNK
+     * __S_IFLNK ä»…é’ˆå¯¹æŒ‡å‘æ–‡ä»¶çš„ç¬¦å·é“¾æ¥
+     * ä½¿ç”¨ç¬¦å·é“¾æ¥ç›®å½•çš„ç›¸å¯¹è·¯å¾„åŒæ ·å¯ä»¥æ­£å¸¸openæ–‡ä»¶
+     * ä¾‹å¦‚ï¼š 
      * /home/Julie/escape/configs -> /etc
-     * int fd = open("/home/Julie/escape/configs/passwd", O_RDONLY); ¿ÉÒÔÕı³£´ò¿ªÎÄ¼ş
+     * int fd = open("/home/Julie/escape/configs/passwd", O_RDONLY); å¯ä»¥æ­£å¸¸æ‰“å¼€æ–‡ä»¶
      * 
-     * shell ÖĞ²éÕÒËùÓĞ·ûºÅÁ´½ÓµÄÃüÁî:
+     * shell ä¸­æŸ¥æ‰¾æ‰€æœ‰ç¬¦å·é“¾æ¥çš„å‘½ä»¤:
      * find . -type l
-     * É¾³ıËùÓĞµÄ·ûºÅÁ´½Ó
+     * åˆ é™¤æ‰€æœ‰çš„ç¬¦å·é“¾æ¥
      * find . -type l | xargs rm
     */
     if (st.st_mode & __S_IFDIR) {
@@ -543,7 +543,7 @@ int posix__getsysmem(sys_memory_t *sysmem) {
     sysmem->freeram |= s_info.freeram;
     sysmem->totalswap = s_info.totalswap;
     sysmem->freeswap = s_info.freeswap;
-    /* ÑéÖ¤£¬ ×¢Òâ£¬ ÃüÁîÄÃ³öÀ´ÊÇKB£¬ ÕâÀïÈ¡³öÀ´ÊÇ×Ö½Ú
+    /* éªŒè¯ï¼Œ æ³¨æ„ï¼Œ å‘½ä»¤æ‹¿å‡ºæ¥æ˜¯KBï¼Œ è¿™é‡Œå–å‡ºæ¥æ˜¯å­—èŠ‚
      *  FILE *fp;
      char str[81];
      memset(str,0,81);
@@ -630,7 +630,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
         return -1;
     }
 
-    /* ±ä¸ü±¾µØ×Ö·û¼¯ */
+    /* å˜æ›´æœ¬åœ°å­—ç¬¦é›† */
     setlocale(LC_ALL, "zh_CN.gb18030");
     retval = iconv(cd, from, &input_bytes, to, output_bytes);
     if (retval < 0) {
@@ -747,7 +747,7 @@ int posix__random(const int range_min, const int range_max) {
             u = r;
         } else {
 #if _WIN32
-            /* Çø¼ä²îÖµ´óÓÚ7FFFH, Èç¹û²»½øĞĞµ÷Õû£¬ÔòÈ¡ÖµÇø¼ä±»½Ø¶ÏÎª [min, min+7FFFH) */
+            /* åŒºé—´å·®å€¼å¤§äº7FFFH, å¦‚æœä¸è¿›è¡Œè°ƒæ•´ï¼Œåˆ™å–å€¼åŒºé—´è¢«æˆªæ–­ä¸º [min, min+7FFFH) */
             if (range_max - range_min > RAND_MAX) {
                 u = (int) ((double) rand() / (RAND_MAX + 1) * (range_max - range_min) + range_min);
             } else {

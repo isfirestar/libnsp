@@ -27,7 +27,7 @@ namespace nsp {
         public:
 
             static T* instance() {
-                // 使用带原子锁的DoubleCheckNull 进行最大层度的线程安全校验
+                // 浣跨敤甯﹀師瀛愰攣鐨凞oubleCheckNull 杩涜鏈�澶у眰搴︾殑绾跨▼瀹夊叏鏍￠獙
                 T* tmp = instance_.load(std::memory_order::memory_order_acquire);
                 if (!tmp) {
                     std::lock_guard<std::recursive_mutex> guard(lock_);
@@ -42,7 +42,7 @@ namespace nsp {
             }
 
             static void associate(T *ptr) {
-                // 使用带原子锁的DoubleCheckNull 进行最大层度的线程安全校验
+                // 浣跨敤甯﹀師瀛愰攣鐨凞oubleCheckNull 杩涜鏈�澶у眰搴︾殑绾跨▼瀹夊叏鏍￠獙
                 T* tmp = instance_.load(std::memory_order::memory_order_acquire);
                 if (!tmp) {
                     std::lock_guard<std::recursive_mutex> guard(lock_);

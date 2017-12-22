@@ -136,13 +136,13 @@ int base64__encode(const char *input, int incb, char *output, int *outcb) {
         return -EINVAL;
     }
 
-    /* ²¹¡®=¡¯¸öÊı */
+    /* è¡¥â€˜=â€™ä¸ªæ•° */
     cnt_symbol_add = 0;
     if (0 != (incb % 3)) {
         cnt_symbol_add = 3 - (incb % 3);
     }
 
-    /* Ô­ÎÄ³¤¶È²¹È«£¬²¢ÇÒ¼ÆËã·ÖÒ³Êı */
+    /* åŸæ–‡é•¿åº¦è¡¥å…¨ï¼Œå¹¶ä¸”è®¡ç®—åˆ†é¡µæ•° */
     src_len = incb + cnt_symbol_add;
     page = src_len / 3;
     dst_len = page * 4;
@@ -174,16 +174,16 @@ int base64__encode(const char *input, int incb, char *output, int *outcb) {
         memcpy(src, &src_buffer[i * 3], 3);
 
         unsigned char dst[4];
-        /* Ô­ÎÄ0×Ö½Ú¸ß6Î»=>Ä¿±ê0×Ö½ÚµÍ6Î» */
+        /* åŸæ–‡0å­—èŠ‚é«˜6ä½=>ç›®æ ‡0å­—èŠ‚ä½6ä½ */
         dst[0] = (src[0] >> 2);
 
-        /* Ô­ÎÄ0×Ö½ÚµÍ2Î»=>Ä¿±ê1×Ö½Ú¸ß2Î» Ô­ÎÄ1×Ö½Ú¸ß4Î»=>Ä¿±ê1×Ö½ÚµÍ4Î» */
+        /* åŸæ–‡0å­—èŠ‚ä½2ä½=>ç›®æ ‡1å­—èŠ‚é«˜2ä½ åŸæ–‡1å­—èŠ‚é«˜4ä½=>ç›®æ ‡1å­—èŠ‚ä½4ä½ */
         dst[1] = ((src[0] & 3) << 4) | (src[1] >> 4);
 
-        /* Ô­ÎÄ1×Ö½ÚµÍ4Î»=>Ä¿±ê2×Ö½Ú¸ß4Î» Ô­ÎÄ2×Ö½Ú¸ß2Î»=>Ä¿±ê2×Ö½ÚµÍ2Î» */
+        /* åŸæ–‡1å­—èŠ‚ä½4ä½=>ç›®æ ‡2å­—èŠ‚é«˜4ä½ åŸæ–‡2å­—èŠ‚é«˜2ä½=>ç›®æ ‡2å­—èŠ‚ä½2ä½ */
         dst[2] = ((src[1] & 0xf) << 2) | (src[2] >> 6);
 
-        /* Ô­ÎÄ2×Ö½ÚµÍ6Î»=>Ä¿±ê3×Ö½ÚÂú6Î» */
+        /* åŸæ–‡2å­—èŠ‚ä½6ä½=>ç›®æ ‡3å­—èŠ‚æ»¡6ä½ */
         dst[3] = (src[2] & 0x3f);
 
         for (k = 0; k < 4; k++) {
@@ -193,7 +193,7 @@ int base64__encode(const char *input, int incb, char *output, int *outcb) {
         memcpy(&dst_buffer[t * 4], dst, 4);
     }
 
-    /* ×îºóµÄ0Êı¾İ×Ö½ÚÓÃ'='Ìæ´ú */
+    /* æœ€åçš„0æ•°æ®å­—èŠ‚ç”¨'='æ›¿ä»£ */
     for (k = 0; k < cnt_symbol_add; k++) {
         dst_buffer[dst_len - (1 + k)] = '=';
     }
@@ -271,33 +271,33 @@ int base64__decode(const char *input, int incb, char *output, int *outcb) {
             }
         }
 
-        /* ÃÜÎÄ0×Ö½ÚÂú6Î»=>Ô­ÎÄ0×Ö½Ú¸ß6Î» */
+        /* å¯†æ–‡0å­—èŠ‚æ»¡6ä½=>åŸæ–‡0å­—èŠ‚é«˜6ä½ */
         dst[0] = src[0];
         dst[0] <<= 2;
 
-        /* ÃÜÎÄ1×Ö½Ú(4,5)Î»=>Ô­ÎÄ0×Ö½ÚµÍ2Î» */
+        /* å¯†æ–‡1å­—èŠ‚(4,5)ä½=>åŸæ–‡0å­—èŠ‚ä½2ä½ */
         dst[0] |= (src[1] >> 4);
 
-        /* ÃÜÎÄ1×Ö½Ú(0,1,2,3)Î»=>Ô­ÎÄ1×Ö½Ú¸ß4Î» */
+        /* å¯†æ–‡1å­—èŠ‚(0,1,2,3)ä½=>åŸæ–‡1å­—èŠ‚é«˜4ä½ */
         dst[1] = (src[1] & 0xf);
         dst[1] <<= 4;
 
         if ('=' != src[2]) {
-            /* ÃÜÎÄ2×Ö½Ú(2,3,4,5)Î»=>Ô­ÎÄ1×Ö½ÚµÍ4Î» */
+            /* å¯†æ–‡2å­—èŠ‚(2,3,4,5)ä½=>åŸæ–‡1å­—èŠ‚ä½4ä½ */
             dst[1] |= (src[2] >> 2);
-            /* ÃÜÎÄ2×Ö½Ú(0,1)Î»=>Ô­ÎÄ2×Ö½Ú¸ß2Î» */
+            /* å¯†æ–‡2å­—èŠ‚(0,1)ä½=>åŸæ–‡2å­—èŠ‚é«˜2ä½ */
             dst[2] = (src[2] & 3);
             dst[2] <<= 6;
         } else {
-            /* ´Ó·µ»Ø³¤¶ÈÖĞÈ¥³ı'=' */
+            /* ä»è¿”å›é•¿åº¦ä¸­å»é™¤'=' */
             dst_len--;
         }
 
         if ('=' != src[3]) {
-            /* ÃÜÎÄ3×Ö½ÚÂú6Î»=>Ô­ÎÄ2×Ö½ÚµÍ6Î» */
+            /* å¯†æ–‡3å­—èŠ‚æ»¡6ä½=>åŸæ–‡2å­—èŠ‚ä½6ä½ */
             dst[2] |= src[3];
         } else {
-            /* ´Ó·µ»Ø³¤¶ÈÖĞÈ¥³ı'=' */
+            /* ä»è¿”å›é•¿åº¦ä¸­å»é™¤'=' */
             dst_len--;
         }
 
@@ -551,7 +551,7 @@ void MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16]) {
 /*--------------------------------------------DES--------------------------------------------*/
 typedef char DES_ElemType;
 
-/* ³õÊ¼ÖÃ»»±íIP */
+/* åˆå§‹ç½®æ¢è¡¨IP */
 static const int DES_IP_Table[64] = {
     58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4,
     62, 54, 46, 38, 30, 22, 14, 6, 64, 56, 48, 40, 32, 24, 16, 8,
@@ -559,7 +559,7 @@ static const int DES_IP_Table[64] = {
     61, 53, 45, 37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7
 };
 
-/* Äæ³õÊ¼ÖÃ»»±íIP^-1 */
+/* é€†åˆå§‹ç½®æ¢è¡¨IP^-1 */
 static const int DES_IP_1_Table[64] = {
     40, 8, 48, 16, 56, 24, 64, 32, 39, 7, 47, 15, 55, 23, 63, 31,
     38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29,
@@ -567,7 +567,7 @@ static const int DES_IP_1_Table[64] = {
     34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25
 };
 
-/* À©³äÖÃ»»±íE */
+/* æ‰©å……ç½®æ¢è¡¨E */
 static const int DES_E_Table[48] = {
     32, 1, 2, 3, 4, 5, 4, 5, 6, 7, 8, 9,
     8, 9, 10, 11, 12, 13, 12, 13, 14, 15, 16, 17,
@@ -575,13 +575,13 @@ static const int DES_E_Table[48] = {
     24, 25, 26, 27, 28, 29, 28, 29, 30, 31, 32, 1
 };
 
-/* ÖÃ»»º¯ÊıP */
+/* ç½®æ¢å‡½æ•°P */
 static const int DES_P_Table[32] = {
     16, 7, 20, 21, 29, 12, 28, 17, 1, 15, 23, 26, 5, 18, 31, 10,
     2, 8, 24, 14, 32, 27, 3, 9, 19, 13, 30, 6, 22, 11, 4, 25
 };
 
-/* SºĞ */
+/* Sç›’ */
 static const int DES_S[8][4][16] ={
     /* S1 */
     {
@@ -641,7 +641,7 @@ static const int DES_S[8][4][16] ={
     }
 };
 
-/* ÖÃ»»Ñ¡Ôñ1 */
+/* ç½®æ¢é€‰æ‹©1 */
 static const int DES_PC_1[56] = {
     57, 49, 41, 33, 25, 17, 9, 1, 58, 50, 42, 34, 26, 18,
     10, 2, 59, 51, 43, 35, 27, 19, 11, 3, 60, 52, 44, 36,
@@ -649,18 +649,18 @@ static const int DES_PC_1[56] = {
     14, 6, 61, 53, 45, 37, 29, 21, 13, 5, 28, 20, 12, 4
 };
 
-/* ÖÃ»»Ñ¡Ôñ2 */
+/* ç½®æ¢é€‰æ‹©2 */
 static const int DES_PC_2[48] = {
     14, 17, 11, 24, 1, 5, 3, 28, 15, 6, 21, 10,
     23, 19, 12, 4, 26, 8, 16, 7, 27, 20, 13, 2,
     41, 52, 31, 37, 47, 55, 30, 40, 51, 45, 33, 48,
     44, 49, 39, 56, 34, 53, 46, 42, 50, 36, 29, 32
-}; /* ÃÜÔ¿Ñ¹Ëõ±í */
+}; /* å¯†é’¥å‹ç¼©è¡¨ */
 
-/* ¶Ô×óÒÆÎ»Êı±í */
+/* å¯¹å·¦ç§»ä½æ•°è¡¨ */
 static const int DES_MOVE_TIMES[16] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
 
-/* ×Ö½Ú×ª»»³É¶ş½øÖÆ */
+/* å­—èŠ‚è½¬æ¢æˆäºŒè¿›åˆ¶ */
 static void ByteToBit(DES_ElemType ch, DES_ElemType bit[8]) {
     int cnt;
     for (cnt = 0; cnt < 8; cnt++) {
@@ -668,7 +668,7 @@ static void ByteToBit(DES_ElemType ch, DES_ElemType bit[8]) {
     }
 }
 
-/* ¶ş½øÖÆ×ª»»³É×Ö½Ú */
+/* äºŒè¿›åˆ¶è½¬æ¢æˆå­—èŠ‚ */
 static void BitToByte(DES_ElemType bit[8], DES_ElemType *ch) {
     int cnt;
     for (cnt = 0; cnt < 8; cnt++) {
@@ -676,7 +676,7 @@ static void BitToByte(DES_ElemType bit[8], DES_ElemType *ch) {
     }
 }
 
-/* ½«³¤¶ÈÎª8µÄ×Ö·û´®×ªÎª¶ş½øÖÆÎ»´® */
+/* å°†é•¿åº¦ä¸º8çš„å­—ç¬¦ä¸²è½¬ä¸ºäºŒè¿›åˆ¶ä½ä¸² */
 static void Char8ToBit64(const DES_ElemType ch[8], DES_ElemType bit[64]) {
     int cnt;
     for (cnt = 0; cnt < 8; cnt++) {
@@ -684,7 +684,7 @@ static void Char8ToBit64(const DES_ElemType ch[8], DES_ElemType bit[64]) {
     }
 }
 
-/* ½«¶ş½øÖÆÎ»´®×ªÎª³¤¶ÈÎª8µÄ×Ö·û´® */
+/* å°†äºŒè¿›åˆ¶ä½ä¸²è½¬ä¸ºé•¿åº¦ä¸º8çš„å­—ç¬¦ä¸² */
 static void Bit64ToChar8(DES_ElemType bit[64], DES_ElemType ch[8]) {
     int cnt;
     memset(ch, 0, 8);
@@ -693,7 +693,7 @@ static void Bit64ToChar8(DES_ElemType bit[64], DES_ElemType ch[8]) {
     }
 }
 
-/* ÃÜÔ¿ÖÃ»»·½·¨ */
+/* å¯†é’¥ç½®æ¢æ–¹æ³• */
 static void DES_PC1_Transform(DES_ElemType key[64], DES_ElemType tempbts[56]) {
     int cnt;
     for (cnt = 0; cnt < 56; cnt++) {
@@ -701,24 +701,24 @@ static void DES_PC1_Transform(DES_ElemType key[64], DES_ElemType tempbts[56]) {
     }
 }
 
-/* Ñ­»·×óÒÆ */
+/* å¾ªç¯å·¦ç§» */
 static void DES_ROL(DES_ElemType data[56], int time) {
     DES_ElemType temp[56];
 
-    /* ±£´æ½«ÒªÑ­»·ÒÆ¶¯µ½ÓÒ±ßµÄÎ» */
+    /* ä¿å­˜å°†è¦å¾ªç¯ç§»åŠ¨åˆ°å³è¾¹çš„ä½ */
     memcpy(temp, data, time);
     memcpy(temp + time, data + 28, time);
 
-    /* Ç°28Î»ÒÆ¶¯ */
+    /* å‰28ä½ç§»åŠ¨ */
     memcpy(data, data + time, 28 - time);
     memcpy(data + 28 - time, temp, time);
 
-    /* ºó28Î»ÒÆ¶¯ */
+    /* å28ä½ç§»åŠ¨ */
     memcpy(data + 28, data + 28 + time, 28 - time);
     memcpy(data + 56 - time, temp + time, time);
 }
 
-/* ÃÜÔ¿À©Õ¹·½·¨ */
+/* å¯†é’¥æ‰©å±•æ–¹æ³• */
 static void DES_PC2_Transform(DES_ElemType key[56], DES_ElemType tempbts[48]) {
     int cnt;
     for (cnt = 0; cnt < 48; cnt++) {
@@ -726,18 +726,18 @@ static void DES_PC2_Transform(DES_ElemType key[56], DES_ElemType tempbts[48]) {
     }
 }
 
-/* Éú³É×ÓÃÜÔ¿ */
+/* ç”Ÿæˆå­å¯†é’¥ */
 static void DES_MakeSubKeys(DES_ElemType key[64], DES_ElemType subKeys[16][48]) {
     DES_ElemType temp[56];
     int cnt;
-    DES_PC1_Transform(key, temp); /* PC1ÖÃ»» */
-    for (cnt = 0; cnt < 16; cnt++) { /* 16ÂÖµø´ú£¬²úÉú16¸ö×ÓÃÜÔ¿ */
-        DES_ROL(temp, DES_MOVE_TIMES[cnt]); /* Ñ­»·×óÒÆ */
-        DES_PC2_Transform(temp, subKeys[cnt]); /* PC2ÖÃ»»£¬²úÉú×ÓÃÜÔ¿ */
+    DES_PC1_Transform(key, temp); /* PC1ç½®æ¢ */
+    for (cnt = 0; cnt < 16; cnt++) { /* 16è½®è·Œä»£ï¼Œäº§ç”Ÿ16ä¸ªå­å¯†é’¥ */
+        DES_ROL(temp, DES_MOVE_TIMES[cnt]); /* å¾ªç¯å·¦ç§» */
+        DES_PC2_Transform(temp, subKeys[cnt]); /* PC2ç½®æ¢ï¼Œäº§ç”Ÿå­å¯†é’¥ */
     }
 }
 
-/* IPÖÃ»» */
+/* IPç½®æ¢ */
 static void DES_IP_Transform(DES_ElemType data[64]) {
     int cnt;
     DES_ElemType temp[64];
@@ -747,7 +747,7 @@ static void DES_IP_Transform(DES_ElemType data[64]) {
     memcpy(data, temp, 64);
 }
 
-/* IPÄæÖÃ»» */
+/* IPé€†ç½®æ¢ */
 static void DES_IP_1_Transform(DES_ElemType data[64]) {
     int cnt;
     DES_ElemType temp[64];
@@ -757,7 +757,7 @@ static void DES_IP_1_Transform(DES_ElemType data[64]) {
     memcpy(data, temp, 64);
 }
 
-/* À©Õ¹ÖÃ»» */
+/* æ‰©å±•ç½®æ¢ */
 static void DES_E_Transform(DES_ElemType data[48]) {
     int cnt;
     DES_ElemType temp[48];
@@ -767,7 +767,7 @@ static void DES_E_Transform(DES_ElemType data[48]) {
     memcpy(data, temp, 48);
 }
 
-/* PÖÃ»» */
+/* Pç½®æ¢ */
 static void DES_P_Transform(DES_ElemType data[32]) {
     int cnt;
     DES_ElemType temp[32];
@@ -777,7 +777,7 @@ static void DES_P_Transform(DES_ElemType data[32]) {
     memcpy(data, temp, 32);
 }
 
-/* Òì»ò */
+/* å¼‚æˆ– */
 static void DES_XOR(DES_ElemType R[48], DES_ElemType L[48], int count) {
     int cnt;
     for (cnt = 0; cnt < count; cnt++) {
@@ -785,7 +785,7 @@ static void DES_XOR(DES_ElemType R[48], DES_ElemType L[48], int count) {
     }
 }
 
-/* ½»»» */
+/* äº¤æ¢ */
 static void DES_Swap(DES_ElemType left[32], DES_ElemType right[32]) {
     DES_ElemType temp[32];
     memcpy(temp, left, 32);
@@ -793,7 +793,7 @@ static void DES_Swap(DES_ElemType left[32], DES_ElemType right[32]) {
     memcpy(right, temp, 32);
 }
 
-/* SºĞÖÃ»» */
+/* Sç›’ç½®æ¢ */
 static void DES_SBOX(DES_ElemType data[48]) {
     int cnt;
     int line, row, output;
@@ -802,13 +802,13 @@ static void DES_SBOX(DES_ElemType data[48]) {
         cur1 = cnt * 6;
         cur2 = cnt << 2;
 
-        /* ¼ÆËãÔÚSºĞÖĞµÄĞĞÓëÁĞ */
-        line = (data[cur1] << 1) + data[cur1 + 5]; /* Ã¿×éµÚÒ»Î»³Ë2¼ÓÉÏµÚÁùÎ» */
+        /* è®¡ç®—åœ¨Sç›’ä¸­çš„è¡Œä¸åˆ— */
+        line = (data[cur1] << 1) + data[cur1 + 5]; /* æ¯ç»„ç¬¬ä¸€ä½ä¹˜2åŠ ä¸Šç¬¬å…­ä½ */
         row = (data[cur1 + 1] << 3) + (data[cur1 + 2] << 2)
-                + (data[cur1 + 3] << 1) + data[cur1 + 4]; /* Ã¿×éµÚ¶şÎ»³Ë8¼ÓÉÏµÚÈıÎ»³Ë4¼ÓÉÏµÚËÄÎ»³Ë2¼ÓÉÏµÚÎåÎ» */
+                + (data[cur1 + 3] << 1) + data[cur1 + 4]; /* æ¯ç»„ç¬¬äºŒä½ä¹˜8åŠ ä¸Šç¬¬ä¸‰ä½ä¹˜4åŠ ä¸Šç¬¬å››ä½ä¹˜2åŠ ä¸Šç¬¬äº”ä½ */
         output = DES_S[cnt][line][row];
 
-        /* »¯Îª2½øÖÆ */
+        /* åŒ–ä¸º2è¿›åˆ¶ */
         data[cur2] = (output & 0X08) >> 3;
         data[cur2 + 1] = (output & 0X04) >> 2;
         data[cur2 + 2] = (output & 0X02) >> 1;
@@ -816,68 +816,68 @@ static void DES_SBOX(DES_ElemType data[48]) {
     }
 }
 
-/* ¼ÓÃÜµ¥¸ö·Ö×é */
+/* åŠ å¯†å•ä¸ªåˆ†ç»„ */
 static void DES_EncryptBlock(const DES_ElemType plainBlock[8], DES_ElemType subKeys[16][48], DES_ElemType cipherBlock[8]) {
     DES_ElemType plainBits[64];
     DES_ElemType copyRight[48];
     int cnt;
 
     Char8ToBit64(plainBlock, plainBits);
-    /* ³õÊ¼ÖÃ»»£¨IPÖÃ»»£© */
+    /* åˆå§‹ç½®æ¢ï¼ˆIPç½®æ¢ï¼‰ */
     DES_IP_Transform(plainBits);
 
-    /* 16ÂÖµü´ú */
+    /* 16è½®è¿­ä»£ */
     for (cnt = 0; cnt < 16; cnt++) {
         memcpy(copyRight, plainBits + 32, 32);
-        /* ½«ÓÒ°ë²¿·Ö½øĞĞÀ©Õ¹ÖÃ»»£¬´Ó32Î»À©Õ¹µ½48Î» */
+        /* å°†å³åŠéƒ¨åˆ†è¿›è¡Œæ‰©å±•ç½®æ¢ï¼Œä»32ä½æ‰©å±•åˆ°48ä½ */
         DES_E_Transform(copyRight);
-        /* ½«ÓÒ°ë²¿·ÖÓë×ÓÃÜÔ¿½øĞĞÒì»ò²Ù×÷ */
+        /* å°†å³åŠéƒ¨åˆ†ä¸å­å¯†é’¥è¿›è¡Œå¼‚æˆ–æ“ä½œ */
         DES_XOR(copyRight, subKeys[cnt], 48);
-        /* Òì»ò½á¹û½øÈëSºĞ£¬Êä³ö32Î»½á¹û */
+        /* å¼‚æˆ–ç»“æœè¿›å…¥Sç›’ï¼Œè¾“å‡º32ä½ç»“æœ */
         DES_SBOX(copyRight);
-        /* PÖÃ»» */
+        /* Pç½®æ¢ */
         DES_P_Transform(copyRight);
-        /* ½«Ã÷ÎÄ×ó°ë²¿·ÖÓëÓÒ°ë²¿·Ö½øĞĞÒì»ò */
+        /* å°†æ˜æ–‡å·¦åŠéƒ¨åˆ†ä¸å³åŠéƒ¨åˆ†è¿›è¡Œå¼‚æˆ– */
         DES_XOR(plainBits, copyRight, 32);
         if (cnt != 15) {
-            /* ×îÖÕÍê³É×óÓÒ²¿µÄ½»»» */
+            /* æœ€ç»ˆå®Œæˆå·¦å³éƒ¨çš„äº¤æ¢ */
             DES_Swap(plainBits, plainBits + 32);
         }
     }
-    /* Äæ³õÊ¼ÖÃ»»£¨IP^1ÖÃ»»£© */
+    /* é€†åˆå§‹ç½®æ¢ï¼ˆIP^1ç½®æ¢ï¼‰ */
     DES_IP_1_Transform(plainBits);
     Bit64ToChar8(plainBits, cipherBlock);
 }
 
-/* ½âÃÜµ¥¸ö·Ö×é */
+/* è§£å¯†å•ä¸ªåˆ†ç»„ */
 static void DES_DecryptBlock(const DES_ElemType cipherBlock[8], DES_ElemType subKeys[16][48], DES_ElemType plainBlock[8]) {
     DES_ElemType cipherBits[64];
     DES_ElemType copyRight[48];
     int cnt;
 
     Char8ToBit64(cipherBlock, cipherBits);
-    /* ³õÊ¼ÖÃ»»£¨IPÖÃ»»£© */
+    /* åˆå§‹ç½®æ¢ï¼ˆIPç½®æ¢ï¼‰ */
     DES_IP_Transform(cipherBits);
 
-    /* 16ÂÖµü´ú */
+    /* 16è½®è¿­ä»£ */
     for (cnt = 15; cnt >= 0; cnt--) {
         memcpy(copyRight, cipherBits + 32, 32);
-        /* ½«ÓÒ°ë²¿·Ö½øĞĞÀ©Õ¹ÖÃ»»£¬´Ó32Î»À©Õ¹µ½48Î» */
+        /* å°†å³åŠéƒ¨åˆ†è¿›è¡Œæ‰©å±•ç½®æ¢ï¼Œä»32ä½æ‰©å±•åˆ°48ä½ */
         DES_E_Transform(copyRight);
-        /* ½«ÓÒ°ë²¿·ÖÓë×ÓÃÜÔ¿½øĞĞÒì»ò²Ù×÷ */
+        /* å°†å³åŠéƒ¨åˆ†ä¸å­å¯†é’¥è¿›è¡Œå¼‚æˆ–æ“ä½œ */
         DES_XOR(copyRight, subKeys[cnt], 48);
-        /* Òì»ò½á¹û½øÈëSºĞ£¬Êä³ö32Î»½á¹û */
+        /* å¼‚æˆ–ç»“æœè¿›å…¥Sç›’ï¼Œè¾“å‡º32ä½ç»“æœ */
         DES_SBOX(copyRight);
-        /* PÖÃ»» */
+        /* Pç½®æ¢ */
         DES_P_Transform(copyRight);
-        /* ½«Ã÷ÎÄ×ó°ë²¿·ÖÓëÓÒ°ë²¿·Ö½øĞĞÒì»ò */
+        /* å°†æ˜æ–‡å·¦åŠéƒ¨åˆ†ä¸å³åŠéƒ¨åˆ†è¿›è¡Œå¼‚æˆ– */
         DES_XOR(cipherBits, copyRight, 32);
         if (cnt != 0) {
-            /* ×îÖÕÍê³É×óÓÒ²¿µÄ½»»» */
+            /* æœ€ç»ˆå®Œæˆå·¦å³éƒ¨çš„äº¤æ¢ */
             DES_Swap(cipherBits, cipherBits + 32);
         }
     }
-    /* Äæ³õÊ¼ÖÃ»»£¨IP^1ÖÃ»»£© */
+    /* é€†åˆå§‹ç½®æ¢ï¼ˆIP^1ç½®æ¢ï¼‰ */
     DES_IP_1_Transform(cipherBits);
     Bit64ToChar8(cipherBits, plainBlock);
 }
@@ -898,11 +898,11 @@ int DES__encrypt(const char* input, size_t cb, const char * key, char* output) {
         memcpy(keyBlock, DEFAULT_DES_KEY, sizeof ( void *));
     }
 
-    /* ½«ÃÜÔ¿×ª»»Îª¶ş½øÖÆÁ÷ */
+    /* å°†å¯†é’¥è½¬æ¢ä¸ºäºŒè¿›åˆ¶æµ */
     Char8ToBit64(keyBlock, bKey);
-    /* Éú³É×ÓÃÜÔ¿ */
+    /* ç”Ÿæˆå­å¯†é’¥ */
     DES_MakeSubKeys(bKey, subKeys);
-    /* 8×Ö½Ú¶ÔÆë·ÖÅú¼ÓÃÜ */
+    /* 8å­—èŠ‚å¯¹é½åˆ†æ‰¹åŠ å¯† */
     length = cb;
     offset = 0;
     while (length >= 8) {
@@ -928,11 +928,11 @@ int DES__decrypt(const char* input, size_t cb, const char key[8], char* output) 
         memcpy(keyBlock, DEFAULT_DES_KEY, sizeof ( void *));
     }
 
-    /* ½«ÃÜÔ¿×ª»»Îª¶ş½øÖÆÁ÷ */
+    /* å°†å¯†é’¥è½¬æ¢ä¸ºäºŒè¿›åˆ¶æµ */
     Char8ToBit64(keyBlock, bKey);
-    /* Éú³É×ÓÃÜÔ¿ */
+    /* ç”Ÿæˆå­å¯†é’¥ */
     DES_MakeSubKeys(bKey, subKeys);
-    /* 8×Ö½Ú¶ÔÆë·ÖÅú¼ÓÃÜ */
+    /* 8å­—èŠ‚å¯¹é½åˆ†æ‰¹åŠ å¯† */
     length = cb;
     offset = 0;
     while (length >= 8) {

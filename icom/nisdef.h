@@ -9,14 +9,14 @@
 #include <stdint.h>
 #endif
 
-/* Ç°ÖÃÍøÂçĞ­Òé²ã¼°Æä³¤¶È */
+/* å‰ç½®ç½‘ç»œåè®®å±‚åŠå…¶é•¿åº¦ */
 #define MTU       			(1500)   
-#define ETHERNET_P_SIZE     (14)   /*ÍøÂç²ã14¸ö×Ö½Ú */
-#define IP_P_SIZE      		(20)   /* IP²ã20¸ö×Ö½Ú */
-#define UDP_P_SIZE      	(8)   /* UDP²ã8¸ö×Ö½Ú */
-#define TCP_P_SIZE      	(20)   /* TCP²ã20¸ö×Ö½Ú */
+#define ETHERNET_P_SIZE     (14)   /*ç½‘ç»œå±‚14ä¸ªå­—èŠ‚ */
+#define IP_P_SIZE      		(20)   /* IPå±‚20ä¸ªå­—èŠ‚ */
+#define UDP_P_SIZE      	(8)   /* UDPå±‚8ä¸ªå­—èŠ‚ */
+#define TCP_P_SIZE      	(20)   /* TCPå±‚20ä¸ªå­—èŠ‚ */
 
-/* ÏÂ²ã¾ä±ú¶¨Òå */
+/* ä¸‹å±‚å¥æŸ„å®šä¹‰ */
 typedef uint32_t HLNK;
 typedef uint32_t HTCPLINK;
 typedef int32_t HUDPLINK;
@@ -45,27 +45,27 @@ typedef int nis_boolean_t;
 #define INVALID_HUDPLINK ((HUDPLINK)(~0))
 #endif
 
-/* Í¨ÓÃÍøÂçÊÂ¼ş */
-#define EVT_CREATED   (0x0001)   /* ÒÑ¾­´´½¨ */
-#define EVT_PRE_CLOSE   (0x0002)   /* ¼´½«¹Ø±Õ*/
-#define EVT_CLOSED   (0x0003)   /* ÒÑ¾­¹Ø±Õ*/
-#define EVT_RECEIVEDATA   (0x0004)   /* ½ÓÊÕÊı¾İ*/
-#define EVT_SENDDATA   (0x0005)   /* ·¢ËÍÊı¾İ*/
-#define EVT_DEBUG_LOG   (0x0006)   /* ·´À¡µÄµ÷ÊÔĞÅÏ¢ */
-#define EVT_EXCEPTION   (0xFFFF)   /* Òì³£*/
+/* é€šç”¨ç½‘ç»œäº‹ä»¶ */
+#define EVT_CREATED   (0x0001)   /* å·²ç»åˆ›å»º */
+#define EVT_PRE_CLOSE   (0x0002)   /* å³å°†å…³é—­*/
+#define EVT_CLOSED   (0x0003)   /* å·²ç»å…³é—­*/
+#define EVT_RECEIVEDATA   (0x0004)   /* æ¥æ”¶æ•°æ®*/
+#define EVT_SENDDATA   (0x0005)   /* å‘é€æ•°æ®*/
+#define EVT_DEBUG_LOG   (0x0006)   /* åé¦ˆçš„è°ƒè¯•ä¿¡æ¯ */
+#define EVT_EXCEPTION   (0xFFFF)   /* å¼‚å¸¸*/
 
-/* TCP ÍøÂçÊÂ¼ş */
-#define EVT_TCP_ACCEPTED  (0x0013)   /* ÒÑ¾­Accept */
-#define EVT_TCP_CONNECTED  (0x0014)   /* ÒÑ¾­Á¬½Ó³É¹¦ */
+/* TCP ç½‘ç»œäº‹ä»¶ */
+#define EVT_TCP_ACCEPTED  (0x0013)   /* å·²ç»Accept */
+#define EVT_TCP_CONNECTED  (0x0014)   /* å·²ç»è¿æ¥æˆåŠŸ */
 
-/* »ñÈ¡µØÖ·ĞÅÏ¢Ñ¡Ïî */
-#define LINK_ADDR_LOCAL   (0x0001)   /* µÃµ½°ó¶¨±¾»úµØÖ·¶Ë¿ÚĞÅÏ¢ */
-#define LINK_ADDR_REMOTE  (0x0002)   /* µÃµ½°ó¶¨¶Ô¶ËµØÖ·¶Ë¿ÚĞÅÏ¢ */
+/* è·å–åœ°å€ä¿¡æ¯é€‰é¡¹ */
+#define LINK_ADDR_LOCAL   (0x0001)   /* å¾—åˆ°ç»‘å®šæœ¬æœºåœ°å€ç«¯å£ä¿¡æ¯ */
+#define LINK_ADDR_REMOTE  (0x0002)   /* å¾—åˆ°ç»‘å®šå¯¹ç«¯åœ°å€ç«¯å£ä¿¡æ¯ */
 
 #pragma pack(push, 1)
 
 typedef struct _nis_event_t {
-    int Event; /* ÊÂ¼şÀàĞÍ */
+    int Event; /* äº‹ä»¶ç±»å‹ */
 
     union {
 
@@ -79,27 +79,27 @@ typedef struct _nis_event_t {
     } Ln;
 } nis_event_t;
 
-/* Ğ­Òé»Øµ÷Àı³Ì¶¨Òå */
+/* åè®®å›è°ƒä¾‹ç¨‹å®šä¹‰ */
 typedef void( STD_CALL *nis_callback_t)(const nis_event_t *naio_event, const void *pParam2);
 typedef nis_callback_t tcp_io_callback_t;
 typedef nis_callback_t udp_io_callback_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
-    TCP ²¿·Ö
+    TCP éƒ¨åˆ†
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-/* Ë½ÓĞĞ­ÒéÄ£°å(PPT, private protocol template) Ö§³Ö
+/* ç§æœ‰åè®®æ¨¡æ¿(PPT, private protocol template) æ”¯æŒ
 
-        Ğ­Òé½âÎöÄ£°å tcp_ppt_parser_t
-                @data               Êı¾İÁ÷
-                @cb                 Êı¾İÁ÷³¤¶È
-                @user_data_size   ÓÃ»§²¿·ÖµÄ³¤¶È(³ıÈ¥Ğ­Òé³¤¶Èºó)
+        åè®®è§£ææ¨¡æ¿ tcp_ppt_parser_t
+                @data               æ•°æ®æµ
+                @cb                 æ•°æ®æµé•¿åº¦
+                @user_data_size   ç”¨æˆ·éƒ¨åˆ†çš„é•¿åº¦(é™¤å»åè®®é•¿åº¦å)
 
-        Ğ­Òé¹¹½¨Ä£°å tcp_ppt_builder_t
-                @data               ¹¹½¨Ğ­ÒéµÄÊı¾İÁ÷
-                @cb                 ¹¹½¨Ğ­ÒéµÄÊı¾İ×Ö½Ú³¤¶È
+        åè®®æ„å»ºæ¨¡æ¿ tcp_ppt_builder_t
+                @data               æ„å»ºåè®®çš„æ•°æ®æµ
+                @cb                 æ„å»ºåè®®çš„æ•°æ®å­—èŠ‚é•¿åº¦
 
-        Ë½ÓĞĞ­ÒéÄ£°åµÄ²Ù×÷·µ»Ø<0, ½«»áÊ¹ÏÂ¼¶ÍøÂçÁ÷³ÌÊ§°ÜÖĞÖ¹
+        ç§æœ‰åè®®æ¨¡æ¿çš„æ“ä½œè¿”å›<0, å°†ä¼šä½¿ä¸‹çº§ç½‘ç»œæµç¨‹å¤±è´¥ä¸­æ­¢
  */
 
 typedef int( STD_CALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
@@ -118,8 +118,8 @@ typedef struct {
     union {
 
         struct {
-            const char * Data; /* ½ÓÊÕÊı¾İBuf */
-            int Size; /* ¸ÃÊı¾İ°ü×Ö½Ú´óĞ¡ */
+            const char * Data; /* æ¥æ”¶æ•°æ®Buf */
+            int Size; /* è¯¥æ•°æ®åŒ…å­—èŠ‚å¤§å° */
         } Packet;
 
         struct {
@@ -144,7 +144,7 @@ typedef struct {
 } tcp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
- UDP ²¿·Ö
+ UDP éƒ¨åˆ†
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #define UDP_FLAG_NONE           (0)
 #define UDP_FLAG_UNITCAST       (UDP_FLAG_NONE)
@@ -179,7 +179,7 @@ typedef struct {
 } udp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
- GRPÏà¹Ø²¿·Ö
+ GRPç›¸å…³éƒ¨åˆ†
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 typedef struct _packet_grp_node {
@@ -192,7 +192,7 @@ typedef struct _packet_grp {
     int Count;
 } packet_grp_t;
 
-/* Ö§³Ö¿â°æ±¾Ğ­Òé	*/
+/* æ”¯æŒåº“ç‰ˆæœ¬åè®®	*/
 typedef struct _swnet_version {
     short procedure_;
     short main_;

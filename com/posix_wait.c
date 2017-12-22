@@ -6,10 +6,10 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waitable_handle) {
 #if !_WIN32
         posix__pthread_mutex_init(&waitable_handle->mutex_);
         pthread_condattr_init(&waitable_handle->condattr_);
-        /*²âÁ¿Ê±¼ä²ÎÕÕ¸ÄÎªCLOCK_MONOTONIC*/
+        /*æµ‹é‡æ—¶é—´å‚ç…§æ”¹ä¸ºCLOCK_MONOTONIC*/
         pthread_condattr_setclock(&waitable_handle->condattr_, CLOCK_MONOTONIC);
         pthread_cond_init(&waitable_handle->cond_, &waitable_handle->condattr_);
-        /*³õÊ¼»¯·Å¹ıÌõ¼ş*/
+        /*åˆå§‹åŒ–æ”¾è¿‡æ¡ä»¶*/
         waitable_handle->pass_ = 0;
 #endif
         return 0;
@@ -112,14 +112,14 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         posix__pthread_mutex_lock(&waiter->mutex_);
         while (!waiter->pass_) {
             retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
-            /* ÏµÍ³µ÷ÓÃÊ§°Ü£¬ Ìø³öÑ­»·, ÈÏ¶¨Îª·µ»ØÊ§°Ü */
+            /* ç³»ç»Ÿè°ƒç”¨å¤±è´¥ï¼Œ è·³å‡ºå¾ªç¯, è®¤å®šä¸ºè¿”å›å¤±è´¥ */
             if (0 != retval) {
                 retval = -1;
                 break;
             }
         }
 
-        /* Èç¹ûÊÇÍ¬²½¶ÔÏó£¬ ÔòĞèÒªÖØÖÃÍ¨¹ı±ê¼Ç */
+        /* å¦‚æœæ˜¯åŒæ­¥å¯¹è±¡ï¼Œ åˆ™éœ€è¦é‡ç½®é€šè¿‡æ ‡è®° */
         if (waiter->sync_) {
             waiter->pass_ = 0;
         }
@@ -128,29 +128,29 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         return retval;
     }
 
-    /* ´ø³¬Ê±µÈ */
+    /* å¸¦è¶…æ—¶ç­‰ */
     if (clock_gettime(CLOCK_MONOTONIC, &abstime) >= 0) {
-        /* ´Óµ±Ç°Ê±¼ä¼ÆËãÑÓ³Ù£¬·ÀÖ¹64Î»»·¾³ÏÂµÄÄÉÃëÒç³ö(tv_nsec >= 1000000000 »áµ¼ÖÂ pthread_cond_timedwait ·µ»Ø²ÎÊı´íÎó ) */
+        /* ä»å½“å‰æ—¶é—´è®¡ç®—å»¶è¿Ÿï¼Œé˜²æ­¢64ä½ç¯å¢ƒä¸‹çš„çº³ç§’æº¢å‡º(tv_nsec >= 1000000000 ä¼šå¯¼è‡´ pthread_cond_timedwait è¿”å›å‚æ•°é”™è¯¯ ) */
         uint64_t nsec = abstime.tv_nsec;
-        nsec += ((uint64_t) tsc * 1000000); /* ºÁÃë×ª»»ÎªÄÉÃë */
+        nsec += ((uint64_t) tsc * 1000000); /* æ¯«ç§’è½¬æ¢ä¸ºçº³ç§’ */
         abstime.tv_sec += (nsec / 1000000000);
         abstime.tv_nsec = (nsec % 1000000000);
         posix__pthread_mutex_lock(&waiter->mutex_);
         while (!waiter->pass_) {
             retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-            /* ³¬Ê±, ÈÏ¶¨ÎªÏµÍ³µ÷ÓÃ³É¹¦, ÇÒ²»ĞèÒªÅĞ¶Ïpass, Ö±½ÓÍË³öÑ­»· */
+            /* è¶…æ—¶, è®¤å®šä¸ºç³»ç»Ÿè°ƒç”¨æˆåŠŸ, ä¸”ä¸éœ€è¦åˆ¤æ–­pass, ç›´æ¥é€€å‡ºå¾ªç¯ */
             if (ETIMEDOUT == retval) {
                 break;
             }
 
-			/* ÏµÍ³µ÷ÓÃÊ§°Ü */
+			/* ç³»ç»Ÿè°ƒç”¨å¤±è´¥ */
             if (0 != retval) {
                 retval = -1;
                 break;
             }
         }
 		
-        /* Èç¹ûÊÇÍ¬²½¶ÔÏó£¬ ÔòĞèÒªÖØÖÃÍ¨¹ı±ê¼Ç */
+        /* å¦‚æœæ˜¯åŒæ­¥å¯¹è±¡ï¼Œ åˆ™éœ€è¦é‡ç½®é€šè¿‡æ ‡è®° */
         if (waiter->sync_) {
             waiter->pass_ = 0;
         }

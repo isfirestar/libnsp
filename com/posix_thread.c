@@ -113,7 +113,7 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 
     pthread_attr_init(&tidp->attr_);
 
-    /* ÊµÊ±Ïß³ÌÖ±½Óµ¼ÖÂ½ø³ÌÓÅÏÈ¼¶ÌáÉý */
+    /* å®žæ—¶çº¿ç¨‹ç›´æŽ¥å¯¼è‡´è¿›ç¨‹ä¼˜å…ˆçº§æå‡ */
     if (0 == nice(-5)) {
         if (pthread_attr_setschedpolicy(&tidp->attr_, SCHED_FIFO) < 0) {
             return -1;
@@ -191,7 +191,7 @@ void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
     InitializeCriticalSection(&mutex->handle_);
 #else
     pthread_mutexattr_init(&mutex->attr_);
-    /* ÎªºÍ WIN32 µÄÁÙ½çÇø±£³ÖÓïÒå¼æÈÝÐÔ£¬ MUTEX Ä¬ÈÏÎªµÝ¹éËø */
+    /* ä¸ºå’Œ WIN32 çš„ä¸´ç•ŒåŒºä¿æŒè¯­ä¹‰å…¼å®¹æ€§ï¼Œ MUTEX é»˜è®¤ä¸ºé€’å½’é” */
     pthread_mutexattr_settype(&mutex->attr_, PTHREAD_MUTEX_RECURSIVE_NP);
     pthread_mutex_init(&mutex->handle_, &mutex->attr_);
 #endif

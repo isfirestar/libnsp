@@ -60,14 +60,14 @@ int posix__strncasecmp(const char* s1, const char* s2, uint32_t n);
 __extern__
 int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n);
 
-/* ´¦Àí×Ö·û´® @s, È¥³ıÇ°ºó¿Õ¸ñ£¬·µ»Ø´¦ÀíºóµÄ×Ö·û´®ÆğÊ¼Ö¸Õë
- * ¸±×÷ÓÃ:
- * ËäÈ» @s ±£ÁôÁËÔ­Ê¼Ö¸Õë£¬µ«ÊÇ×Ö·û´®Î²²¿µÄ¿Õ¸ñ£¬»á±»ÎŞÌõ¼şÇå³ı
- * Èç¹ûĞèÒªÍêÕû±£ÁôÔ­Ê¼´®£¬Ó¦¸Ã¿¼ÂÇÊ¹ÓÃ posix__strtrimcpy
+/* å¤„ç†å­—ç¬¦ä¸² @s, å»é™¤å‰åç©ºæ ¼ï¼Œè¿”å›å¤„ç†åçš„å­—ç¬¦ä¸²èµ·å§‹æŒ‡é’ˆ
+ * å‰¯ä½œç”¨:
+ * è™½ç„¶ @s ä¿ç•™äº†åŸå§‹æŒ‡é’ˆï¼Œä½†æ˜¯å­—ç¬¦ä¸²å°¾éƒ¨çš„ç©ºæ ¼ï¼Œä¼šè¢«æ— æ¡ä»¶æ¸…é™¤
+ * å¦‚æœéœ€è¦å®Œæ•´ä¿ç•™åŸå§‹ä¸²ï¼Œåº”è¯¥è€ƒè™‘ä½¿ç”¨ posix__strtrimcpy
 */
 __extern__
 const char *posix__strtrim(const char *s); 
 __extern__
-char *posix__strtrimcpy(char *target, uint32_t cch, const char *src); /* trim´¦Àí×Ö·û´® @src ºó´æÈë¿½±´ @target  */
+char *posix__strtrimcpy(char *target, uint32_t cch, const char *src); /* trimå¤„ç†å­—ç¬¦ä¸² @src åå­˜å…¥æ‹·è´ @target  */
 
 #endif

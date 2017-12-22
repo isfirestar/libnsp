@@ -24,7 +24,7 @@ namespace nsp {
 			std::size_t loc = 0, offset = 0;
 
 			int i = 0;
-			// ÇĞ¸îIP´®£¬ ²»Âú×ã¸ÕºÃ -- 3¸ö'.'4¸ö½Ú -- µÄ´®¾ùÎª·Ç·¨IPv4
+			// åˆ‡å‰²IPä¸²ï¼Œ ä¸æ»¡è¶³åˆšå¥½ -- 3ä¸ª'.'4ä¸ªèŠ‚ -- çš„ä¸²å‡ä¸ºéæ³•IPv4
 			while ( ( loc = ipstr.find_first_of( delim, offset ) ) != std::string::npos ) {
 				if ( i == 3 ) {
 					return posix__false;
@@ -40,14 +40,14 @@ namespace nsp {
 				return posix__false;
 			}
 
-			//¶Ô4¸övalue½øĞĞÅĞ¶Ï
+			//å¯¹4ä¸ªvalueè¿›è¡Œåˆ¤æ–­
 			for ( int i = 0; i < 4; i++ ) {
-				//È«Êı×ÖĞ£Ñé
+				//å…¨æ•°å­—æ ¡éªŒ
 				if ( !toolkit::is_digit_str( value[i] ) ) {
 					return posix__false;
 				}
 
-				// Ã¿¸ö½ÚµÄÔ½½çÅĞ¶Ï
+				// æ¯ä¸ªèŠ‚çš„è¶Šç•Œåˆ¤æ–­
 				char* endptr;
 				auto n_value = strtol( value[i].c_str(), &endptr, 10 );
 				if ( n_value > 255 ) {
@@ -58,17 +58,17 @@ namespace nsp {
 		}
 
 		posix__boolean_t endpoint::is_effective_port( const std::string &portstr, uint16_t &port ) {
-			// È«Êı×ÖĞ£Ñé
+			// å…¨æ•°å­—æ ¡éªŒ
 			if ( !toolkit::is_digit_str( portstr ) ) {
 				return posix__false;
 			}
 
-			// Èç¹û²»ÊÇÖ¸¶¨¶Ë¿ÚÎª0(Ê¹ÓÃËæ»ú¶Ë¿Ú), µÚ0¸ö×Ö½Ú±ØĞëÊÇ1-9, ²»ÄÜÊÇ0
+			// å¦‚æœä¸æ˜¯æŒ‡å®šç«¯å£ä¸º0(ä½¿ç”¨éšæœºç«¯å£), ç¬¬0ä¸ªå­—èŠ‚å¿…é¡»æ˜¯1-9, ä¸èƒ½æ˜¯0
 			if ( 0x30 == portstr[0] && portstr.size() > 1 ) {
 				return posix__false;
 			}
 
-			// Ô½½çÅĞ¶Ï
+			// è¶Šç•Œåˆ¤æ–­
 			char* endptr;
 			auto n_port = strtol( portstr.c_str(), &endptr, 10 );
 			if ( n_port >= MAXIMU_TCPIP_PORT_NUMBER ) {
@@ -81,7 +81,7 @@ namespace nsp {
 		int endpoint::parse_domain( const std::string &domain, std::string &ipv4 ) {
 			uint32_t ip;
 
-			// "localhost" ¿ÉÒÔµÃµ½ÕıÈ·½âÎö
+			// "localhost" å¯ä»¥å¾—åˆ°æ­£ç¡®è§£æ
 			if ( toolkit::singleton<tcpip::swnet>::instance()->nis_gethost( domain.c_str(), &ip ) < 0 ) {
 				return -1;
 			}
@@ -97,12 +97,12 @@ namespace nsp {
 		int endpoint::parse_ep( const std::string & epstr, std::string &ipv4, port_t &port ) {
 			static const std::string delim = ":";
 
-			// Çø·Ö¿ªipºÍport
+			// åŒºåˆ†å¼€ipå’Œport
 			std::string hoststr;
 			std::string portstr;
 			std::size_t loc = 0, offset = 0;
 
-			// ÕÒ²»µ½ÓĞĞ§µÄ¶Ë¿Ú·Ö¸î·û
+			// æ‰¾ä¸åˆ°æœ‰æ•ˆçš„ç«¯å£åˆ†å‰²ç¬¦
 			loc = epstr.find( delim, offset );
 			if ( ( 0 == loc ) || ( std::string::npos == loc ) ) {
 				return -1;
@@ -111,25 +111,25 @@ namespace nsp {
 			offset = loc + 1;
 			portstr = epstr.substr( offset );
 
-			// ±ØĞëÒªÓĞhostÓò
+			// å¿…é¡»è¦æœ‰hoståŸŸ
 			if ( 0 == hoststr.length() ) {
 				return -1;
 			}
 
-			// ¶Ë¿Ú±ØĞë±£Ö¤ÓĞĞ§
+			// ç«¯å£å¿…é¡»ä¿è¯æœ‰æ•ˆ
 			if ( !endpoint::is_effective_port( portstr, port ) ) {
 				return -1;
 			}
 
-			// host ÓòÖ±½ÓÊÇÓĞĞ§µÄIPv4µØÖ·
-			// ¶ÔIP×Ö·û´®ºÍ¶Ë¿Ú½øĞĞÓĞĞ§ĞÔÅĞ¶¨
-			// Êı×ÖµÄÍøÂçµØÖ·£¬ ²»×÷ gethostbyaddr ÓĞĞ§ĞÔÅĞ¶Ï
+			// host åŸŸç›´æ¥æ˜¯æœ‰æ•ˆçš„IPv4åœ°å€
+			// å¯¹IPå­—ç¬¦ä¸²å’Œç«¯å£è¿›è¡Œæœ‰æ•ˆæ€§åˆ¤å®š
+			// æ•°å­—çš„ç½‘ç»œåœ°å€ï¼Œ ä¸ä½œ gethostbyaddr æœ‰æ•ˆæ€§åˆ¤æ–­
 			if ( endpoint::is_effective_ipv4( hoststr ) ) {
 				ipv4 = hoststr;
 				return 0;
 			}
 
-			// ÔÊĞí½âÎöÓòÃû/Ö÷»úÃû
+			// å…è®¸è§£æåŸŸå/ä¸»æœºå
 			return parse_domain( hoststr, ipv4 );
 		}
 
@@ -233,13 +233,13 @@ namespace nsp {
 			}
 
 			do {
-				// Ö±½ÓÊÇÓĞĞ§µÄIPµØÖ·
+				// ç›´æ¥æ˜¯æœ‰æ•ˆçš„IPåœ°å€
 				if ( is_effective_ipv4( ipstr ) ) {
 					toolkit::posix_strcpy( ipstr_, cchof( ipstr_ ), ipstr.c_str() );
 					break;
 				}
 
-				// ¿ÉÒÔ½âÎöµÄÓòÃû
+				// å¯ä»¥è§£æçš„åŸŸå
 				std::string domain_ipstr;
 				if ( endpoint::parse_domain( ipstr, domain_ipstr ) >= 0 ) {
 					toolkit::posix_strcpy( ipstr_, cchof( ipstr_ ), domain_ipstr.c_str() );

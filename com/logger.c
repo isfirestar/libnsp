@@ -24,8 +24,8 @@
 
 #define  MAXIMUM_LOGFILE_LINE    (5000)
 
-/* ×î´óÒì²½ÈÕÖ¾´æ´¢ÊıÁ¿£¬ ´ïµ½´ÎÊıÁ¿£¬ ½«ÎŞ·¨½øĞĞÒì²½ÈÕÖ¾´æ´¢ 
- * °´Ã¿¸ö½Úµã 2KB + 180 ×Ö½ÚËã£¬ ½ø³ÌÔÊĞí×î´ó×èÈû 53.5MB ĞéÄâÄÚ´æ
+/* æœ€å¤§å¼‚æ­¥æ—¥å¿—å­˜å‚¨æ•°é‡ï¼Œ è¾¾åˆ°æ¬¡æ•°é‡ï¼Œ å°†æ— æ³•è¿›è¡Œå¼‚æ­¥æ—¥å¿—å­˜å‚¨ 
+ * æŒ‰æ¯ä¸ªèŠ‚ç‚¹ 2KB + 180 å­—èŠ‚ç®—ï¼Œ è¿›ç¨‹å…è®¸æœ€å¤§é˜»å¡ 53.5MB è™šæ‹Ÿå†…å­˜
  */
 #define MAXIMUM_LOGSAVE_COUNT       (30000)
 
@@ -149,7 +149,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     }
 
     do {
-        /* ¶ÔÏóÎª¿Õ£¬ËµÃ÷¸ÃmoduleÄ£¿éĞÂÔö */
+        /* å¯¹è±¡ä¸ºç©ºï¼Œè¯´æ˜è¯¥moduleæ¨¡å—æ–°å¢ */
         if (!file) {
             if (NULL == (file = malloc(sizeof ( log__file_describe_t)))) {
                 return NULL;
@@ -168,7 +168,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
             break;
         }
 
-        /* Ã»ÓĞ·¢ÉúÈÕÆÚÇĞ»» ÇÒ ¸ÃÎÄ¼şÄÚÈİ¼ÇÔØÃ»ÓĞ³¬¹ıÏŞÖÆĞĞÊı, ÔòÖ±½Ó¸´ÓÃ¸ÃÎÄ¼ş */
+        /* æ²¡æœ‰å‘ç”Ÿæ—¥æœŸåˆ‡æ¢ ä¸” è¯¥æ–‡ä»¶å†…å®¹è®°è½½æ²¡æœ‰è¶…è¿‡é™åˆ¶è¡Œæ•°, åˆ™ç›´æ¥å¤ç”¨è¯¥æ–‡ä»¶ */
         if (file->filest_.day == currst->day &&
                 file->filest_.month == currst->month &&
                 file->filest_.day == currst->day &&
@@ -176,11 +176,11 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
             return file;
         }
 
-        /* ÇĞ»»ÈÕÖ¾ÎÄ¼ş£¬ ²¢²»»ØÊÕÈÕÖ¾¶ÔÏóÖ¸Õë£¬½ö½öÊÇ¹Ø±ÕÎÄ¼şÃèÊö·û¼´¿É */
+        /* åˆ‡æ¢æ—¥å¿—æ–‡ä»¶ï¼Œ å¹¶ä¸å›æ”¶æ—¥å¿—å¯¹è±¡æŒ‡é’ˆï¼Œä»…ä»…æ˜¯å…³é—­æ–‡ä»¶æè¿°ç¬¦å³å¯ */
         log__close_file(file);
     } while (0);
 
-    /* ÈÕÖ¾·¢¼ş·¢ÉúĞÂ½¨»òÈÎºÎĞÎÊ½µÄÎÄ¼şÇĞ»» */
+    /* æ—¥å¿—å‘ä»¶å‘ç”Ÿæ–°å»ºæˆ–ä»»ä½•å½¢å¼çš„æ–‡ä»¶åˆ‡æ¢ */
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", module,
             currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
     posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR, posix__getpedir());
@@ -193,7 +193,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
         file->line_count_ = 0;
     } else {
         /* bug fixed:
-         * Èç¹ûÎÄ¼ş´´½¨Ê§°Ü, ÔòĞèÒªÒÆ³ıÁ´±í½Úµã */
+         * å¦‚æœæ–‡ä»¶åˆ›å»ºå¤±è´¥, åˆ™éœ€è¦ç§»é™¤é“¾è¡¨èŠ‚ç‚¹ */
 		posix__syslog("nsplog failed to open storage file");
         list_del(&file->link_);
         free(file);
@@ -279,7 +279,7 @@ void *log__asnyc_proc(void *argv) {
         } while (node);
     }
 
-    /* Èç¹ûÒì²½Ïß³ÌÍË³ö£¬Ôò¿ÉÄÜµ¼ÖÂ log__save ÄÚ´æ¶Ñ»ı, ÒòÎª´ËÊ±ÎŞ·¨×¼È·½øĞĞÈÕÖ¾¼ÇÂ¼£¬ Òò´ËÍ¶µİÏµÍ³¼ÇÂ¼ */
+    /* å¦‚æœå¼‚æ­¥çº¿ç¨‹é€€å‡ºï¼Œåˆ™å¯èƒ½å¯¼è‡´ log__save å†…å­˜å †ç§¯, å› ä¸ºæ­¤æ—¶æ— æ³•å‡†ç¡®è¿›è¡Œæ—¥å¿—è®°å½•ï¼Œ å› æ­¤æŠ•é€’ç³»ç»Ÿè®°å½• */
     posix__syslog("nsplog asynchronous thread has been terminated.");
     return NULL;
 }

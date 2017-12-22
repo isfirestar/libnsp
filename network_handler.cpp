@@ -13,8 +13,8 @@
 
 namespace nsp {
     namespace tcpip {
-        ///////////////////////////////////////		TCP ²¿·Ö ///////////////////////////////////////
-        static std::atomic_long __tcp_refcnt{ 0}; // GCC4.8ÖĞ£¬ "= 0"ÕâÑùµÄ´úÂë±»ÊÓÎª·ÏÆú
+        ///////////////////////////////////////		TCP éƒ¨åˆ† ///////////////////////////////////////
+        static std::atomic_long __tcp_refcnt{ 0}; // GCC4.8ä¸­ï¼Œ "= 0"è¿™æ ·çš„ä»£ç è¢«è§†ä¸ºåºŸå¼ƒ
 
         obtcp::obtcp() {
             if (1 == ++__tcp_refcnt) {
@@ -77,7 +77,7 @@ namespace nsp {
                     return std::weak_ptr<obtcp>();
                 }
 
-                // ¿Í»§Á¬½Ó, ĞèÒªÄÃµ½¶Ô¶ËºÍ±¾µØµÄµØÖ·ĞÅÏ¢
+                // å®¢æˆ·è¿æ¥, éœ€è¦æ‹¿åˆ°å¯¹ç«¯å’Œæœ¬åœ°çš„åœ°å€ä¿¡æ¯
                 uint32_t actip;
                 port_t actport;
                 toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
@@ -130,7 +130,7 @@ namespace nsp {
                 return -1;
             }
 
-            // ³É¹¦Á¬½Óºó, ¿ÉÒÔÈ¡³ö¶Ô¶ËºÍ±¾µØµÄµØÖ·ĞÅÏ¢
+            // æˆåŠŸè¿æ¥å, å¯ä»¥å–å‡ºå¯¹ç«¯å’Œæœ¬åœ°çš„åœ°å€ä¿¡æ¯
             uint32_t actip;
             port_t actport;
             toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
@@ -182,8 +182,8 @@ namespace nsp {
                 return -1;
             }
 
-            // ¿ªÊ¼¼àÌıºó, ¿Ï¶¨²»»áÔÙ³öÏÖ¶Ô¶ËµØÖ·
-            // ²¢È¡³ö±¾µØµØÖ·
+            // å¼€å§‹ç›‘å¬å, è‚¯å®šä¸ä¼šå†å‡ºç°å¯¹ç«¯åœ°å€
+            // å¹¶å–å‡ºæœ¬åœ°åœ°å€
             remote_.ipv4("0.0.0.0");
             remote_.port(0);
             uint32_t actip;
@@ -194,7 +194,7 @@ namespace nsp {
             return 0;
         }
 
-        // ·¢ËÍÀı³Ì
+        // å‘é€ä¾‹ç¨‹
         int obtcp::send(int cb, const std::function<int( void *, int) > &fill) {
             if (cb <= 0 || INVALID_HTCPLINK == lnk_ || !fill) {
                 return -1;
@@ -284,7 +284,7 @@ namespace nsp {
             lnk_ = lnk;
         }
 
-        ///////////////////////////////////////		UDP ²¿·Ö ///////////////////////////////////////
+        ///////////////////////////////////////		UDP éƒ¨åˆ† ///////////////////////////////////////
         static int __udp_refcnt = 0;
 
         obudp::obudp() {

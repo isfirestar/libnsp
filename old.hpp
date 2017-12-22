@@ -9,8 +9,8 @@ namespace nsp {
 
         namespace sw {
 
-#define PACKET_FLAG_DATA        (0xFDFD) //Êı¾İ´«Êä
-#define PACKET_FLAG_CONTROL        (0xFEFE)  //¿ØÖÆ´«Êä
+#define PACKET_FLAG_DATA        (0xFDFD) //æ•°æ®ä¼ è¾“
+#define PACKET_FLAG_CONTROL        (0xFEFE)  //æ§åˆ¶ä¼ è¾“
 #define PACKET_ENCRYPT_KEY        (0x7F)
 
 #define TcpIsPacketMarkAsControlStream(head)   (PACKET_FLAG_CONTROL == (head)->wFlagHead)
@@ -38,7 +38,7 @@ namespace nsp {
                         return;
                     }
 
-                    // ¸²¸Ç´«ÈëÖ¸ÕëµÄÊı¾İÇø
+                    // è¦†ç›–ä¼ å…¥æŒ‡é’ˆçš„æ•°æ®åŒº
                     if (!pOutputHead) {
                         pOutputHead = pOriHead;
                     }
@@ -59,7 +59,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL parser(void *dat, int cb/*´«ÈëÊı¾İ³¤¶È*/, int *pkt_cb/*·µ»Ø°üÖĞ¼ÇÂ¼µÄ²»º¬°üÍ·µÄ³¤¶È, Ò²¾ÍÊÇbuild½×¶ÎµÄÖ¸¶¨³¤¶È*/) {
+                int STD_CALL parser(void *dat, int cb/*ä¼ å…¥æ•°æ®é•¿åº¦*/, int *pkt_cb/*è¿”å›åŒ…ä¸­è®°å½•çš„ä¸å«åŒ…å¤´çš„é•¿åº¦, ä¹Ÿå°±æ˜¯buildé˜¶æ®µçš„æŒ‡å®šé•¿åº¦*/) {
                     if (!dat) return -1;
 
                     TCP_STREAM_HEADER head;
@@ -109,7 +109,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL parser(void *dat, int cb/*´«ÈëÊı¾İ³¤¶È*/, int *pkt_cb/*·µ»Ø°üÖĞ¼ÇÂ¼µÄ²»º¬°üÍ·µÄ³¤¶È, Ò²¾ÍÊÇbuild½×¶ÎµÄÖ¸¶¨³¤¶È*/) {
+                int STD_CALL parser(void *dat, int cb/*ä¼ å…¥æ•°æ®é•¿åº¦*/, int *pkt_cb/*è¿”å›åŒ…ä¸­è®°å½•çš„ä¸å«åŒ…å¤´çš„é•¿åº¦, ä¹Ÿå°±æ˜¯buildé˜¶æ®µçš„æŒ‡å®šé•¿åº¦*/) {
                     if (!dat) return -1;
 
                     head_t *head = (head_t *) dat;

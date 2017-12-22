@@ -288,7 +288,7 @@ namespace nsp {
             return radian * 360 / (2 * PI);
         }
 
-        /*¼ÆËãÀëÉ¢¸µÁ¢Ò¶±ä»»*/
+        /*è®¡ç®—ç¦»æ•£å‚…ç«‹å¶å˜æ¢*/
         int dispersed_fourier_transform(int dir, int m, double *x1, double *y1) {
             long i, k;
             double arg;
@@ -342,7 +342,7 @@ namespace nsp {
             ;
         }
 
-        // °´·Ö¸ô·ûÇĞ¸î×Ó´®, ÊµÏÖ strtok µÄ¹¦ÄÜ
+        // æŒ‰åˆ†éš”ç¬¦åˆ‡å‰²å­ä¸², å®ç° strtok çš„åŠŸèƒ½
 
         template<>
         std::size_t slicing_symbol_string(const std::basic_string<char> &source, const char symbol, std::vector<std::basic_string<char>> &vct_substr) {
@@ -405,7 +405,7 @@ namespace nsp {
                 posix_strcpy(outputString, cch, ori);
             }
 
-            if (0 == strlen(outputString)) return outputString; // ¿Õ´®, »òÈ«¿Õ¸ñµÄÔ­Ê¼´®
+            if (0 == strlen(outputString)) return outputString; // ç©ºä¸², æˆ–å…¨ç©ºæ ¼çš„åŸå§‹ä¸²
 
             tag = &outputString[strlen(outputString) - 1];
             while (0x20 == *tag) {
@@ -416,7 +416,7 @@ namespace nsp {
             return outputString;
         }
 
-        // È¥³ı×óÓÒ¿Õ¸ñ
+        // å»é™¤å·¦å³ç©ºæ ¼
         template<>
         int trim(const std::basic_string<char> &src, std::basic_string<char> &dst) {
             try {
@@ -447,7 +447,7 @@ namespace nsp {
             }
         }
 
-        // ±£ÁôÔ­´®£¬È¡³ö×óÓÒ¿Õ¸ñºó·µ»ØĞÂ´®
+        // ä¿ç•™åŸä¸²ï¼Œå–å‡ºå·¦å³ç©ºæ ¼åè¿”å›æ–°ä¸²
 
         template<>
         std::basic_string<char> trim_copy(const std::basic_string<char> &src) {
@@ -755,10 +755,10 @@ namespace nsp {
 		uint64_t vfn1a_hash<uint64_t>(const unsigned char *hash, int length) {
 			return vfn1a_h64(hash,length);
 		}
-        /////////////////////////////////////////// ¸¡µãºÍ fixed point µÄ¶¨Ïò×ª»» ///////////////////////////////
+        /////////////////////////////////////////// æµ®ç‚¹å’Œ fixed point çš„å®šå‘è½¬æ¢ ///////////////////////////////
 
         typedef struct {
-            uint16_t u_spare_ : 3; // ¶ÔÆë
+            uint16_t u_spare_ : 3; // å¯¹é½
             uint16_t u_sign_ : 12;
             int16_t sign_ : 1;
         } fixed_bit_t;
@@ -769,9 +769,9 @@ namespace nsp {
         } fixed_t;
 
         typedef struct {
-            uint32_t u_significand : 23; // ÓĞĞ§Êı¾İ¶Î
-            int exponent_ : 8; // ÔËËãÖ¸Êı
-            int sign_ : 1; // ·ûºÅÎ»
+            uint32_t u_significand : 23; // æœ‰æ•ˆæ•°æ®æ®µ
+            int exponent_ : 8; // è¿ç®—æŒ‡æ•°
+            int sign_ : 1; // ç¬¦å·ä½
         } float_bit_t;
 
         typedef union {
@@ -794,12 +794,12 @@ namespace nsp {
             exponent = ((float_as_integer & 0x7fffffff) >> 23) - 0x7f;
             significand = (float_as_integer & 0x7fffff) + 0x800000;
 
-            // floatµÄsignificand±íÊ¾1~2Ö®¼äµÄÊı£¬expoent=0x7f±íÊ¾Ö¸Êı0
-            // Ö¸ÊıÒç³ö
+            // floatçš„significandè¡¨ç¤º1~2ä¹‹é—´çš„æ•°ï¼Œexpoent=0x7fè¡¨ç¤ºæŒ‡æ•°0
+            // æŒ‡æ•°æº¢å‡º
             assert((exponent >= -12) && (exponent <= 0));
 
             significand >>= (8 - exponent);
-            significand &= 0xfffff8; // Çå³ıµÍ3Î»
+            significand &= 0xfffff8; // æ¸…é™¤ä½3ä½
 
             if (sign == 0) {
                 return (unsigned short) significand;

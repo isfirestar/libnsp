@@ -36,27 +36,27 @@ namespace nsp {
             endpoint &operator=(endpoint &&rf);
 
         public:
-            bool operator==(const endpoint &rf) const; // ÔÊĞí endpoint ×÷Îª std::find ¶ÔÏó
-            bool operator<(const endpoint &rf) const; // ÔÊĞí endpoint Ö±½Ó×÷Îª std::map µÄ KEY Öµ
-            operator bool() const; // 0.0.0.0:65535 ½«±»ÈÏÎªÊÇÎŞĞ§µÄIPµØÖ·, 255.255.255.255:65535×÷ÎªÊÖ¶¯µØÖ·ÓĞĞ§
-            const bool connectable() const; // ¿É×÷Îª TcpConnect ¶ÔÏóµÄµØÖ·½á¹¹
-            const bool bindable() const; // ¿É×÷Îª±¾µØ°ó¶¨
-            const bool manual() const; // ÑÓ³ÙÈ·¶¨¾ßÌåµØÖ·ĞÅÏ¢µÄ¶ÔÏó
+            bool operator==(const endpoint &rf) const; // å…è®¸ endpoint ä½œä¸º std::find å¯¹è±¡
+            bool operator<(const endpoint &rf) const; // å…è®¸ endpoint ç›´æ¥ä½œä¸º std::map çš„ KEY å€¼
+            operator bool() const; // 0.0.0.0:65535 å°†è¢«è®¤ä¸ºæ˜¯æ— æ•ˆçš„IPåœ°å€, 255.255.255.255:65535ä½œä¸ºæ‰‹åŠ¨åœ°å€æœ‰æ•ˆ
+            const bool connectable() const; // å¯ä½œä¸º TcpConnect å¯¹è±¡çš„åœ°å€ç»“æ„
+            const bool bindable() const; // å¯ä½œä¸ºæœ¬åœ°ç»‘å®š
+            const bool manual() const; // å»¶è¿Ÿç¡®å®šå…·ä½“åœ°å€ä¿¡æ¯çš„å¯¹è±¡
 
         public:
             const char *ipv4() const;
             const u32_ipv4_t ipv4_uint32() const;
             void ipv4(const u32_ipv4_t uint32_address);
-            void ipv4(const std::string &ipstr); // ÒòÎªÒÑ¾­ÓĞ uint32 ²ÎÊıµÄº¯Êı, ±ØĞë±ÜÃâ³öÏÖ const char * µÄÖØÔØ, º¯ÊıÊ§°ÜÔò±£ÁôÔ­ÓĞµÄIPµØÖ·´®
+            void ipv4(const std::string &ipstr); // å› ä¸ºå·²ç»æœ‰ uint32 å‚æ•°çš„å‡½æ•°, å¿…é¡»é¿å…å‡ºç° const char * çš„é‡è½½, å‡½æ•°å¤±è´¥åˆ™ä¿ç•™åŸæœ‰çš„IPåœ°å€ä¸²
             void ipv4(const char *ipstr, int cpcch);
             const port_t port() const;
             void port(const port_t po);
             const std::string to_string() const;
-            void disable(); // ½«¶ÔÏóÖÃÎªÎŞĞ§
+            void disable(); // å°†å¯¹è±¡ç½®ä¸ºæ— æ•ˆ
 
         public:
-            // ÊÍÒå: ÎªÊ²Ã´²»Ìá¹© epstr ×÷Îª²ÎÊıµÄ endpoint ¹¹Ôìº¯Êı
-            // epstr µÄ½âÎö²»Ò»¶¨ÄÜ³É¹¦, Èç¹ûÌá¹©¹¹Ôìº¯Êı, ½«Ã»ÓĞÈÎºÎ»ú»á·µ»ØÒì³£, ×î¶àÖ»ÄÜÅ×³öÒì³£, Ôö¼ÓÁË¿Í»§´úÂë²¶»ñÒì³£µÄ¸´ÔÓ¶È
+            // é‡Šä¹‰: ä¸ºä»€ä¹ˆä¸æä¾› epstr ä½œä¸ºå‚æ•°çš„ endpoint æ„é€ å‡½æ•°
+            // epstr çš„è§£æä¸ä¸€å®šèƒ½æˆåŠŸ, å¦‚æœæä¾›æ„é€ å‡½æ•°, å°†æ²¡æœ‰ä»»ä½•æœºä¼šè¿”å›å¼‚å¸¸, æœ€å¤šåªèƒ½æŠ›å‡ºå¼‚å¸¸, å¢åŠ äº†å®¢æˆ·ä»£ç æ•è·å¼‚å¸¸çš„å¤æ‚åº¦
             static int build(const std::string &epstr, endpoint &ep);
             static int build(const char *ipstr, uint16_t port, endpoint &ep);
             static endpoint boardcast(const port_t po);

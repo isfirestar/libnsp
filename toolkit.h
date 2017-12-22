@@ -10,15 +10,15 @@
 namespace nsp {
     namespace toolkit {
 
-        // ½« @n ÌáÉıµ½ÏÂÒ»¸ö2µÄÕıÕû´ÎÃİ
-        // Èç¹ûÕıÊı @n ²»ÊÇ 2 µÄÕıÕû´ÎÃİ£¬Ö»ĞèÕÒµ½Æä×î¸ßµÄÓĞĞ§Î»1ËùÔÚµÄÎ»ÖÃ£¨´Ó1¿ªÊ¼¼ÆÊı£©pos£¬È»ºó1 << pos¼´¿É½«kÏòÉÏÈ¡ÕûÎª2µÄÕıÕû´ÎÃİ
+        // å°† @n æå‡åˆ°ä¸‹ä¸€ä¸ª2çš„æ­£æ•´æ¬¡å¹‚
+        // å¦‚æœæ­£æ•° @n ä¸æ˜¯ 2 çš„æ­£æ•´æ¬¡å¹‚ï¼Œåªéœ€æ‰¾åˆ°å…¶æœ€é«˜çš„æœ‰æ•ˆä½1æ‰€åœ¨çš„ä½ç½®ï¼ˆä»1å¼€å§‹è®¡æ•°ï¼‰posï¼Œç„¶å1 << poså³å¯å°†kå‘ä¸Šå–æ•´ä¸º2çš„æ­£æ•´æ¬¡å¹‚
 
         template<class T>
         inline T roundup_powerof_2(T n) {
             if (is_powerof_2(n)) {
                 return n;
             }
-            // ÖÁÉÙ±£Ö¤ 2 µÄ 1 ´ÎÃİ
+            // è‡³å°‘ä¿è¯ 2 çš„ 1 æ¬¡å¹‚
             if (0 == n) {
                 return 2;
             }
@@ -70,7 +70,7 @@ namespace nsp {
         template<class T>
         std::basic_string<T> strformat(int cch, const T *format, ...);
 
-        // ×Ö½ÚĞò×ª»»Àı³Ì
+        // å­—èŠ‚åºè½¬æ¢ä¾‹ç¨‹
 
         template<class T>
         T change_byte_order(const T &t) {
@@ -90,38 +90,38 @@ namespace nsp {
         template<class T>
         T *trim_space(const T *inputString, T * outputString, std::size_t cch);
 
-        // ×î´ó¹«Ô¼Êı, greatest common divisor
+        // æœ€å¤§å…¬çº¦æ•°, greatest common divisor
         int gcd(int a, int b);
-        // ×îĞ¡¹«±¶Êı, Least common multiple
+        // æœ€å°å…¬å€æ•°, Least common multiple
         double lcm(int a, int b);
-        // ½Ç¶È×ª»¡¶È
+        // è§’åº¦è½¬å¼§åº¦
         double deg2rad(double angle);
-        // »¡¶È×ª½Ç¶È
+        // å¼§åº¦è½¬è§’åº¦
         double rad2deg(double radian);
-        // ¼ÆËãÀëÉ¢¸µÁ¢Ò¶
+        // è®¡ç®—ç¦»æ•£å‚…ç«‹å¶
         int dispersed_fourier_transform(int dir, int m, double *x1, double *y1);
 
-        // °´·Ö¸ô·ûÇĞ¸î×Ó´®
+        // æŒ‰åˆ†éš”ç¬¦åˆ‡å‰²å­ä¸²
         template<class T>
         std::size_t slicing_symbol_string(const std::basic_string<T> &source, const T symbol, std::vector<std::basic_string<T>> &vct_substr);
 
-        // È¥³ı×óÓÒ¿Õ¸ñ
+        // å»é™¤å·¦å³ç©ºæ ¼
         template<class T>
         int trim(const std::basic_string<T> &src, std::basic_string<T> &dst);
         template<class T>
         void trim(std::basic_string<T> &str);
 
-        // ±£ÁôÔ­´®£¬È¡³ö×óÓÒ¿Õ¸ñºó·µ»ØĞÂ´®
+        // ä¿ç•™åŸä¸²ï¼Œå–å‡ºå·¦å³ç©ºæ ¼åè¿”å›æ–°ä¸²
         template<class T>
         std::basic_string<T> trim_copy(const std::basic_string<T> &src);
 
-        // È¡Ëæ»úÊı [range_min, range_max)
-        // Èç¹û²ÎÊıÎª (0,0), Ôò·¶Î§ÎªÄ¬ÈÏµÄ[0, 32768)
-        // Èç¹û range_max < range_min, ×öÄ¬ÈÏ´¦Àí£¬ ·¶Î§²»ÉúĞ§
-        // Èç¹û range_max == range_min, ÇÒ·Ç0£¬ Ôò·µ»Ø¸ÃÖµ
+        // å–éšæœºæ•° [range_min, range_max)
+        // å¦‚æœå‚æ•°ä¸º (0,0), åˆ™èŒƒå›´ä¸ºé»˜è®¤çš„[0, 32768)
+        // å¦‚æœ range_max < range_min, åšé»˜è®¤å¤„ç†ï¼Œ èŒƒå›´ä¸ç”Ÿæ•ˆ
+        // å¦‚æœ range_max == range_min, ä¸”é0ï¼Œ åˆ™è¿”å›è¯¥å€¼
         int random(const int range_min = 0, const int range_max = 0);
 
-        // ¶Ô³Æ¼Ó½âÃÜÀı³Ì
+        // å¯¹ç§°åŠ è§£å¯†ä¾‹ç¨‹
         int encrypt(const unsigned char* origin, int oricb, const unsigned char* key, int keycb, unsigned char** out, int* outcb);
         template<class T>
         int encrypt(const std::basic_string<T> &origin, const std::basic_string<T> &key, std::string &out);
@@ -136,17 +136,17 @@ namespace nsp {
         int decrypt(const std::string &crypt, const std::vector<T> &key, std::vector<T> &out);
         int decrypt(const std::string &crypt, const char *key, std::string &out);
 
-        // HEX×Ö·û´®×ªÕûĞÍ, "1234ABCD" ×ª»»Îª 0x1234ABCD£¬ ×¢Òâ¸ßµÍÎ»½á¹¹
+        // HEXå­—ç¬¦ä¸²è½¬æ•´å‹, "1234ABCD" è½¬æ¢ä¸º 0x1234ABCDï¼Œ æ³¨æ„é«˜ä½ä½ç»“æ„
 
         template<class T>
         int strtohex(const std::basic_string<char> &strhex, T &int_hex) {
-            // Êä³ö³õÊ¼Öµ
+            // è¾“å‡ºåˆå§‹å€¼
             int_hex = 0;
 
-            // È¨Öµ
+            // æƒå€¼
             int access = strhex.length() - 1;
 
-            // ³¬³öÁËÃèÊö·¶Î§
+            // è¶…å‡ºäº†æè¿°èŒƒå›´
             if (strhex.length() > (sizeof ( T) * 2)) {
                 return -1;
             }
@@ -170,14 +170,14 @@ namespace nsp {
             return 0;
         }
 
-        // »ñÈ¡ CRC Âë
+        // è·å– CRC ç 
         uint32_t crc32(uint32_t crc, const unsigned char *block, uint32_t cb);
 
-        // »ñÈ¡ MD5 Âë
+        // è·å– MD5 ç 
         template<class T>
         void md5(const T *input, int inputlen, unsigned char digest[16]);
 
-        // base64 ±à½âÂë
+        // base64 ç¼–è§£ç 
         int base64_encode(const char *input, int cb, std::string &output);
         int base64_encode(const std::string &input, std::string &output);
         int base64_decode(const std::string &input, std::string &output);
@@ -188,7 +188,7 @@ namespace nsp {
 		template<class T>
 		T vfn1a_hash(const unsigned char *hash, int length);
 
-        // ¸¡µã×ª»»
+        // æµ®ç‚¹è½¬æ¢
         unsigned short float2fixed(float fFloat);
         float fixed2float(unsigned short uFixed);
 

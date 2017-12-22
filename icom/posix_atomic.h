@@ -25,18 +25,18 @@
 
 /*
  * type __sync_lock_test_and_set (type *ptr, type value, ...)
- *          ĞĞÎª: *ptr = value, ·µ»Ø *ptr½»»»Ç°µÄÖµ
+ *          è¡Œä¸º: *ptr = value, è¿”å› *pträº¤æ¢å‰çš„å€¼
  * 
  * bool __sync_bool_compare_and_swap (type*ptr, type oldval, type newval, ...)
- *          ĞĞÎª: Èç¹û (*ptr == oldval) Ôò *ptr = newval, ·µ»Ø1
- *                ·ñÔò ·µ»Ø 0, ptr/ *ptr²»±ä
+ *          è¡Œä¸º: å¦‚æœ (*ptr == oldval) åˆ™ *ptr = newval, è¿”å›1
+ *                å¦åˆ™ è¿”å› 0, ptr/ *pträ¸å˜
  * 
  * type __sync_val_compare_and_swap (type *ptr, type oldval,  type newval, ...)
- *          ĞĞÎª: Èç¹û (*ptr == oldval) Ôò *ptr = newval, ·µ»Ø *ptr ½»»»Ç°µÄÖµ
- *                ·ñÔò ·µ»Ø *ptr, ptr/ *ptr²»±ä
+ *          è¡Œä¸º: å¦‚æœ (*ptr == oldval) åˆ™ *ptr = newval, è¿”å› *ptr äº¤æ¢å‰çš„å€¼
+ *                å¦åˆ™ è¿”å› *ptr, ptr/ *pträ¸å˜
  * 
  * void __sync_lock_release (type *ptr, ...)
- *          ĞĞÎª: *ptr = 0
+ *          è¡Œä¸º: *ptr = 0
  *  */
 
 #endif

@@ -8,10 +8,10 @@
 #include <sys/time.h>
 #endif
 
-// ×ª»»Îª100ns
+// è½¬æ¢ä¸º100ns
 static const uint64_t ET_METHOD_NTKRNL = ((uint64_t) ((uint64_t) 1000 * 1000 * 10));
-// NT FILETIME µ½ Epoch Ê±¼äµÄ²î¾à£¬ µ¥Î»100ns(NT FILETIME²ÉÓÃ1640Äê¼ÇÊ±)
-// Ê¹ÓÃULLÇ¿ÖÆÏŞÖÆÊı¾İÀàĞÍ£¬ ±ÜÃâ warning: this decimal constant is unsigned only in ISO C90 ¾¯¸æ
+// NT FILETIME åˆ° Epoch æ—¶é—´çš„å·®è·ï¼Œ å•ä½100ns(NT FILETIMEé‡‡ç”¨1640å¹´è®°æ—¶)
+// ä½¿ç”¨ULLå¼ºåˆ¶é™åˆ¶æ•°æ®ç±»å‹ï¼Œ é¿å… warning: this decimal constant is unsigned only in ISO C90 è­¦å‘Š
 static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111902ULL << 32) | 3577643008ULL); 
 //{ .dwLowDateTime = 3577643008, .dwHighDateTime = 27111902 };
 
@@ -97,7 +97,7 @@ int posix__localtime_clock(posix__systime_t *systime) {
         return -1;
     }
 
-    systime->epoch = epoch; // Ãë
+    systime->epoch = epoch; // ç§’
     systime->epoch *= 10000000; // 100ns
     systime->epoch += systime->low; // ms->100ns
 #endif
@@ -155,7 +155,7 @@ uint64_t posix__clock_gettime() {
     /* gcc -lrt */
     struct timespec tsc;
     if (clock_gettime(CLOCK_MONOTONIC, &tsc) >= 0) { /* CLOCK_REALTIME */
-        return (uint64_t) tsc.tv_sec * /*10000000*/ET_METHOD_NTKRNL + tsc.tv_nsec / 100; /* ·µ»Ø 100ns, ¼æÈİwindowsµÄKRNL¼ÆÊ± */
+        return (uint64_t) tsc.tv_sec * /*10000000*/ET_METHOD_NTKRNL + tsc.tv_nsec / 100; /* è¿”å› 100ns, å…¼å®¹windowsçš„KRNLè®¡æ—¶ */
     }
     return 0;
 #endif

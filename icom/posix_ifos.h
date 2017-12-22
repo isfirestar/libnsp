@@ -11,7 +11,7 @@ long posix__gettid();
 __extern__
 long posix__getpid();
 /*
- * posix__sleep ¹ı³ÌÔÚ linux ÎŞ·¨¾«È·µ½ºÁÃë£¬ Èç¹ûĞèÒª¾«È·µ½ºÁÃë£¬ ÔòÊ¹ÓÃ waitable_handle µÄ³¬Ê±»úÖÆ
+ * posix__sleep è¿‡ç¨‹åœ¨ linux æ— æ³•ç²¾ç¡®åˆ°æ¯«ç§’ï¼Œ å¦‚æœéœ€è¦ç²¾ç¡®åˆ°æ¯«ç§’ï¼Œ åˆ™ä½¿ç”¨ waitable_handle çš„è¶…æ—¶æœºåˆ¶
  */
 __extern__
 void posix__sleep(uint64_t ms);
@@ -26,13 +26,13 @@ int posix__dlclose(void *handle);
 __extern__
 const char *posix__dlerror();
 
-/* ifos-dir/file posix__pmkdir ·½·¨ÔÊĞíµİ¹é¹¹½¨Ä¿Â¼Ê÷*/
+/* ifos-dir/file posix__pmkdir æ–¹æ³•å…è®¸é€’å½’æ„å»ºç›®å½•æ ‘*/
 __extern__
 int posix__mkdir(const char *const dir);
 __extern__
 int posix__pmkdir(const char *const dir);
 
-/* Èç¹û @target Ö¸¶¨Ä¿Â¼£¬ Ôò¶Ô¸ÃÄ¿Â¼Ö´ĞĞµİ¹éÉ¾³ı rm -rf */
+/* å¦‚æœ @target æŒ‡å®šç›®å½•ï¼Œ åˆ™å¯¹è¯¥ç›®å½•æ‰§è¡Œé€’å½’åˆ é™¤ rm -rf */
 __extern__
 int posix__rm(const char *const target);
 __extern__
@@ -40,11 +40,11 @@ void posix__close(int fd);
 __extern__
 int posix__fflush(int fd);
 
-/* »ñÈ¡µ±Ç°Ö´ĞĞÎÄ¼şÍêÕûÂ·¾¶ */
+/* è·å–å½“å‰æ‰§è¡Œæ–‡ä»¶å®Œæ•´è·¯å¾„ */
 __extern__
 const char *posix__fullpath_current();
 
-/* »ñÈ¡µ±Ç°Ö´ĞĞÎÄ¼ş¼°ÆäËùÔÚÄ¿Â¼ */
+/* è·å–å½“å‰æ‰§è¡Œæ–‡ä»¶åŠå…¶æ‰€åœ¨ç›®å½• */
 __extern__
 const char *posix__getpedir();
 __extern__
@@ -58,15 +58,15 @@ int posix__isdir(const char *const file);
 
 /*ifos-ps*/
 
-/* »ñÈ¡µ±Ç°½ø³ÌÓÅÏÈ¼¶
- * @priority ·µ»Ø½ø³ÌÓÅÏÈ¼¶£¬ ²»ÄÜÎª¿Õ
+/* è·å–å½“å‰è¿›ç¨‹ä¼˜å…ˆçº§
+ * @priority è¿”å›è¿›ç¨‹ä¼˜å…ˆçº§ï¼Œ ä¸èƒ½ä¸ºç©º
  *  */
 __extern__
 int posix__getpriority(int *priority);
 
-/* µ÷Õû½ø³ÌÓÅÏÈ¼¶
- * linux Ìá¹© 5,0,-5,-10 ËÄ¸öÄÚÖÃµµ´ÎµÄÓÅÏÈ¼¶
- * win32 ¶ÔÓ¦ IDLE_PRIORITY_CLASS NORMAL_PRIORITY_CLASS HIGH_PRIORITY_CLASS REALTIME_PRIORITY_CLASS ËÄ¸öÄÚÖÃµµ´ÎµÄÓÅÏÈ¼¶
+/* è°ƒæ•´è¿›ç¨‹ä¼˜å…ˆçº§
+ * linux æä¾› 5,0,-5,-10 å››ä¸ªå†…ç½®æ¡£æ¬¡çš„ä¼˜å…ˆçº§
+ * win32 å¯¹åº” IDLE_PRIORITY_CLASS NORMAL_PRIORITY_CLASS HIGH_PRIORITY_CLASS REALTIME_PRIORITY_CLASS å››ä¸ªå†…ç½®æ¡£æ¬¡çš„ä¼˜å…ˆçº§
  *  */
 __extern__
 int posix__setpriority_below();
@@ -77,11 +77,11 @@ int posix__setpriority_critical();
 __extern__
 int posix__setpriority_realtime();
 
-/* »ñÈ¡CPUºËĞÄÊıÁ¿ */
+/* è·å–CPUæ ¸å¿ƒæ•°é‡ */
 __extern__
 int posix__getnprocs();
 
-/* »ñÈ¡ÏµÍ³ÄÚ´æĞÅÏ¢ */
+/* è·å–ç³»ç»Ÿå†…å­˜ä¿¡æ¯ */
 typedef struct {
     uint64_t totalram;
     uint64_t freeram;
@@ -92,16 +92,16 @@ typedef struct {
 __extern__
 int posix__getsysmem(sys_memory_t *sysmem);
 
-/* »ñÈ¡ÏµÍ³·ÖÒ³´óĞ¡ */
+/* è·å–ç³»ç»Ÿåˆ†é¡µå¤§å° */
 __extern__
 uint32_t posix__getpagesize();
 
-/* ¼ÆÈëÏµÍ³¼¶ÈÕÖ¾ */
+/* è®¡å…¥ç³»ç»Ÿçº§æ—¥å¿— */
 __extern__
 void posix__syslog(const char *const logmsg );
 
-/* ±àÂë¸ñÊ½×ª»» 
- * from_encode/to_encode Ö§³ÖÁĞ±í:
+/* ç¼–ç æ ¼å¼è½¬æ¢ 
+ * from_encode/to_encode æ”¯æŒåˆ—è¡¨:
  * utf-8
  * gb2312
  * unicode
@@ -109,8 +109,8 @@ void posix__syslog(const char *const logmsg );
 __extern__
 int posix__iconv(const char *from_encode, const char *to_encode, char **from, size_t from_bytes, char **to, size_t *to_bytes);
 
-/* ¼òµ¥Í¬²½¶ÁĞ´ÎÄ¼ş£¬ ²¢È·±£¶ÁĞ´³¤¶È·ûºÏµ÷ÓÃĞèÇó
- * @·µ»ØÖµ: ×îÖÕÍê³É¶ÁĞ´µÄ×Ö½ÚÊı£¬²»»á·µ»Ø¸ºÊı */
+/* ç®€å•åŒæ­¥è¯»å†™æ–‡ä»¶ï¼Œ å¹¶ç¡®ä¿è¯»å†™é•¿åº¦ç¬¦åˆè°ƒç”¨éœ€æ±‚
+ * @è¿”å›å€¼: æœ€ç»ˆå®Œæˆè¯»å†™çš„å­—èŠ‚æ•°ï¼Œä¸ä¼šè¿”å›è´Ÿæ•° */
 __extern__
 int posix__write_file(int fd, const char *buffer, int size);
 __extern__

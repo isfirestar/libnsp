@@ -78,10 +78,10 @@ namespace nsp {
 	namespace os {
 
 
-		// »ñÈ¡·ÖÒ³ĞÅÏ¢
+		// è·å–åˆ†é¡µä¿¡æ¯
 		uint32_t get_pagesize();
 
-		// ÒÔÏÂÂ·¾¶º¯Êı²»´ø×îºóµÄ DIR_SYMBOL
+		// ä»¥ä¸‹è·¯å¾„å‡½æ•°ä¸å¸¦æœ€åçš„ DIR_SYMBOL
 		template<class T>
 		std::basic_string<T> get_module_fullpath();
 		template<class T>
@@ -108,9 +108,9 @@ namespace nsp {
 		template <class T>
 		int mkdir_s( const std::basic_string<T> &dir );
 		template<class T>
-		int is_dir( const std::basic_string<T> &file ); // ·µ»Ø>0 ÔòÊÇÄ¿Â¼, 0ÔòÊÇÎÄ¼ş£¬ ¸ºÊıÔòÊÇ´íÎó
+		int is_dir( const std::basic_string<T> &file ); // è¿”å›>0 åˆ™æ˜¯ç›®å½•, 0åˆ™æ˜¯æ–‡ä»¶ï¼Œ è´Ÿæ•°åˆ™æ˜¯é”™è¯¯
 		template<class T>
-		int rmdir_s( const std::basic_string<T> &dir ); // dir ´«Èë²»´ø×îºóµÄ'/'
+		int rmdir_s( const std::basic_string<T> &dir ); // dir ä¼ å…¥ä¸å¸¦æœ€åçš„'/'
 
 		long gettid();
 		int getpid();
@@ -124,20 +124,20 @@ namespace nsp {
 		public:
 			waitable_handle( int sync = 1 );
 			~waitable_handle();
-			/* @timeo Ö¸¶¨µÈ´ı·½Ê½£¬ÆäÖĞ:
-			 *  <0 ±íÊ¾ÎŞÏŞµÈ´ı
-			 *  0  ±íÊ¾²âÊÔĞÅºÅ
-			 *  >0  ±íÊ¾´ø³¬Ê±µÈ´ı
+			/* @timeo æŒ‡å®šç­‰å¾…æ–¹å¼ï¼Œå…¶ä¸­:
+			 *  <0 è¡¨ç¤ºæ— é™ç­‰å¾…
+			 *  0  è¡¨ç¤ºæµ‹è¯•ä¿¡å·
+			 *  >0  è¡¨ç¤ºå¸¦è¶…æ—¶ç­‰å¾…
 			 *
-			 * ·µ»Ø¶¨Òå:
-			 * Èç¹û tsc <= 0 ÔòÓĞ:
-			 * 0: ÊÂ¼ş´¥·¢
-			 * -1: ÏµÍ³µ÷ÓÃÊ§°Ü
+			 * è¿”å›å®šä¹‰:
+			 * å¦‚æœ tsc <= 0 åˆ™æœ‰:
+			 * 0: äº‹ä»¶è§¦å‘
+			 * -1: ç³»ç»Ÿè°ƒç”¨å¤±è´¥
 			 * 
-			 * Èç¹û tsc > 0 ÔòÓĞ£º
-			 * 0: ÊÂ¼ş´¥·¢
-			 * ETIMEOUT: µÈ´ı³¬Ê±
-			 * -1: ÏµÍ³µ÷ÓÃÊ§°Ü 
+			 * å¦‚æœ tsc > 0 åˆ™æœ‰ï¼š
+			 * 0: äº‹ä»¶è§¦å‘
+			 * ETIMEOUT: ç­‰å¾…è¶…æ—¶
+			 * -1: ç³»ç»Ÿè°ƒç”¨å¤±è´¥ 
 			 */
 			int wait( uint32_t timeo = 0xFFFFFFFF );
 			void sig();
@@ -150,13 +150,13 @@ namespace nsp {
 		void attempt_syslog( const std::basic_string<T> &msg, uint32_t err );
 
 
-		// »ñÈ¡ÏµÍ³Æô¶¯µ½Ä¿Ç°Ê±¼ä½ÚµãÁ÷ÊÅµÄtick
-		// gettick			·µ»ØÓ¦ÓÃ²ãµÎ´ğ¾«¶È£¬ ¾«¶Èµ¥Î»Îª  ms,
-		// clock_gettime	·µ»ØÄÚºË¼¶µÎ´ğ¾«¶È£¬ µ¥Î»Îª     100ns
+		// è·å–ç³»ç»Ÿå¯åŠ¨åˆ°ç›®å‰æ—¶é—´èŠ‚ç‚¹æµé€çš„tick
+		// gettick			è¿”å›åº”ç”¨å±‚æ»´ç­”ç²¾åº¦ï¼Œ ç²¾åº¦å•ä½ä¸º  ms,
+		// clock_gettime	è¿”å›å†…æ ¸çº§æ»´ç­”ç²¾åº¦ï¼Œ å•ä½ä¸º     100ns
 		uint64_t gettick();
 		uint64_t clock_gettime();
 
-		// ¶¯Ì¬¿â¼ÓÔØÀı³Ì gcc -ldl
+		// åŠ¨æ€åº“åŠ è½½ä¾‹ç¨‹ gcc -ldl
 		void *dlopen( const char *file );
 		void* dlsym( void* handle, const char* symbol );
 		int dlclose( void *handle );

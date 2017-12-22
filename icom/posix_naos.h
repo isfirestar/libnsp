@@ -2,14 +2,14 @@
 #define POSIX_NAOS_H
 
 /*
- * posix_naos.h ¶¨ÁxÒ»Ğ©ÓÚ²Ù×÷ÏµÍ³ÎŞ¹ØµÄ¹¤¾ßº¯Êı
+ * posix_naos.h å®šç¾©ä¸€äº›äºæ“ä½œç³»ç»Ÿæ— å…³çš„å·¥å…·å‡½æ•°
  * anderson 2017-05-08
  */
 
 #include "compiler.h"
 
 /*
- * ipv4tou ipv4tos ·½·¨£¬ Ö´ĞĞIPv4ÔÚ×Ö·û´®ºÍ32Î»ÎŞ·ûºÅÕûĞÎÖ®¼äµÄ×ª»»£¬ ¿ÉÒÔÖ¸¶¨´ó¶Ë»òÕßĞ¡¶Ë
+ * ipv4tou ipv4tos æ–¹æ³•ï¼Œ æ‰§è¡ŒIPv4åœ¨å­—ç¬¦ä¸²å’Œ32ä½æ— ç¬¦å·æ•´å½¢ä¹‹é—´çš„è½¬æ¢ï¼Œ å¯ä»¥æŒ‡å®šå¤§ç«¯æˆ–è€…å°ç«¯
  */
 __extern__
 uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t byte_order);
@@ -17,7 +17,7 @@ __extern__
 char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch);
 
 /*
- * chord32 / chrod16 Àı³ÌÌá¹©32Î»/16Î»µÄ×Ö½ÚĞò×ª»»²Ù×÷
+ * chord32 / chrod16 ä¾‹ç¨‹æä¾›32ä½/16ä½çš„å­—èŠ‚åºè½¬æ¢æ“ä½œ
  *  */
 __extern__
 uint32_t posix__chord32( uint32_t value);

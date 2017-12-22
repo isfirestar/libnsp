@@ -18,25 +18,25 @@ typedef struct {
 
 #pragma pack(pop)
 
-/* »ñÈ¡ÏµÍ³Ê±¼äµÎ´ğ£¬ ºÁÃëµ¥Î» */
+/* è·å–ç³»ç»Ÿæ—¶é—´æ»´ç­”ï¼Œ æ¯«ç§’å•ä½ */
 __extern__
 uint64_t posix__gettick();
 
-/* »ñÈ¡ÏµÍ³Ê±¼äµÎ´ğ£¬ µ¥Î»100ÄÉÃë */
+/* è·å–ç³»ç»Ÿæ—¶é—´æ»´ç­”ï¼Œ å•ä½100çº³ç§’ */
 __extern__
 uint64_t posix__clock_gettime();
 
-/* »ñÈ¡¾ø¶ÔÊ±¼ä 1970-01-01 00:00:00 000 µ½º¯Êıµ÷ÓÃµÄÊ±¼äÁ÷ÊÅ£¬ µ¥Î»100ns  */
+/* è·å–ç»å¯¹æ—¶é—´ 1970-01-01 00:00:00 000 åˆ°å‡½æ•°è°ƒç”¨çš„æ—¶é—´æµé€ï¼Œ å•ä½100ns  */
 __extern__
 uint64_t posix__clock_epoch();
 
-/* ÇóÈ¡µ±Ç°Ê±¼ä, clock_now Îªµ±Ç° epoch */
+/* æ±‚å–å½“å‰æ—¶é—´, clock_now ä¸ºå½“å‰ epoch */
 __extern__
 int posix__localtime(posix__systime_t *systime);
-/* ¸ù¾İ clock_now ÇóÈ¡ÄêÔÂÈÕÊ±·ÖÃë */
+/* æ ¹æ® clock_now æ±‚å–å¹´æœˆæ—¥æ—¶åˆ†ç§’ */
 __extern__
 int posix__clock_localtime(posix__systime_t *systime);
-/* ¸ù¾İ systime ÖĞµÄÄêÔÂÈÕÊ±·ÖÃë£¬ ¼ÆËã clock_now */
+/* æ ¹æ® systime ä¸­çš„å¹´æœˆæ—¥æ—¶åˆ†ç§’ï¼Œ è®¡ç®— clock_now */
 __extern__
 int posix__localtime_clock(posix__systime_t *systime);
 

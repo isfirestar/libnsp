@@ -119,7 +119,7 @@ typedef int posix__boolean_t;
 #endif
 #endif
 
-/* Ê¹ÓÃÕýÊý´íÎóÂë¹¹½¨¸ºÊý·µ»ØÖµ */
+/* ä½¿ç”¨æ­£æ•°é”™è¯¯ç æž„å»ºè´Ÿæ•°è¿”å›žå€¼ */
 #if defined MAKE_ERROR_RETVAL
 #undef MAKE_ERROR_RETVAL
 #endif
@@ -127,22 +127,22 @@ typedef int posix__boolean_t;
 #define MAKE_ERROR_RETVAL(err)      ((int)((int)err * -1))
 #define make_error_result(err)      MAKE_ERROR_RETVAL(err)
 
-/* ÅÐ¶Ï @x ÊÇ·ñÎª 2 µÄÕýÕû´ÎÃÝ */
+/* åˆ¤æ–­ @x æ˜¯å¦ä¸º 2 çš„æ­£æ•´æ¬¡å¹‚ */
 #if !defined is_powerof_2
 #define is_powerof_2(x) ((x) != 0 && (((x) & ((x) - 1)) == 0))
 #endif
 
-/* ¸¡µãÎª0µÄ¶Ô±ÈÄ¿±ê */
+/* æµ®ç‚¹ä¸º0çš„å¯¹æ¯”ç›®æ ‡ */
 #if !defined EPSINON
 #define EPSINON  (0.000001)
 #endif
 
-/* ÅÐ¶Ï¸¡µãÊý @x ÊÇ·ñÎª 0 */
+/* åˆ¤æ–­æµ®ç‚¹æ•° @x æ˜¯å¦ä¸º 0 */
 #if !defined is_float_zero
 #define is_float_zero(x) (((x) > EPSINON) && ((x) < -EPSINON))
 #endif
 
-/* ÅÐ¶Ï¸¡µãÊý @n @m ÊÇ·ñÏàµÈ */
+/* åˆ¤æ–­æµ®ç‚¹æ•° @n @m æ˜¯å¦ç›¸ç­‰ */
 #if !defined is_float_equal
 #define is_float_equal(n, m) ((fabs((n)-(m))) <= EPSINON )
 #endif

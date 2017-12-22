@@ -23,10 +23,10 @@ void log__write(const char *module, enum log__levels level, int target, const ch
 __extern__
 void log__save(const char *module, enum log__levels level, int target, const char *format, ...);
 
-/* ×î´óÔÊĞíÖ¸¶¨ÈÕÖ¾Ä£¿éÃû³Æ³¤¶È */
+/* æœ€å¤§å…è®¸æŒ‡å®šæ—¥å¿—æ¨¡å—åç§°é•¿åº¦ */
 #define  LOG_MODULE_NAME_LEN   (128)
 
-/* ×î´óÔÊĞíµ¥´ÎÈÕÖ¾Ğ´ÈëÊı¾İ³¤¶È */
+/* æœ€å¤§å…è®¸å•æ¬¡æ—¥å¿—å†™å…¥æ•°æ®é•¿åº¦ */
 #define  MAXIMUM_LOG_BUFFER_SIZE  (2048)
 
 #endif

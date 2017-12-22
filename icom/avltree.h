@@ -8,81 +8,81 @@
 #pragma pack(push, 1)
 
 struct avltree_node_t {
-    struct avltree_node_t *lchild, *rchild; /* ·Ö±ğÖ¸Ïò×óÓÒ×ÓÊ÷ */
-    int height; /* Ê÷µÄ¸ß¶È */
+    struct avltree_node_t *lchild, *rchild; /* åˆ†åˆ«æŒ‡å‘å·¦å³å­æ ‘ */
+    int height; /* æ ‘çš„é«˜åº¦ */
 };
 
 #pragma pack(pop)
 
 /**
- *	½á¹¹ÀàĞÍÖØÉùÃ÷
+ *	ç»“æ„ç±»å‹é‡å£°æ˜
  */
 typedef struct avltree_node_t TREENODE_T, *PTREENODE, *TREEROOT;
 
 /**
- *	½ÚµãÊı¾İ¶Ô±ÈÀı³Ì
+ *	èŠ‚ç‚¹æ•°æ®å¯¹æ¯”ä¾‹ç¨‹
  *
- *	left ÓÃÓÚ¶Ô±ÈµÄ×ó½Úµã£¬ Êı¾İÀàĞÍÇ¿ÖÆ×ª»¯Îªstruct avltree_node_t *ºó¿ÉÓÃ
- *	fight ÓÃÓÚ¶Ô±ÈµÄÓÒ½Úµã£¬ Êı¾İÀàĞÍÇ¿ÖÆ×ª»¯Îªstruct avltree_node_t *ºó¿ÉÓÃ
+ *	left ç”¨äºå¯¹æ¯”çš„å·¦èŠ‚ç‚¹ï¼Œ æ•°æ®ç±»å‹å¼ºåˆ¶è½¬åŒ–ä¸ºstruct avltree_node_t *åå¯ç”¨
+ *	fight ç”¨äºå¯¹æ¯”çš„å³èŠ‚ç‚¹ï¼Œ æ•°æ®ç±»å‹å¼ºåˆ¶è½¬åŒ–ä¸ºstruct avltree_node_t *åå¯ç”¨
  *
- *	×ó½Úµã´óÓÚÓÒ½Úµã£¬ ·µ»ØÖ¸¶¨ 1
- *	ÓÒ½Úµã´óÓÚ×ó½Úµã£¬ ·µ»ØÖ¸¶¨ -1
- *	×óÓÒ½ÚµãÏàµÈ£¬     ·µ»ØÖ¸¶¨ 0
+ *	å·¦èŠ‚ç‚¹å¤§äºå³èŠ‚ç‚¹ï¼Œ è¿”å›æŒ‡å®š 1
+ *	å³èŠ‚ç‚¹å¤§äºå·¦èŠ‚ç‚¹ï¼Œ è¿”å›æŒ‡å®š -1
+ *	å·¦å³èŠ‚ç‚¹ç›¸ç­‰ï¼Œ     è¿”å›æŒ‡å®š 0
  */
 typedef int( *compare_routine)(const void *left, const void *right);
 
 /**
- *  Ïò¸ùÎªtreeµÄAVLÊ÷²åÈëÊı¾İ¡£
+ *  å‘æ ¹ä¸ºtreeçš„AVLæ ‘æ’å…¥æ•°æ®ã€‚
  *
- *  treeÖ¸Ïò²åÈëÊı¾İÇ°AVLÊ÷µÄ¸ù¡£
- *  nodeÖ¸Ïò°üº¬´ı²åÈëÊı¾İµÄavltree_node_t½Úµã¡£
- *  compareÖ¸Ïò½ÚµãÖ®¼äµÄ±È½Ïº¯Êı£¬ÓÉÓÃ»§¶¨Òå¡£
+ *  treeæŒ‡å‘æ’å…¥æ•°æ®å‰AVLæ ‘çš„æ ¹ã€‚
+ *  nodeæŒ‡å‘åŒ…å«å¾…æ’å…¥æ•°æ®çš„avltree_node_tèŠ‚ç‚¹ã€‚
+ *  compareæŒ‡å‘èŠ‚ç‚¹ä¹‹é—´çš„æ¯”è¾ƒå‡½æ•°ï¼Œç”±ç”¨æˆ·å®šä¹‰ã€‚
  *
- *  ·µ»Ø²åÈëÊı¾İºóAVLÊ÷µÄ¸ù¡£
+ *  è¿”å›æ’å…¥æ•°æ®åAVLæ ‘çš„æ ¹ã€‚
  *
- *	Êı¾İ½á¹¹¹ı³ÌÊ¹ÓÃ²ÎÊı´«ÈëÖ¸ÕëÖ±½Ó¹³Á´£¬ ¶øÃ»ÓĞ½øĞĞÉî¿½±´²Ù×÷£¬ ĞèÒªÖ÷µ÷º¯Êı±£Ö¤½ÚµãÖ¸ÕëÔÚµ÷ÓÃ avlremove Ö®Ç°µÄÓĞĞ§ĞÔ
+ *	æ•°æ®ç»“æ„è¿‡ç¨‹ä½¿ç”¨å‚æ•°ä¼ å…¥æŒ‡é’ˆç›´æ¥é’©é“¾ï¼Œ è€Œæ²¡æœ‰è¿›è¡Œæ·±æ‹·è´æ“ä½œï¼Œ éœ€è¦ä¸»è°ƒå‡½æ•°ä¿è¯èŠ‚ç‚¹æŒ‡é’ˆåœ¨è°ƒç”¨ avlremove ä¹‹å‰çš„æœ‰æ•ˆæ€§
  */
 __extern__
 struct avltree_node_t *avlinsert(struct avltree_node_t *tree, struct avltree_node_t *node,
         int( *compare)(const void *, const void *));
 /**
- *  ´Ó¸ùÎªtreeµÄAVLÊ÷É¾³ıÊı¾İ¡£
+ *  ä»æ ¹ä¸ºtreeçš„AVLæ ‘åˆ é™¤æ•°æ®ã€‚
  *
- *  treeÖ¸ÏòÉ¾³ıÊı¾İÇ°AVLÊ÷µÄ¸ù¡£
- *  nodeÖ¸Ïò°üº¬´ıÆ¥ÅäÊı¾İµÄavltree_node_t½Úµã¡£
- *  rmnodeÎªÒ»¸ö¶ş´ÎÖ¸Õë£¬É¾³ı³É¹¦Ê±*rmnode´æ·ÅµÄÊÇ±»É¾³ı½ÚµãÖ¸Õë£¬Ê§°ÜÔòÎªNULL¡£
- *  compareÖ¸Ïò½ÚµãÖ®¼äµÄ±È½Ïº¯Êı£¬ÓÉÓÃ»§¶¨Òå¡£
+ *  treeæŒ‡å‘åˆ é™¤æ•°æ®å‰AVLæ ‘çš„æ ¹ã€‚
+ *  nodeæŒ‡å‘åŒ…å«å¾…åŒ¹é…æ•°æ®çš„avltree_node_tèŠ‚ç‚¹ã€‚
+ *  rmnodeä¸ºä¸€ä¸ªäºŒæ¬¡æŒ‡é’ˆï¼Œåˆ é™¤æˆåŠŸæ—¶*rmnodeå­˜æ”¾çš„æ˜¯è¢«åˆ é™¤èŠ‚ç‚¹æŒ‡é’ˆï¼Œå¤±è´¥åˆ™ä¸ºNULLã€‚
+ *  compareæŒ‡å‘èŠ‚ç‚¹ä¹‹é—´çš„æ¯”è¾ƒå‡½æ•°ï¼Œç”±ç”¨æˆ·å®šä¹‰ã€‚
  *
- *  ·µ»ØÉ¾³ıÊı¾İºóAVLÊ÷µÄ¸ù¡£
+ *  è¿”å›åˆ é™¤æ•°æ®åAVLæ ‘çš„æ ¹ã€‚
  */
 __extern__
 struct avltree_node_t *avlremove(struct avltree_node_t *tree, struct avltree_node_t *node,
         struct avltree_node_t **rmnode,
         int( *compare)(const void *, const void *));
 /**
- *  ´Ó¸ùÎªtreeµÄAVLÊ÷ÖĞËÑË÷Êı¾İ¡£
+ *  ä»æ ¹ä¸ºtreeçš„AVLæ ‘ä¸­æœç´¢æ•°æ®ã€‚
  *
- *  treeÖ¸ÏòAVLÊ÷µÄ¸ù¡£
- *  nodeÖ¸Ïò°üº¬´ıÆ¥ÅäÊı¾İµÄavltree_node_t½Úµã¡£
- *  compareÖ¸Ïò½ÚµãÖ®¼äµÄ±È½Ïº¯Êı£¬ÓÉÓÃ»§¶¨Òå¡£
+ *  treeæŒ‡å‘AVLæ ‘çš„æ ¹ã€‚
+ *  nodeæŒ‡å‘åŒ…å«å¾…åŒ¹é…æ•°æ®çš„avltree_node_tèŠ‚ç‚¹ã€‚
+ *  compareæŒ‡å‘èŠ‚ç‚¹ä¹‹é—´çš„æ¯”è¾ƒå‡½æ•°ï¼Œç”±ç”¨æˆ·å®šä¹‰ã€‚
  *
- *  ·µ»ØÆ¥ÅäÊı¾İ½Úµã£¬»òÕßNULL¡£
+ *  è¿”å›åŒ¹é…æ•°æ®èŠ‚ç‚¹ï¼Œæˆ–è€…NULLã€‚
  */
 __extern__
 struct avltree_node_t *avlsearch(struct avltree_node_t *tree, struct avltree_node_t *node,
         int( *compare)(const void *, const void *));
 /**
- *  ´Ó¸ùÎªtreeµÄAVLÊ÷ÖĞËÑË÷×îĞ¡Êı¾İ½Úµã¡£
+ *  ä»æ ¹ä¸ºtreeçš„AVLæ ‘ä¸­æœç´¢æœ€å°æ•°æ®èŠ‚ç‚¹ã€‚
  *
- *  ·µ»Ø×îĞ¡Êı¾İ½Úµã£¬»òÕßNULL£¨¿ÕÊ÷£©¡£
+ *  è¿”å›æœ€å°æ•°æ®èŠ‚ç‚¹ï¼Œæˆ–è€…NULLï¼ˆç©ºæ ‘ï¼‰ã€‚
  */
 __extern__
 struct avltree_node_t *avlgetmin(struct avltree_node_t *tree);
 
 /**
- *  ´Ó¸ùÎªtreeµÄAVLÊ÷ÖĞËÑË÷×î´óÊı¾İ½Úµã¡£
+ *  ä»æ ¹ä¸ºtreeçš„AVLæ ‘ä¸­æœç´¢æœ€å¤§æ•°æ®èŠ‚ç‚¹ã€‚
  *
- *  ·µ»Ø×î´óÊı¾İ½Úµã£¬»òÕßNULL£¨¿ÕÊ÷£©¡£
+ *  è¿”å›æœ€å¤§æ•°æ®èŠ‚ç‚¹ï¼Œæˆ–è€…NULLï¼ˆç©ºæ ‘ï¼‰ã€‚
  */
 __extern__
 struct avltree_node_t *avlgetmax(struct avltree_node_t *tree);

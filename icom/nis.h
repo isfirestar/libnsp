@@ -2,24 +2,24 @@
 #define SW_NET_API_HEADER_20130217
 
 /*
-        ÍøÂçÓ¦ÓÃ³ÌĞò½Ó¿Ú¹æ·¶ (nis, network interface specification) ¶¨Òå
+        ç½‘ç»œåº”ç”¨ç¨‹åºæ¥å£è§„èŒƒ (nis, network interface specification) å®šä¹‰
 
-        ¹æ·¶ÑÜÉú×Ô swnet.dll ultimate 2,2,5,0(2013-02-17) °æ±¾(Ë³Íø9ÏµÁĞ¸üĞÂÇ°×îÖÕ°æ)
-                Ö§³Ö¿âÎ¬³ÖÔÚ ccl runtime 1,3,3,0(2010-09-01) °æ±¾(ÎÈ¶¨°æ)
-                        NIS¹æ·¶ 2015-05-26 ¶¨¸å / neo.anderson
+        è§„èŒƒè¡ç”Ÿè‡ª swnet.dll ultimate 2,2,5,0(2013-02-17) ç‰ˆæœ¬(é¡ºç½‘9ç³»åˆ—æ›´æ–°å‰æœ€ç»ˆç‰ˆ)
+                æ”¯æŒåº“ç»´æŒåœ¨ ccl runtime 1,3,3,0(2010-09-01) ç‰ˆæœ¬(ç¨³å®šç‰ˆ)
+                        NISè§„èŒƒ 2015-05-26 å®šç¨¿ / neo.anderson
 
-        ËùÓĞµÄ swnet2250+ Ó¦ÓÃÊµÀı£¬ ¶¼×ñÑ­±¾¹æ·¶¶¨Òå£¬²¢ÊÊÓÃÓÚ win32/x64/POSIX
+        æ‰€æœ‰çš„ swnet2250+ åº”ç”¨å®ä¾‹ï¼Œ éƒ½éµå¾ªæœ¬è§„èŒƒå®šä¹‰ï¼Œå¹¶é€‚ç”¨äº win32/x64/POSIX
 
-        °æ±¾ÕûÌåÈõ»¯ÁËÔ­ mxx µÄÏµÁĞ¹¦ÄÜ£¬ TransmitPackets¹¦ÄÜÔİÊ±±»ÏŞÖÆÔÚ UDP ÖĞ¿ÉÓÃ
+        ç‰ˆæœ¬æ•´ä½“å¼±åŒ–äº†åŸ mxx çš„ç³»åˆ—åŠŸèƒ½ï¼Œ TransmitPacketsåŠŸèƒ½æš‚æ—¶è¢«é™åˆ¶åœ¨ UDP ä¸­å¯ç”¨
 
-        UNIX like ²Ù×÷ÏµÍ³Æ½Ì¨ÏÂ²»ÔÙÖ§³Ö GRP ·½Ê½µÄ²Ù×÷Ä£ĞÍ
+        UNIX like æ“ä½œç³»ç»Ÿå¹³å°ä¸‹ä¸å†æ”¯æŒ GRP æ–¹å¼çš„æ“ä½œæ¨¡å‹
  */
 #include "nisdef.h"
 
 
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
-  TCP ¹ı³Ì¶¨Òå²¿·Ö	
+  TCP è¿‡ç¨‹å®šä¹‰éƒ¨åˆ†	
 -----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) tcp_init();
 interface_format(void) tcp_uninit();
@@ -36,7 +36,7 @@ interface_format(int) tcp_setopt(HTCPLINK lnk, int level, int opt, const char *v
 interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, int *len);
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
-  UDP ¹ı³Ì¶¨Òå²¿·Ö																				
+  UDP è¿‡ç¨‹å®šä¹‰éƒ¨åˆ†																				
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) udp_init();
 interface_format(void) udp_uninit();
@@ -50,7 +50,7 @@ interface_format(int) udp_joingrp(HUDPLINK lnk, const char *g_ipstr, uint16_t g_
 interface_format(int) udp_dropgrp(HUDPLINK lnk);
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
-  UDP GRP ¹ı³Ì¶¨Òå²¿·Ö																				
+  UDP GRP è¿‡ç¨‹å®šä¹‰éƒ¨åˆ†																				
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #if _WIN32
 interface_format(int) udp_initialize_grp(HUDPLINK lnk, packet_grp_t *grp);
@@ -61,14 +61,14 @@ interface_format(int) udp_write_grp(HUDPLINK lnk, packet_grp_t *grp);
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
- ¶ÔÏóÏà¹Ø/È«¾Ö²ÉÑù ²¿·Ö
+ å¯¹è±¡ç›¸å…³/å…¨å±€é‡‡æ · éƒ¨åˆ†
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) nis_setctx(HLNK lnk, const void * user_context, int user_context_size);
 interface_format(int) nis_getctx(HLNK lnk, void * user_context, int *user_context_size/*opt*/);
 interface_format(void *) nis_refctx(HLNK lnk, int *user_context_size);
 interface_format(int) nis_ctxsize(HLNK lnk);
 interface_format(int) nis_getver(swnet_version_t *version);
-interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); /*¿ÉÓÃÓÚÓòÃû½âÎö£¬»ñÈ¡Ê×¸ö½âÎöIPµØÖ·, ¸ÃµØÖ·½«ÔÚ¹ı³ÌÄÚ²¿±»×ªÎªĞ¡¶Ë*/
-interface_format(char *) nis_lgethost(char *name, int cb); /* »ñÈ¡±¾µØÖ÷»úÃû */
+interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); /*å¯ç”¨äºåŸŸåè§£æï¼Œè·å–é¦–ä¸ªè§£æIPåœ°å€, è¯¥åœ°å€å°†åœ¨è¿‡ç¨‹å†…éƒ¨è¢«è½¬ä¸ºå°ç«¯*/
+interface_format(char *) nis_lgethost(char *name, int cb); /* è·å–æœ¬åœ°ä¸»æœºå */
 
 #endif

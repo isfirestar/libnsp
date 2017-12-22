@@ -15,9 +15,9 @@ namespace nsp {
 
         template<class T>
         class tcp_application_service : public obtcp {
-            tcp_application_service(HTCPLINK lnk) = delete; // ×÷Îª¼àÌı¶ÔÏó£¬ ²»´æÔÚÊ¹ÓÃÁ´½Ó¹¹ÔìÕâÒ»Ëµ·¨
+            tcp_application_service(HTCPLINK lnk) = delete; // ä½œä¸ºç›‘å¬å¯¹è±¡ï¼Œ ä¸å­˜åœ¨ä½¿ç”¨é“¾æ¥æ„é€ è¿™ä¸€è¯´æ³•
 
-            // ÏÂ²ã²»ÔÙĞèÒª¹Ø×¢Á´½Ó½¨Á¢µÄÈÎºÎÏ¸½Ú, Õâ¸öĞéº¯Êıµ½´ËÖÕÖ¹
+            // ä¸‹å±‚ä¸å†éœ€è¦å…³æ³¨é“¾æ¥å»ºç«‹çš„ä»»ä½•ç»†èŠ‚, è¿™ä¸ªè™šå‡½æ•°åˆ°æ­¤ç»ˆæ­¢
             virtual void on_accepted(HTCPLINK lnk) override final {
 
                 std::shared_ptr<T> sptr = std::make_shared<T>(lnk);
@@ -29,7 +29,7 @@ namespace nsp {
                 try {
                     sptr->bind_object(shared_from_this());
                     
-                    // ·şÎñ¶ËÓĞÈ¨ÔÚ»á»°³õ´Îµ½´ï½×¶Î¾Ü¾øÁ¬½Ó
+                    // æœåŠ¡ç«¯æœ‰æƒåœ¨ä¼šè¯åˆæ¬¡åˆ°è¾¾é˜¶æ®µæ‹’ç»è¿æ¥
                     if (sptr->on_established() < 0){
                         throw -ENETRESET;
                     }
@@ -45,7 +45,7 @@ namespace nsp {
                 }
             }
 
-            // ×÷Îª¼àÌı¶ÔÏó, Ò»¶¨²»»á³öÏÖÊÕµ½Êµ¼ÊÊı¾İ°üµÄÇé¿ö
+            // ä½œä¸ºç›‘å¬å¯¹è±¡, ä¸€å®šä¸ä¼šå‡ºç°æ”¶åˆ°å®é™…æ•°æ®åŒ…çš„æƒ…å†µ
             virtual void on_recvdata(const std::string &data) override final {
                 abort();
             }
@@ -63,8 +63,7 @@ namespace nsp {
                 close();
             }
 
-            // ¿ªÊ¼·şÎñ
-
+            // å¼€å§‹æœåŠ¡
             int begin(const endpoint &ep) {
                 return ( (create(ep) >= 0) ? listen() : -1);
             }
@@ -79,7 +78,7 @@ namespace nsp {
                 return begin(ep);
             }
 
-            // ¿Í»§¶Ë¹Ø±ÕºóÍ¨Öª·şÎñ¶Ë
+            // å®¢æˆ·ç«¯å…³é—­åé€šçŸ¥æœåŠ¡ç«¯
             void on_client_closed(const HTCPLINK lnk) {
                 std::lock_guard < decltype(client_locker_) > guard(client_locker_);
                 auto iter = client_set_.find(lnk);
@@ -141,7 +140,7 @@ namespace nsp {
 
             }
 
-            // °´Á´½Ó²éÕÒÒ»¸ö¿Í»§¶Ë
+            // æŒ‰é“¾æ¥æŸ¥æ‰¾ä¸€ä¸ªå®¢æˆ·ç«¯
             int search_client_by_link(const HTCPLINK lnk, std::shared_ptr<T> &client) const {
                 std::lock_guard < decltype(client_locker_) > guard(client_locker_);
                 auto iter = client_set_.find(lnk);
@@ -159,7 +158,7 @@ namespace nsp {
 namespace nsp {
     namespace tcpip {
 
-        /*Ö¸¶¨µ×²ãĞ­ÒéÀàĞÍ£¬ ¶¨ÒåTCPÁ¬½Ó»á»°*/
+        /*æŒ‡å®šåº•å±‚åè®®ç±»å‹ï¼Œ å®šä¹‰TCPè¿æ¥ä¼šè¯*/
         template<class T>
         class tcp_application_client : public obtcp {
             std::weak_ptr<tcp_application_service<tcp_application_client<T>>> tcp_application_server_;
@@ -178,8 +177,8 @@ namespace nsp {
 				;
             }
 
-            // Èç¹ûÊ¹ÓÃ proto::proto_interface µÄÁ÷»¯ºÍ·´Á÷»¯Ä£ĞÍ£¬ Ôò¿ÉÒÔÖ±½ÓÊ¹ÓÃÕâÑùµÄ¶ÔÏó½øĞĞ·¢°ü²Ù×÷
-            // ÕâÖÖ²Ù×÷ÊÇ¿ò¼Ü×îÍÆ¼öµÄ
+            // å¦‚æœä½¿ç”¨ proto::proto_interface çš„æµåŒ–å’ŒåæµåŒ–æ¨¡å‹ï¼Œ åˆ™å¯ä»¥ç›´æ¥ä½¿ç”¨è¿™æ ·çš„å¯¹è±¡è¿›è¡Œå‘åŒ…æ“ä½œ
+            // è¿™ç§æ“ä½œæ˜¯æ¡†æ¶æœ€æ¨èçš„
             int psend(const proto::proto_interface *package) {
                 if (!package) return -1;
                 return obtcp::send(package->length(), [&] (void *buffer, int cb) ->int {
@@ -194,12 +193,12 @@ namespace nsp {
                 tcp_application_server_ = std::static_pointer_cast< tcp_application_service<tcp_application_client < T>> >(object);
             }
             
-            // server ´´½¨ session ºó£¬ Ê×´ÎÖ÷¶¯Í¨Öª»á»°¶ÔÏó
+            // server åˆ›å»º session åï¼Œ é¦–æ¬¡ä¸»åŠ¨é€šçŸ¥ä¼šè¯å¯¹è±¡
             virtual int on_established() {
                 return 0;
             }
         protected:
-            // Èç¹û·şÎñ¶Ë»¹ÔÚ£¬ ÔòÍ¨Öª·şÎñ¶Ë,ÓĞ¿Í»§Á´½Ó¶Ï¿ª£¬ Í¬Ê±ÔÊĞí¼ÌĞøÖØĞ´ÏÂĞĞ
+            // å¦‚æœæœåŠ¡ç«¯è¿˜åœ¨ï¼Œ åˆ™é€šçŸ¥æœåŠ¡ç«¯,æœ‰å®¢æˆ·é“¾æ¥æ–­å¼€ï¼Œ åŒæ—¶å…è®¸ç»§ç»­é‡å†™ä¸‹è¡Œ
             virtual void on_closed(HTCPLINK previous) override final {
                 auto sptr = tcp_application_server_.lock();
                 if (sptr) {
@@ -211,7 +210,7 @@ namespace nsp {
                 on_disconnected(previous);
             }
 
-			// ¿Í»§¶Ë¶ÔÏóÊÕµ½Á¬½ÓÇëÇó£¬ ¿Ï¶¨ÊÇÑÏÖØ´íÎó
+			// å®¢æˆ·ç«¯å¯¹è±¡æ”¶åˆ°è¿æ¥è¯·æ±‚ï¼Œ è‚¯å®šæ˜¯ä¸¥é‡é”™è¯¯
             virtual void on_accepted(HTCPLINK lnk) override final {
                 abort();
             } 
@@ -231,7 +230,7 @@ namespace nsp {
                 ;
             }
 
-            // ÀàËÆÓÚ tcp, ÕâÀïÒ²Ìá¹© psend ·½·¨Ö§³Ö proto_interface µÄÄÚÖÃÁ÷»¯
+            // ç±»ä¼¼äº tcp, è¿™é‡Œä¹Ÿæä¾› psend æ–¹æ³•æ”¯æŒ proto_interface çš„å†…ç½®æµåŒ–
             int psend(const proto::proto_interface *package, const endpoint &ep) {
                 if (!package) {
                     return -1;

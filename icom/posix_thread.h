@@ -44,10 +44,10 @@ typedef struct {
 
 /*
  * posix__pthread_create / posix__pthread_critical_create / posix__pthread_realtime_create
- * ·Ö±ğ´´½¨ÆÕÍ¨/RR£¨ºËĞÄ£©/FIFO£¨ÊµÊ±£©ÓÅÏÈ¼¶±ğµÄÏß³Ì
- * @tidp Ïß³Ì¶ÔÏóÖ¸Õë
- * @start_rtn Ïß³Ì¹ı³Ìº¯Êı
- * @arg Ïß³Ì²ÎÊı
+ * åˆ†åˆ«åˆ›å»ºæ™®é€š/RRï¼ˆæ ¸å¿ƒï¼‰/FIFOï¼ˆå®æ—¶ï¼‰ä¼˜å…ˆçº§åˆ«çš„çº¿ç¨‹
+ * @tidp çº¿ç¨‹å¯¹è±¡æŒ‡é’ˆ
+ * @start_rtn çº¿ç¨‹è¿‡ç¨‹å‡½æ•°
+ * @arg çº¿ç¨‹å‚æ•°
  */
 __extern__
 int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
@@ -56,11 +56,11 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 __extern__
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 
-/* posix__pthread_detach ·ÖÀëÏß³ÌºÍ posix__pthread_t ¶ÔÏó£¬ ·ÖÀëºó¶ÔÏó²»¿ÉÓÃ
- * posix__pthread_joinable ¼ì²éÏß³Ì¶ÔÏóÊÇ·ñ´¦ÓÚ·ÖÀë×´Ì¬£¬ ·ÖÀë·µ»Ø-1£¬ ·ñÔò·µ»Ø>=0
- * posix__pthread_join µÈ´ıÏß³Ì½áÊø
- * @tidp Ïß³Ì¶ÔÏó
- * @retval Ïß³Ì½áÊø·µ»ØÖµ */
+/* posix__pthread_detach åˆ†ç¦»çº¿ç¨‹å’Œ posix__pthread_t å¯¹è±¡ï¼Œ åˆ†ç¦»åå¯¹è±¡ä¸å¯ç”¨
+ * posix__pthread_joinable æ£€æŸ¥çº¿ç¨‹å¯¹è±¡æ˜¯å¦å¤„äºåˆ†ç¦»çŠ¶æ€ï¼Œ åˆ†ç¦»è¿”å›-1ï¼Œ å¦åˆ™è¿”å›>=0
+ * posix__pthread_join ç­‰å¾…çº¿ç¨‹ç»“æŸ
+ * @tidp çº¿ç¨‹å¯¹è±¡
+ * @retval çº¿ç¨‹ç»“æŸè¿”å›å€¼ */
 __extern__
 int posix__pthread_detach(posix__pthread_t * tidp);
 __extern__
@@ -80,8 +80,8 @@ __extern__
 void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex);
 #define posix__pthread_mutex_uninit(mutex) posix__pthread_mutex_release(mutex)
 
-/* Ö÷¶¯·ÅÆúµ±Ç°Ïß³ÌÖ´ĞĞÈ¨
- * ¿ÉÒÔÖ÷¶¯´ò¶ÏÓÅÏÈ¼¶Îª SCHED_FIFO µÄÏß³Ì
+/* ä¸»åŠ¨æ”¾å¼ƒå½“å‰çº¿ç¨‹æ‰§è¡Œæƒ
+ * å¯ä»¥ä¸»åŠ¨æ‰“æ–­ä¼˜å…ˆçº§ä¸º SCHED_FIFO çš„çº¿ç¨‹
  *  */
 __extern__
 void posix__pthread_yield();

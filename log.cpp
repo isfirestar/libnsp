@@ -29,7 +29,7 @@ namespace nsp {
             }
 
             loex::~loex() {
-                if (0 != str_[0]) { // 以此限制设置日志分片的对象，析构阶段不会真实调用日志输出
+                if (0 != str_[0]) { // 浠ユ闄愬埗璁剧疆鏃ュ織鍒嗙墖鐨勫璞★紝鏋愭瀯闃舵涓嶄細鐪熷疄璋冪敤鏃ュ織杈撳嚭
                     ::log__save(module_, level_, kLogTarget_Filesystem | kLogTarget_Stdout, "%s", str_);
                 }
             }

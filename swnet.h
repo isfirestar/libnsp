@@ -110,7 +110,7 @@ namespace nsp {
             NSP_DECLARE_INTERFACE(void *, NULL, nis_refctx, (HLNK lnk, int *user_context_size), (lnk, user_context_size));
             NSP_DECLARE_COMM_INTERFACE(nis_ctxsize, (HLNK lnk), (lnk));
             NSP_DECLARE_COMM_INTERFACE(nis_getver, (swnet_version_t *version), (version));
-            NSP_DECLARE_COMM_INTERFACE(nis_gethost, (const char *name, uint32_t *ipv4), (name, ipv4)); /*¿ÉÓÃÓÚÓòÃû½âÎö£¬»ñÈ¡Ê×¸ö½âÎöIPµØÖ·, ¸ÃµØÖ·½«ÔÚ¹ı³ÌÄÚ²¿±»×ªÎªĞ¡¶Ë*/
+            NSP_DECLARE_COMM_INTERFACE(nis_gethost, (const char *name, uint32_t *ipv4), (name, ipv4)); /*å¯ç”¨äºåŸŸåè§£æï¼Œè·å–é¦–ä¸ªè§£æIPåœ°å€, è¯¥åœ°å€å°†åœ¨è¿‡ç¨‹å†…éƒ¨è¢«è½¬ä¸ºå°ç«¯*/
             NSP_DECLARE_INTERFACE(char *, NULL, nis_lgethost, (char *name, int cb), (name, cb));
             
         public:
