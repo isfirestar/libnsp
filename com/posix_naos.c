@@ -32,9 +32,7 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) {
     char *p;
     unsigned long byteValue;
     unsigned long ipv4Digit;
-#if _WIN32
     char *nextToken;
-#endif
     int i;
     char *Tmp;
     size_t sourceTextLengtchCch;
@@ -54,20 +52,22 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) {
         return 0;
     }
     posix__strcpy(Tmp, (int) (sourceTextLengtchCch + 1), ipv4str);
+
 #if _WIN32
     nextToken = NULL;
-    while (NULL != (p = strtok_s(nextToken ? NULL : Tmp, ".", &nextToken)) && i < 4) {
-#else
-    p = strtok(Tmp, ".");
-    while (p) {
-#endif
+   while (NULL != (p = strtok_s(nextToken ? NULL : Tmp, ".", &nextToken)) && i < 4) {
         byteValue = strtoul(p, NULL, 10);
         ipv4Digit |= byteValue << (kByteOrder_LittleEndian == method ? BIT_MOV_FOR_LITTLE_ENDIAN : BIT_MOV_FOR_BIG_ENDIAN)[i++];
-
-#if !_WIN32
         p = strtok(NULL, ".");
-#endif
     }
+#else
+    p = strtok_r(Tmp, ".", &nextToken);
+    while (p) {
+        byteValue = strtoul(p, NULL, 10);
+        ipv4Digit |= byteValue << (kByteOrder_LittleEndian == method ? BIT_MOV_FOR_LITTLE_ENDIAN : BIT_MOV_FOR_BIG_ENDIAN)[i++];
+        p = strtok_r(nextToken, ".", &nextToken);
+    }
+#endif
 
     free(Tmp);
     return ipv4Digit;
