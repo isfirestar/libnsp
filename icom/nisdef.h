@@ -9,14 +9,14 @@
 #include <stdint.h>
 #endif
 
-/* 前置网络协议层及其长度 */
+/* bytes size of network protocol layer */
 #define MTU       			(1500)   
-#define ETHERNET_P_SIZE     (14)   /*网络层14个字节 */
-#define IP_P_SIZE      		(20)   /* IP层20个字节 */
-#define UDP_P_SIZE      	(8)   /* UDP层8个字节 */
-#define TCP_P_SIZE      	(20)   /* TCP层20个字节 */
+#define ETHERNET_P_SIZE     (14)   /*14 bytes of ethrent layer */
+#define IP_P_SIZE      		(20)   /* 20 bytes of IP layer */
+#define UDP_P_SIZE      	(8)   /* 8 bytes of UDP layer */
+#define TCP_P_SIZE      	(20)   /* 20 bytes of TCP Layer */
 
-/* 下层句柄定义 */
+/* types of nshost handle */
 typedef uint32_t HLNK;
 typedef uint32_t HTCPLINK;
 typedef int32_t HUDPLINK;
@@ -35,6 +35,7 @@ typedef bool nis_boolean_t;
 typedef int nis_boolean_t;
 #endif
 
+/* macro of export format */
 #define interface_format(_Ty) STD_C_FORMAT _Ty STD_CALL
 
 #if !defined INVALID_HTCPLINK
@@ -45,27 +46,27 @@ typedef int nis_boolean_t;
 #define INVALID_HUDPLINK ((HUDPLINK)(~0))
 #endif
 
-/* 通用网络事件 */
-#define EVT_CREATED   (0x0001)   /* 已经创建 */
-#define EVT_PRE_CLOSE   (0x0002)   /* 即将关闭*/
-#define EVT_CLOSED   (0x0003)   /* 已经关闭*/
-#define EVT_RECEIVEDATA   (0x0004)   /* 接收数据*/
-#define EVT_SENDDATA   (0x0005)   /* 发送数据*/
-#define EVT_DEBUG_LOG   (0x0006)   /* 反馈的调试信息 */
-#define EVT_EXCEPTION   (0xFFFF)   /* 异常*/
+/* common network events */
+#define EVT_CREATED     (0x0001)    /* created */
+#define EVT_PRE_CLOSE   (0x0002)    /* ready to close*/
+#define EVT_CLOSED      (0x0003)    /* has been closed */
+#define EVT_RECEIVEDATA (0x0004)    /* receive data*/
+#define EVT_SENDDATA    (0x0005)    /* sent data*/
+#define EVT_DEBUG_LOG   (0x0006)    /* report debug information */
+#define EVT_EXCEPTION   (0xFFFF)    /* exceptions*/
 
-/* TCP 网络事件 */
-#define EVT_TCP_ACCEPTED  (0x0013)   /* 已经Accept */
-#define EVT_TCP_CONNECTED  (0x0014)   /* 已经连接成功 */
+/* TCP events */
+#define EVT_TCP_ACCEPTED  (0x0013)   /* has been Accepted */
+#define EVT_TCP_CONNECTED  (0x0014)  /* success connect to remote */
 
-/* 获取地址信息选项 */
-#define LINK_ADDR_LOCAL   (0x0001)   /* 得到绑定本机地址端口信息 */
-#define LINK_ADDR_REMOTE  (0x0002)   /* 得到绑定对端地址端口信息 */
+/* option to get link address */
+#define LINK_ADDR_LOCAL   (0x0001)   /* get local using endpoint pair */
+#define LINK_ADDR_REMOTE  (0x0002)   /* get remote using endpoint pair */
 
 #pragma pack(push, 1)
 
 typedef struct _nis_event_t {
-    int Event; /* 事件类型 */
+    int Event; 
 
     union {
 
@@ -79,29 +80,28 @@ typedef struct _nis_event_t {
     } Ln;
 } nis_event_t;
 
-/* 协议回调例程定义 */
+/* user callback definition for network events */
 typedef void( STD_CALL *nis_callback_t)(const nis_event_t *naio_event, const void *pParam2);
 typedef nis_callback_t tcp_io_callback_t;
 typedef nis_callback_t udp_io_callback_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
-    TCP 部分
+    TCP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-/* 私有协议模板(PPT, private protocol template) 支持
+/*  private protocol template(PPT,) support
 
-        协议解析模板 tcp_ppt_parser_t
-                @data               数据流
-                @cb                 数据流长度
-                @user_data_size   用户部分的长度(除去协议长度后)
+        protocol parse template: tcp_ppt_parser_t
+                @data               data stream
+                @cb                 bytes of data stream
+                @user_data_size     bytes of user data stream (eliminate length of protocol)
 
-        协议构建模板 tcp_ppt_builder_t
-                @data               构建协议的数据流
-                @cb                 构建协议的数据字节长度
+        protocol builder template: tcp_ppt_builder_t
+                @data               data stream
+                @cb                 bytes of data stream for build
 
-        私有协议模板的操作返回<0, 将会使下级网络流程失败中止
+        Any negative return of PPT templates will terminate the subsequent operation
  */
-
 typedef int( STD_CALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
 typedef int( STD_CALL *tcp_ppt_builder_t)(void *data, int cb);
 
@@ -114,12 +114,10 @@ typedef struct _TCP_STREAM_TEMPLATE {
 typedef int( STD_CALL *nis_sender_maker_t)(void *data, int cb, void *context);
 
 typedef struct {
-
     union {
-
         struct {
-            const char * Data; /* 接收数据Buf */
-            int Size; /* 该数据包字节大小 */
+            const char * Data;
+            int Size; 
         } Packet;
 
         struct {
@@ -140,11 +138,10 @@ typedef struct {
         } DebugLog;
 
     } e;
-
 } tcp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
- UDP 部分
+    UDP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #define UDP_FLAG_NONE           (0)
 #define UDP_FLAG_UNITCAST       (UDP_FLAG_NONE)
@@ -152,9 +149,7 @@ typedef struct {
 #define UDP_FLAG_MULTICAST      (2)
 
 typedef struct {
-
     union {
-
         struct {
             const char * Data;
             int Size;
@@ -179,7 +174,7 @@ typedef struct {
 } udp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
- GRP相关部分
+    GRP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 typedef struct _packet_grp_node {
