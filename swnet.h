@@ -80,6 +80,7 @@ namespace nsp {
             //io
             static void STD_CALL tcp_io(const nis_event_t *pParam1, const void *pParam2);
             static void STD_CALL udp_io(const nis_event_t *pParam1, const void *pParam2);
+            static void STD_CALL ecr(const char *host_event, const char *reserved, int rescb);
 
         public:
             NSP_DECLARE_COMM_INTERFACE(tcp_init, (), ());
@@ -112,6 +113,7 @@ namespace nsp {
             NSP_DECLARE_COMM_INTERFACE(nis_getver, (swnet_version_t *version), (version));
             NSP_DECLARE_COMM_INTERFACE(nis_gethost, (const char *name, uint32_t *ipv4), (name, ipv4)); /*可用于域名解析，获取首个解析IP地址, 该地址将在过程内部被转为小端*/
             NSP_DECLARE_INTERFACE(char *, NULL, nis_lgethost, (char *name, int cb), (name, cb));
+            NSP_DECLARE_INTERFACE(nis_event_callback_t, NULL, nis_checr, (const nis_event_callback_t ecr), (ecr));
             
         public:
             // TCP

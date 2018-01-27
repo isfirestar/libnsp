@@ -3,6 +3,8 @@
 #include "swnet.h"
 #include "os_util.hpp"
 
+#include "icom/logger.h"
+
 namespace nsp {
     namespace tcpip {
 
@@ -80,6 +82,12 @@ namespace nsp {
             }
         }
 
+        void STD_CALL swnet::ecr(const char *host_event, const char *reserved, int rescb) {
+            if (!host_event) return;
+
+            log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", host_event);
+        }
+
         swnet::swnet() {
 #if _WIN32
             shared_library_ = os::dlopen("nshost.dll");
@@ -89,6 +97,7 @@ namespace nsp {
 			if (!shared_library_) {
 				throw -ENOENT;
 			}
+            nis_checr(&swnet::ecr);
         }
 
         swnet::~swnet() {
@@ -105,13 +114,6 @@ namespace nsp {
 
             object->setlnk(lnk);
             return tcp_attach(lnk, object);
-            // std::lock_guard < decltype(this->lock_tcp_redirection_) > guard(lock_tcp_redirection_);
-            // auto iter = tcp_object_.find(lnk);
-            // if (tcp_object_.end() == iter) {
-            //     tcp_object_[lnk] = object;
-            //     return 0;
-            // }
-            // return -1;
         }
 
         int swnet::tcp_attach(HTCPLINK lnk, const std::shared_ptr<obtcp> &object) {
@@ -122,12 +124,6 @@ namespace nsp {
                 return 0;
             }
             return -1;
-            // auto iter = tcp_object_.find(lnk);
-            // if (tcp_object_.end() == iter) {
-            //     tcp_object_[lnk] = object;
-            //     return 0;
-            // }
-            // return -1;
         }
 
         void swnet::tcp_detach(HTCPLINK lnk) {
@@ -173,12 +169,6 @@ namespace nsp {
                 return 0;
             }
             return -1;
-            // auto iter = udp_object_.find(lnk);
-            // if (udp_object_.end() == iter) {
-            //     udp_object_[lnk] = object;
-            //     return 0;
-            // }
-            // return -1;
         }
 
         void swnet::udp_detach(HUDPLINK lnk) {

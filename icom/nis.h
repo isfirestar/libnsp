@@ -62,4 +62,9 @@ interface_format(int) nis_getver(swnet_version_t *version);
 interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); /* parse the domain name, get the first parse result of obtained, convert it to Little-Endian*/
 interface_format(char *) nis_lgethost(char *name, int cb);
 
+/* set/change ECR(event callback routine) for nshost use, return the previous ecr address.
+	version > 9.6.0
+*/
+interface_format(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr);
+
 #endif

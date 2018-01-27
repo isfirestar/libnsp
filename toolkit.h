@@ -75,7 +75,7 @@ namespace nsp {
         template<class T>
         T change_byte_order(const T &t) {
             T dst = 0;
-            for (int i = 0; i < sizeof ( T); i++) {
+            for (unsigned int i = 0; i < sizeof ( T); i++) {
                 // dst = (dst | (t >> (i * BITS_P_BYTE)) & 0xFF) << ((i < (sizeof ( T) - 1) ? BITS_P_BYTE : 0));
                 dst |= ((t >> (i * BITS_P_BYTE)) & 0xFF);
                 dst <<= ((i) < (sizeof ( T) - 1) ? BITS_P_BYTE : (0));

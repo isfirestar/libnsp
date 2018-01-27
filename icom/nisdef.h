@@ -195,6 +195,11 @@ typedef struct _swnet_version {
     short leaf_;
 } swnet_version_t;
 
+/*  receiving notification text informations from nshost moudle
+    version > 9.6.0
+*/
+typedef void( STD_CALL *nis_event_callback_t)(const char *host_event, const char *reserved, int rescb);
+
 #pragma pack(pop)
 
 #endif
