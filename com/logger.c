@@ -180,12 +180,16 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
         log__close_file(file);
     } while (0);
 
+    char pedir[255];
+    posix__getpedir2(pedir, sizeof(pedir));
+
+
     /* 日志发件发生新建或任何形式的文件切换 */
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", module,
             currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
-    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR, posix__getpedir());
+    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR, pedir);
     posix__mkdir(path);
-    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s", posix__getpedir(), name);
+    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s", pedir, name);
     retval = log__create_file(file, path);
     if (retval >= 0) {
         memcpy(&file->filest_, currst, sizeof ( posix__systime_t));
@@ -330,7 +334,11 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     va_end(ap);
 
     if (!module) {
-        log__printf(posix__getpename(), target, &currst, logstr, (int) strlen(logstr));
+        char pename[255], *p;
+        p = posix__getpename2(pename, sizeof(pename));
+        if (p) {
+            log__printf(pename, target, &currst, logstr, (int) strlen(logstr));
+        }
     } else {
         log__printf(module, target, &currst, logstr, (int) strlen(logstr));
     }
@@ -352,7 +360,11 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
     } else {
-        posix__strcpy(node->module_, cchof(node->module_), posix__getpename());
+        char pename[255], *p;
+        p = posix__getpename2(pename, sizeof(pename));
+        if (p) {
+            posix__strcpy(node->module_, cchof(node->module_), pename);
+        }
     }
 
     va_start(ap, format);

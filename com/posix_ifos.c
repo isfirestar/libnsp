@@ -344,8 +344,37 @@ const char *posix__fullpath_current() {
 #endif
 }
 
+char *posix__fullpath_current2(char *holder, int cb) {
+    if (!holder || cb <= 0) {
+        return NULL;
+    }
+
+    memset(holder, 0, cb);
+#if _WIN32
+    uint32_t length;
+    length = GetModuleFileNameA(NULL, holder, cb );
+    if (0 == length) {
+        return NULL;
+    }
+#else
+    long pid;
+    char link[64];
+
+    pid = posix__getpid();
+    if (pid < 0) {
+        return NULL;
+    }
+
+    posix__sprintf(link, cchof(link), "/proc/%d/exe", pid);
+    if (readlink(link, holder, cb) < 0) {
+        return NULL;
+    }
+#endif
+    return holder;
+}
+
 const char *posix__getpedir() {
-    const char *p;
+    char *p;
     static char dir[MAXPATH];
     const char *fullpath = posix__fullpath_current();
     if (!fullpath) {
@@ -359,6 +388,26 @@ const char *posix__getpedir() {
     return dir;
 }
 
+char *posix__getpedir2(char *holder, int cb) {
+    char *p;
+    char fullpath[255];
+
+    if (!holder || cb <= 0) {
+        return NULL;
+    }
+
+    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
+    if (!p) {
+        return NULL;
+    }
+    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
+    if (!p) {
+        return NULL;
+    }
+    posix__strncpy(holder, (uint32_t) (cb), fullpath, (uint32_t) (p - fullpath));
+    return holder;
+}
+
 const char *posix__getpename() {
     const char *p;
     static char name[MAXPATH];
@@ -366,12 +415,36 @@ const char *posix__getpename() {
     if (!fullpath) {
         return NULL;
     }
+
     p = strrchr(fullpath, POSIX__DIR_SYMBOL);
     if (!p) {
         return NULL;
     }
+
     posix__strcpy(name, cchof(name), p + 1);
     return &name[0];
+}
+
+char *posix__getpename2(char *holder, int cb) {
+    char *p;
+    char fullpath[255];
+
+    if (!holder || cb <= 0) {
+        return NULL;
+    }
+
+    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
+    if (!p) {
+        return NULL;
+    }
+
+    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
+    if (!p) {
+        return NULL;
+    }
+
+    posix__strcpy(holder, cb, p + 1);
+    return holder;
 }
 
 const char *posix__getelfname() {
@@ -389,6 +462,22 @@ const char *posix__gettmpdir() {
     posix__strcpy(buffer, cchof(buffer), "/tmp");
     return buffer;
 #endif     
+}
+
+char *posix__gettmpdir2(char *holder, int cb) {
+    if (!holder || cb <= 0) {
+        return NULL;
+    }
+
+#if _WIN32
+    if (0 == GetTempPathA(cb, holder)) {
+        return holder;
+    }
+    return NULL;
+#else
+    posix__strcpy(holder, cb, "/tmp");
+    return holder;
+#endif 
 }
 
 int posix__isdir(const char *const file) {
@@ -543,33 +632,29 @@ int posix__getsysmem(sys_memory_t *sysmem) {
     sysmem->freeram |= s_info.freeram;
     sysmem->totalswap = s_info.totalswap;
     sysmem->freeswap = s_info.freeswap;
-    /* 验证， 注意， 命令拿出来是KB， 这里取出来是字节
-     *  FILE *fp;
-     char str[81];
-     memset(str,0,81);
-     fp=popen("cat /proc/meminfo | grep MemTotal:|sed -e 's/.*:[^0-9]//'","r");
-     if(fp >= 0)
-     {
-     fgets(str,80,fp);
-     fclose(fp);
-     }
-     */
+    /*  FILE *fp;
+        char str[81];
+        memset(str,0,81);
+        fp=popen("cat /proc/meminfo | grep MemTotal:|sed -e 's/.*:[^0-9]//'","r");
+        if(fp >= 0)
+        {
+            fgets(str,80,fp);
+            fclose(fp);
+        }
+    */
     return 0;
 #endif
 }
 
 uint32_t posix__getpagesize() {
-    static uint32_t ps = 0;
+    uint32_t ps = 0;
 #if _WIN32
     SYSTEM_INFO sys_info;
-    if (0 == ps) {
-        GetSystemInfo(&sys_info);
-        ps = sys_info.dwPageSize;
+    GetSystemInfo(&sys_info);
+    ps = sys_info.dwPageSize;
 #else
-    if (0 == ps) {
-        ps = sysconf(_SC_PAGE_SIZE);
+    ps = sysconf(_SC_PAGE_SIZE);
 #endif
-    }
     return ps;
 }
 
@@ -630,7 +715,6 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
         return -1;
     }
 
-    /* 变更本地字符集 */
     setlocale(LC_ALL, "zh_CN.gb18030");
     retval = iconv(cd, from, &input_bytes, to, output_bytes);
     if (retval < 0) {
