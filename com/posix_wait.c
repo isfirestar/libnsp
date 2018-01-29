@@ -111,7 +111,8 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     if (0 == tsc || tsc >= 0x7FFFFFFF) {
         posix__pthread_mutex_lock(&waiter->mutex_);
 
-        /* 如果是同步对象， 在系统调用前重置pass为0，无论当前pass是什么状态 */
+        /* synchronous wait object need to set @pass_ flag to zero befor wait syscall,
+           no mater what status it is now */
         if (waiter->sync_) {
             waiter->pass_ = 0;
         }
@@ -125,7 +126,8 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
             }
         }
 
-        /* 如果是同步对象， 则需要重置通过标记 */
+        /* reset @pass_ flag to zero immediately after wait syscall,
+            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
         if (waiter->sync_) {
             waiter->pass_ = 0;
         }
@@ -143,7 +145,8 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         abstime.tv_nsec = (nsec % 1000000000);
         posix__pthread_mutex_lock(&waiter->mutex_);
 
-        /* 如果是同步对象， 在系统调用前重置pass为0，无论当前pass是什么状态 */
+        /* synchronous wait object need to set @pass_ flag to zero befor wait syscall,
+           no mater what status it is now */
         if (waiter->sync_) {
             waiter->pass_ = 0;
         }
@@ -162,7 +165,8 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
             }
         }
 		
-        /* 如果是同步对象， 则需要重置通过标记 */
+        /* reset @pass_ flag to zero immediately after wait syscall,
+            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
         if (waiter->sync_) {
             waiter->pass_ = 0;
         }
@@ -202,9 +206,12 @@ void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
     ResetEvent(waiter->cond_);
 #else
     if (waiter) {
-        posix__pthread_mutex_lock(&waiter->mutex_);
-        waiter->pass_ = 0;
-        posix__pthread_mutex_unlock(&waiter->mutex_);
+        /* @reset operation effect only for notification wait object.  */
+        if (!waiter->sync_) {
+            posix__pthread_mutex_lock(&waiter->mutex_);
+            waiter->pass_ = 0;
+            posix__pthread_mutex_unlock(&waiter->mutex_);
+        }
     }
 #endif
 }
