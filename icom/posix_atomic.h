@@ -1,4 +1,4 @@
-/* -march=i686 */
+﻿/* -march=i686 */
 
 #ifndef POSIX_ATOMIC_H
 #define POSIX_ATOMIC_H

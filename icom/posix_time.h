@@ -1,4 +1,4 @@
-#ifndef POSIX_TIME_H
+﻿#ifndef POSIX_TIME_H
 #define POSIX_TIME_H
 
 #include "compiler.h"

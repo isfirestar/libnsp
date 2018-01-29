@@ -55,10 +55,9 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) {
 
 #if _WIN32
     nextToken = NULL;
-   while (NULL != (p = strtok_s(nextToken ? NULL : Tmp, ".", &nextToken)) && i < 4) {
+	while (NULL != (p = strtok_s(nextToken ? NULL : Tmp, ".", &nextToken)) && i < 4) {
         byteValue = strtoul(p, NULL, 10);
         ipv4Digit |= byteValue << (kByteOrder_LittleEndian == method ? BIT_MOV_FOR_LITTLE_ENDIAN : BIT_MOV_FOR_BIG_ENDIAN)[i++];
-        p = strtok(NULL, ".");
     }
 #else
     p = strtok_r(Tmp, ".", &nextToken);

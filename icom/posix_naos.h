@@ -1,4 +1,4 @@
-#if !defined POSIX_NAOS_H
+﻿#if !defined POSIX_NAOS_H
 #define POSIX_NAOS_H
 
 /*

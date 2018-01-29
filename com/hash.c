@@ -1,4 +1,4 @@
-#include "hash.h"
+﻿#include "hash.h"
 #include "posix_atomic.h"
 
 #include <string.h>

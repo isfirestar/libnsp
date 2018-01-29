@@ -1,4 +1,4 @@
-#if !defined SWNET_DEF_HEADER_2016_5_24
+﻿#if !defined SWNET_DEF_HEADER_2016_5_24
 #define SWNET_DEF_HEADER_2016_5_24
 
 #if defined __cplusplus

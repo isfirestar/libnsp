@@ -1,4 +1,4 @@
-#if !defined LOGGER_H
+﻿#if !defined LOGGER_H
 #define LOGGER_H
 
 #include "compiler.h"

@@ -1,4 +1,4 @@
-#if !defined POSIX_STRING_H
+﻿#if !defined POSIX_STRING_H
 #define POSIX_STRING_H
 
 #include "compiler.h"

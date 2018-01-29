@@ -1,4 +1,4 @@
-#include "posix_thread.h"
+﻿#include "posix_thread.h"
 
 #if !_WIN32
 #include <unistd.h>

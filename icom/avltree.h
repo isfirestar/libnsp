@@ -1,4 +1,4 @@
-#if !defined (_AVLTREE_HEADER_ANDERSON_20120216)
+﻿#if !defined (_AVLTREE_HEADER_ANDERSON_20120216)
 #define _AVLTREE_HEADER_ANDERSON_20120216
 
 #include "compiler.h"

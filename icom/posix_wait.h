@@ -1,4 +1,4 @@
-#ifndef POSIX_WAIT_H
+﻿#ifndef POSIX_WAIT_H
 #define POSIX_WAIT_H
 
 #include "posix_thread.h"

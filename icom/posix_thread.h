@@ -1,4 +1,4 @@
-/* gcc -lpthread */
+﻿/* gcc -lpthread */
 
 #ifndef POSIX_THREAD_H
 #define POSIX_THREAD_H

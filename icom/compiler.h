@@ -1,4 +1,4 @@
-#ifndef _TOOLS_LINUX_COMPILER_H_
+﻿#ifndef _TOOLS_LINUX_COMPILER_H_
 #define _TOOLS_LINUX_COMPILER_H_
 
 #include <stdint.h>
