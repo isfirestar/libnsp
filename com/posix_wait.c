@@ -119,7 +119,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
 
         while (!waiter->pass_) {
             retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
-            /* 系统调用失败， 跳出循环, 认定为返回失败 */
+            /* fail syscall */
             if (0 != retval) {
                 retval = -1;
                 break;
@@ -136,11 +136,11 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         return retval;
     }
 
-    /* 带超时等 */
+    /* wait with timeout */
     if (clock_gettime(CLOCK_MONOTONIC, &abstime) >= 0) {
         /* 从当前时间计算延迟，防止64位环境下的纳秒溢出(tv_nsec >= 1000000000 会导致 pthread_cond_timedwait 返回参数错误 ) */
         uint64_t nsec = abstime.tv_nsec;
-        nsec += ((uint64_t) tsc * 1000000); /* 毫秒转换为纳秒 */
+        nsec += ((uint64_t) tsc * 1000000); /* convert milliseconds to nanoseconds */
         abstime.tv_sec += (nsec / 1000000000);
         abstime.tv_nsec = (nsec % 1000000000);
         posix__pthread_mutex_lock(&waiter->mutex_);
@@ -153,12 +153,12 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
 
         while (!waiter->pass_) {
             retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-            /* 超时, 认定为系统调用成功, 且不需要判断pass, 直接退出循环 */
+            /* timedout, break the loop */
             if (ETIMEDOUT == retval) {
                 break;
             }
 
-			/* 系统调用失败 */
+			/* fail syscall */
             if (0 != retval) {
                 retval = -1;
                 break;

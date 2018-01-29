@@ -43,16 +43,26 @@ int posix__fflush(int fd);
 /* 获取当前执行文件完整路径 */
 __extern__
 const char *posix__fullpath_current();
+__extern__
+char *posix__fullpath_current2(char *holder, int cb);	/* thread safe method, version > 9.6.0 */
 
 /* 获取当前执行文件及其所在目录 */
 __extern__
 const char *posix__getpedir();
 __extern__
+char *posix__getpedir2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
+__extern__
 const char *posix__getpename();
+__extern__
+char *posix__getpename2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
 __extern__
 const char *posix__getelfname();
 __extern__
+char *posix__getelfname2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
+__extern__
 const char *posix__gettmpdir();
+__extern__
+char *posix__gettmpdir2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
 __extern__
 int posix__isdir(const char *const file);
 

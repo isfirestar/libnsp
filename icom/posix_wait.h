@@ -37,6 +37,9 @@ void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter);
  * ETIMEOUT: 等待超时
  * -1: 系统调用失败 
  */
+#if !defined INFINITE
+#define INFINITE (0xFFFFFFFF)
+#endif
 __extern__
 int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t tsc/*ms*/);
 

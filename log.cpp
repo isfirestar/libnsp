@@ -6,6 +6,7 @@
 
 #include "icom/logger.h"
 #include "icom/posix_string.h"
+#include "icom/posix_ifos.h"
 
 #ifdef _WIN32
 #define snprintf(buffer, size, ...) \
@@ -17,13 +18,15 @@ namespace nsp {
         namespace xlog {
             /////////////////////// loex ///////////////////////
             loex::loex(enum log__levels level) : level_(level) {
-                posix__strcpy(module_, cchof(module_), "nsp");
+                posix__getpename2(module_, sizeof(module_));
                 str_[0] = 0;
             }
 
             loex::loex(const char *module, enum log__levels level) : level_(level) {
                 if (module) {
                     posix__strcpy(module_, cchof(module_), module);
+                }else{
+                    posix__getpename2(module_, sizeof(module_));
                 }
                 str_[0] = 0;
             }

@@ -23,17 +23,23 @@ namespace nsp {
 
         template<>
         std::basic_string<char> get_module_fullpath<char>() {
-            return ::posix__fullpath_current();
+            char fullpath[255], *p;
+            p = ::posix__fullpath_current2(fullpath, sizeof(fullpath));
+            return std::basic_string<char>(p);
         }
 
         template<>
         std::basic_string<char> get_module_directory<char>() {
-            return ::posix__getpedir();
+            char pedir[255], *p;
+            p = posix__getpedir2(pedir, sizeof(pedir));
+            return std::basic_string<char>(p);
         }
 
         template<>
         std::basic_string<char> get_module_filename<char>() {
-            return std::string(::posix__getpename());
+            char pename[255], *p;
+            p = ::posix__getpename2(pename, sizeof(pename));
+            return std::basic_string<char>(p);
         }
 
         template<>
