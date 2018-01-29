@@ -110,6 +110,12 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
 #else
     if (0 == tsc || tsc >= 0x7FFFFFFF) {
         posix__pthread_mutex_lock(&waiter->mutex_);
+
+        /* 如果是同步对象， 在系统调用前重置pass为0，无论当前pass是什么状态 */
+        if (waiter->sync_) {
+            waiter->pass_ = 0;
+        }
+
         while (!waiter->pass_) {
             retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
             /* 系统调用失败， 跳出循环, 认定为返回失败 */
@@ -136,6 +142,12 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         abstime.tv_sec += (nsec / 1000000000);
         abstime.tv_nsec = (nsec % 1000000000);
         posix__pthread_mutex_lock(&waiter->mutex_);
+
+        /* 如果是同步对象， 在系统调用前重置pass为0，无论当前pass是什么状态 */
+        if (waiter->sync_) {
+            waiter->pass_ = 0;
+        }
+
         while (!waiter->pass_) {
             retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
             /* 超时, 认定为系统调用成功, 且不需要判断pass, 直接退出循环 */
