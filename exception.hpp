@@ -1,4 +1,4 @@
-#if !defined NSP_EXCEPTION_H
+﻿#if !defined NSP_EXCEPTION_H
 #define NSP_EXCEPTION_H
 
 #include <string>

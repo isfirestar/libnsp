@@ -1,4 +1,4 @@
-#if !defined SWNET_INTERFACE_CALL
+﻿#if !defined SWNET_INTERFACE_CALL
 #define SWNET_INTERFACE_CALL
 
 #include <memory>

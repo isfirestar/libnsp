@@ -1,4 +1,4 @@
-#ifndef BASE_LOG_LOG_HPP
+﻿#ifndef BASE_LOG_LOG_HPP
 #define BASE_LOG_LOG_HPP
 
 #include <cstdarg>

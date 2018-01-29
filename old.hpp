@@ -1,4 +1,4 @@
-#if !defined NSP_PROTODEF_HEADER_20160614
+﻿#if !defined NSP_PROTODEF_HEADER_20160614
 #define NSP_PROTODEF_HEADER_20160614
 
 #include "toolkit.h"

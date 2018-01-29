@@ -1,4 +1,4 @@
-#if !defined TASK_SCHEDULRE_HEADER_20160707
+﻿#if !defined TASK_SCHEDULRE_HEADER_20160707
 #define TASK_SCHEDULRE_HEADER_20160707
 
 #include <vector>

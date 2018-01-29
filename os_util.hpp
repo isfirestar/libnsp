@@ -1,4 +1,4 @@
-#if !defined OS_UTIL_HEADER_02160616
+﻿#if !defined OS_UTIL_HEADER_02160616
 #define OS_UTIL_HEADER_02160616
 
 #include <cstring>

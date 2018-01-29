@@ -1,4 +1,4 @@
-#if !defined TOOLKIT_HEADER_02160613
+﻿#if !defined TOOLKIT_HEADER_02160613
 #define TOOLKIT_HEADER_02160613
 
 #include "icom/compiler.h"

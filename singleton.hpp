@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //
 // PLEASE READ: Do you really need a singleton?
