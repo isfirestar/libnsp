@@ -129,7 +129,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
 
 static
 log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module) {
-    char name[128], path[512];
+    char name[128], path[512], pename[128];
     int retval;
     struct list_head *pos;
     log__file_describe_t *file;
@@ -182,14 +182,15 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 
     char pedir[255];
     posix__getpedir2(pedir, sizeof(pedir));
+    posix__getpename2(pename, cchof(pename));
 
 
     /* 日志发件发生新建或任何形式的文件切换 */
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", module,
             currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
-    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR, pedir);
-    posix__mkdir(path);
-    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s", pedir, name);
+    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR, pedir, pename );
+    posix__pmkdir(path);
+    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR"%s", pedir, pename, name);
     retval = log__create_file(file, path);
     if (retval >= 0) {
         memcpy(&file->filest_, currst, sizeof ( posix__systime_t));
@@ -198,7 +199,6 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     } else {
         /* bug fixed:
          * 如果文件创建失败, 则需要移除链表节点 */
-		posix__syslog("nsplog failed to open storage file");
         list_del(&file->link_);
         free(file);
         file = NULL;
