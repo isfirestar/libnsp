@@ -68,6 +68,12 @@ posix__boolean_t posix__pthread_joinable(posix__pthread_t * tidp);
 __extern__
 int posix__pthread_join(posix__pthread_t * tidp, void **retval);
 
+#if _WIN32
+#define posix__pthread_exit(exit_code)
+#else
+#define posix__pthread_exit(exit_code) pthread_exit(exit_code)
+#endif
+
 __extern__
 void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex);
 __extern__
