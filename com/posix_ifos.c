@@ -14,6 +14,7 @@
 
 #if _WIN32
 #include <Windows.h>
+#pragma comment(lib, "Advapi32.lib")
 #else
 #include <sys/types.h>
 #include <syscall.h>
