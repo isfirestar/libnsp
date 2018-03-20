@@ -53,6 +53,7 @@ namespace nsp {
             void on_accepted(HTCPLINK srv, HTCPLINK client);
             void on_closed();
             void on_debug_output(const char *info);
+            void on_connected2();
 
             virtual void on_connected();
             virtual void bind_object(const std::shared_ptr<obtcp> &object);

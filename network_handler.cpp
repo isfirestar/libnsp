@@ -243,6 +243,20 @@ namespace nsp {
                 on_closed(previous);
             }
         }
+
+        void obtcp::on_connected2() {
+            // when connected by asynchronous, get address information
+            uint32_t actip;
+            port_t actport;
+            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
+            remote_.ipv4(actip);
+            remote_.port(actport);
+            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
+            local_.ipv4(actip);
+            local_.port(actport);
+
+            this->on_connected();
+        }
         
         void obtcp::on_debug_output(const char *info){
             on_lowlevel_debug(info);

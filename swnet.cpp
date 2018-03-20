@@ -26,7 +26,7 @@ namespace nsp {
                     break;
 				case EVT_TCP_CONNECTED:
 					toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&](const std::shared_ptr<obtcp> &object) {
-						object->on_connected();
+						object->on_connected2();
 					});
 					break;
                 case EVT_PRE_CLOSE:
