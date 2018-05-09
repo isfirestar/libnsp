@@ -117,12 +117,12 @@ namespace nsp {
             
         public:
             // TCP
-            int tcp_create(std::shared_ptr<obtcp> object, const char *ipstr, const port_t port);
+            int tcp_create(const std::shared_ptr<obtcp> &object, const char *ipstr, const port_t port);
             int tcp_attach(HTCPLINK lnk, const std::shared_ptr<obtcp> &object);
             void tcp_detach(HTCPLINK lnk);
 
             // UDP
-            int udp_create(std::shared_ptr<obudp> object, const char* ipstr, const port_t port, int flag = UDP_FLAG_NONE);
+            int udp_create(const std::shared_ptr<obudp> &object, const char* ipstr, const port_t port, int flag = UDP_FLAG_NONE);
             void udp_detach(HUDPLINK lnk);
         };
     }

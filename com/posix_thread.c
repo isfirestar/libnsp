@@ -218,6 +218,22 @@ int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex) {
     return -1;
 }
 
+int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires) {
+#if _WIN32
+    return -1;
+#else
+    struct timespec abstime;
+    if (clock_gettime(CLOCK_REALTIME, &abstime) >= 0) {
+        uint64_t nsec = abstime.tv_nsec;
+        nsec += ((uint64_t) expires * 1000000); /* convert milliseconds to nanoseconds */
+        abstime.tv_sec += (nsec / 1000000000);
+        abstime.tv_nsec = (nsec % 1000000000);
+        return pthread_mutex_timedlock(&mutex->handle_, &abstime);
+    }
+    return -1;
+#endif
+}
+
 void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex) {
     if (mutex) {
 #if _WIN32
