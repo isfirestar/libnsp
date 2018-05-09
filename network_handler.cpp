@@ -55,7 +55,8 @@ namespace nsp {
 
             std::string ipstr = ep.ipv4();
             try {
-                if (nsp::toolkit::singleton<swnet>::instance()->tcp_create(shared_from_this(), ipstr.size() > 0 ? ipstr.c_str() : nullptr, ep.port()) < 0) {
+                if (nsp::toolkit::singleton<swnet>::instance()->tcp_create(
+                        shared_from_this(), ipstr.size() > 0 ? ipstr.c_str() : nullptr, ep.port()) < 0) {
                     return -1;
                 }
             } catch (...) {

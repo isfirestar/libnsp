@@ -106,7 +106,7 @@ namespace nsp {
             }
         }
 
-        int swnet::tcp_create(std::shared_ptr<obtcp> object, const char *ipstr, const port_t port) {
+        int swnet::tcp_create(const std::shared_ptr<obtcp> &object, const char *ipstr, const port_t port) {
             auto lnk = tcp_create(&swnet::tcp_io, ipstr, port);
             if (INVALID_HTCPLINK == lnk) {
                 return -1;
@@ -154,7 +154,7 @@ namespace nsp {
         }
         ///////////////////////////////////////////////////////////   UDP /////////////////////////////////////////////////////////////
 
-        int swnet::udp_create(std::shared_ptr<obudp> object, const char* ipstr, const port_t port, int flag) {
+        int swnet::udp_create(const std::shared_ptr<obudp> &object, const char* ipstr, const port_t port, int flag) {
             auto lnk = udp_create(&swnet::udp_io, ipstr, port, flag);
             if (INVALID_HUDPLINK == lnk) {
                 return -1;
