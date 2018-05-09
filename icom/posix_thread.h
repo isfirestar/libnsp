@@ -80,6 +80,11 @@ __extern__
 void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex);
 __extern__
 int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex);
+/* try to get lock in @expires milliseconds
+ * WIN32 programing not support
+ */
+__extern__
+int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires);
 __extern__
 void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex);
 __extern__
