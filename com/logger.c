@@ -29,6 +29,9 @@
  */
 #define MAXIMUM_LOGSAVE_COUNT       (30000)
 
+/* maximum number of concurrent threads for log_safe */
+#define MAXIMUM_NUMBEROF_CONCURRENT_THREADS   (2000)
+
 static const char *LOG__LEVEL_TXT[] = {
     "info", "warning", "error", "fatal", "trace"
 };
@@ -45,7 +48,8 @@ typedef struct {
     char module_[LOG_MODULE_NAME_LEN];
 } log__file_describe_t;
 
-static int __log_inited = 0;
+static int __log_inited = -1;
+static pthread_mutex_t __init_locker = PTHREAD_MUTEX_INITIALIZER;
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
 static posix__pthread_mutex_t __log_file_lock;
 
@@ -59,11 +63,13 @@ typedef struct {
 } log__async_node_t;
 
 typedef struct {
-    long pendding_;
+    int pendding_;
     struct list_head items_; /* list<log__async_node_t> */
     posix__pthread_mutex_t lock_;
     posix__pthread_t thread_;
     posix__waitable_handle_t alert_;
+    log__async_node_t *misc_memory;
+    int misc_index;
 } log__async_context_t;
 
 static log__async_context_t __log_async;
@@ -262,7 +268,7 @@ void *log__asnyc_proc(void *argv) {
             posix__pthread_mutex_lock(&__log_async.lock_);
 #if _WIN32
             if (!list_empty(&__log_async.items_)) {
-                --__log_async.pendding_;
+                __sync_sub_and_fetch(&__log_async.pendding_, 1);
                 node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
                 if (node) {
                     list_del(&node->link_);
@@ -270,7 +276,7 @@ void *log__asnyc_proc(void *argv) {
             }
 #else
             if (NULL != (node = list_first_entry_or_null(&__log_async.items_, log__async_node_t, link_))) {
-                --__log_async.pendding_;
+                __sync_sub_and_fetch(&__log_async.pendding_, 1);
                 list_del(&node->link_);
             }
 #endif
@@ -278,7 +284,7 @@ void *log__asnyc_proc(void *argv) {
 
             if (node) {
                 log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
-                free(node);
+                //free(node);
             }
         } while (node);
     }
@@ -291,6 +297,13 @@ void *log__asnyc_proc(void *argv) {
 static
 int log__async_init() {
     __log_async.pendding_ = 0;
+
+    __log_async.misc_memory = (log__async_node_t *)malloc(MAXIMUM_LOGSAVE_COUNT * sizeof(log__async_node_t));
+    if (!__log_async.misc_memory) {
+        return -ENOMEM;
+    }
+    __log_async.misc_index = 0;
+
     INIT_LIST_HEAD(&__log_async.items_);
     posix__pthread_mutex_init(&__log_async.lock_);
     posix__init_synchronous_waitable_handle(&__log_async.alert_);
@@ -298,6 +311,8 @@ int log__async_init() {
     if (posix__pthread_create(&__log_async.thread_, &log__asnyc_proc, NULL) < 0) {
         posix__pthread_mutex_release(&__log_async.lock_);
         posix__uninit_waitable_handle(&__log_async.alert_);
+        free(__log_async.misc_memory);
+        __log_async.misc_memory = NULL;
         return -1;
     }
 
@@ -306,16 +321,26 @@ int log__async_init() {
 
 static
 int log__init() {
-    if (1 == posix__atomic_inc(&__log_inited)) {
-        posix__pthread_mutex_init(&__log_file_lock);
-        if (log__async_init() < 0) {
-            posix__pthread_mutex_release(&__log_file_lock);
-            return -1;
-        }
-    } else {
-        posix__atomic_dec(&__log_inited);
+    int retval;
+
+    if (__log_inited >= 0) {
+        return 0;
     }
-    return 0;
+
+    pthread_mutex_lock(&__init_locker);
+     /* double check if other thread complete the initialize request */
+    if (__log_inited < 0) {
+        /* need to initialize global context */
+        posix__pthread_mutex_init(&__log_file_lock);
+        retval = log__async_init();
+        if (retval < 0) {
+            posix__pthread_mutex_release(&__log_file_lock);
+        }else{
+            posix__atomic_xchange(&__log_inited, retval);
+        }
+    }
+    pthread_mutex_unlock(&__init_locker);
+    return retval;
 }
 
 void log__write(const char *module, enum log__levels level, int target, const char *format, ...) {
@@ -347,14 +372,25 @@ void log__write(const char *module, enum log__levels level, int target, const ch
 void log__save(const char *module, enum log__levels level, int target, const char *format, ...) {
     va_list ap;
     log__async_node_t *node;
+    int index;
 
     if (log__init() < 0 || !format) {
         return;
     }
 
-    if (NULL == (node = (log__async_node_t *) malloc(sizeof ( log__async_node_t)))) {
+    /* thread safe in count less or equal to 50 */
+    if (posix__atomic_inc(&__log_async.pendding_) >= (MAXIMUM_LOGSAVE_COUNT - MAXIMUM_NUMBEROF_CONCURRENT_THREADS)) {
+        posix__atomic_dec(&__log_async.pendding_);
         return;
     }
+
+    /* atomic increase index */
+#if _WIN32
+    index = InterlockedIncrement(( LONG volatile *)&__log_async.misc_index);
+#else
+    index = __sync_fetch_and_add(&__log_async.misc_index, 1);
+#endif
+    node = (log__async_node_t *)&__log_async.misc_memory[index % MAXIMUM_LOGSAVE_COUNT];
     node->target_ = target;
     posix__localtime(&node->logst_);
     if (module) {
@@ -371,17 +407,8 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     log__format_string(level, posix__gettid(), format, ap, &node->logst_, node->logstr_, sizeof (node->logstr_));
     va_end(ap);
 
-    do {
-        posix__pthread_mutex_lock(&__log_async.lock_);
-        if (__log_async.pendding_ < MAXIMUM_LOGSAVE_COUNT) {
-            list_add_tail(&node->link_, &__log_async.items_);
-            ++__log_async.pendding_;
-            break;
-        }
-
-        free(node);
-    } while (0);
-
+    posix__pthread_mutex_lock(&__log_async.lock_);
+    list_add_tail(&node->link_, &__log_async.items_);
     posix__pthread_mutex_unlock(&__log_async.lock_);
     posix__sig_waitable_handle(&__log_async.alert_);
 }
