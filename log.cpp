@@ -32,8 +32,12 @@ namespace nsp {
             }
 
             loex::~loex() {
+                int target = kLogTarget_Filesystem | kLogTarget_Stdout;
                 if (0 != str_[0]) { // 以此限制设置日志分片的对象，析构阶段不会真实调用日志输出
-                    ::log__save(module_, level_, kLogTarget_Filesystem | kLogTarget_Stdout, "%s", str_);
+                    if (level_ & kLogLevel_Trace) {
+                        target &= ~kLogTarget_Stdout;
+                    }
+                    ::log__save(module_, level_, target, "%s", str_);
                 }
             }
 

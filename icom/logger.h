@@ -7,16 +7,14 @@ enum log__levels {
     kLogLevel_Info = 0,
     kLogLevel_Warning,
     kLogLevel_Error,
-    kLogLevel_Fatal,
+    kLogLevel_Fatal,   
     kLogLevel_Trace,
     kLogLevel_Maximum,
 };
 
-enum log__targets {
-    kLogTarget_Filesystem = 1,
-    kLogTarget_Stdout = 2,
-	kLogTarget_Sysmesg = 4,
-};
+#define kLogTarget_Filesystem   (1)
+#define kLogTarget_Stdout       (2)
+#define	kLogTarget_Sysmesg      (4)
 
 __extern__
 void log__write(const char *module, enum log__levels level, int target, const char *format, ...);

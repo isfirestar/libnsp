@@ -56,7 +56,7 @@ static posix__pthread_mutex_t __log_file_lock;
 typedef struct {
     struct list_head link_;
     char logstr_[MAXIMUM_LOG_BUFFER_SIZE];
-    enum log__targets target_;
+    int target_;
     posix__systime_t logst_;
     int tid_;
     char module_[LOG_MODULE_NAME_LEN];
@@ -214,7 +214,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 }
 
 static
-void log__printf(const char *module, enum log__targets target, const posix__systime_t *currst, const char* logstr, int cb) {
+void log__printf(const char *module, int target, const posix__systime_t *currst, const char* logstr, int cb) {
     log__file_describe_t *fileptr;
 
     if (target & kLogTarget_Filesystem) {
@@ -284,7 +284,6 @@ void *log__asnyc_proc(void *argv) {
 
             if (node) {
                 log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
-                //free(node);
             }
         } while (node);
     }
@@ -322,6 +321,8 @@ int log__async_init() {
 static
 int log__init() {
     int retval;
+
+    retval = 0;
 
     if (__log_inited >= 0) {
         return 0;
