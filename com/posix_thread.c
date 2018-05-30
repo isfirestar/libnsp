@@ -53,7 +53,7 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     struct WIN32_THPAR *thpar = malloc(sizeof ( struct WIN32_THPAR));
 
     if (!tidp) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     thpar->arg_ = arg;
@@ -108,7 +108,7 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     return 0;
 #else
     if (!tidp) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     pthread_attr_init(&tidp->attr_);
@@ -140,7 +140,7 @@ int posix__pthread_detach(posix__pthread_t * tidp) {
     return 0;
 #else
     if (!tidp) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     if (!posix__pthread_joinable(tidp)) {
@@ -173,7 +173,7 @@ int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
     }
 #else
     if (!tidp) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
     if (tidp->pid_ > 0) {
         if (posix__pthread_joinable(tidp)) {

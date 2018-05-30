@@ -119,14 +119,6 @@ typedef int posix__boolean_t;
 #endif
 #endif
 
-/* 使用正数错误码构建负数返回值 */
-#if defined MAKE_ERROR_RETVAL
-#undef MAKE_ERROR_RETVAL
-#endif
-
-#define MAKE_ERROR_RETVAL(err)      ((int)((int)err * -1))
-#define make_error_result(err)      MAKE_ERROR_RETVAL(err)
-
 /* 判断 @x 是否为 2 的正整次幂 */
 #if !defined is_powerof_2
 #define is_powerof_2(x) ((x) != 0 && (((x) & ((x) - 1)) == 0))
@@ -362,6 +354,14 @@ enum byte_order_t {
 
 #if !defined BYTES_PER_SECTOR
 #define BYTES_PER_SECTOR		(512)
+#endif
+
+#if !defined RE_ERROR
+#define RE_ERROR(eval)   ((((int)eval) > 0 ) ? (int)((~(int)(eval)) + 1) : eval)
+#endif
+
+#if !defined RE_ERRNO
+#define RE_ERRNO    RE_ERROR(errno)
 #endif
 
 #endif

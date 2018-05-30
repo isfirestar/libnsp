@@ -48,7 +48,7 @@ typedef struct {
     char module_[LOG_MODULE_NAME_LEN];
 } log__file_describe_t;
 
-static int __log_inited = -1;
+static int __inited = -1;
 static pthread_mutex_t __init_locker = PTHREAD_MUTEX_INITIALIZER;
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
 static posix__pthread_mutex_t __log_file_lock;
@@ -59,6 +59,7 @@ typedef struct {
     int target_;
     posix__systime_t logst_;
     int tid_;
+    enum log__levels level_;
     char module_[LOG_MODULE_NAME_LEN];
 } log__async_node_t;
 
@@ -214,7 +215,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 }
 
 static
-void log__printf(const char *module, int target, const posix__systime_t *currst, const char* logstr, int cb) {
+void log__printf(const char *module, enum log__levels level, int target, const posix__systime_t *currst, const char* logstr, int cb) {
     log__file_describe_t *fileptr;
 
     if (target & kLogTarget_Filesystem) {
@@ -229,7 +230,11 @@ void log__printf(const char *module, int target, const posix__systime_t *currst,
     }
 
     if (target & kLogTarget_Stdout) {
-        printf("%s", logstr);
+        if (level == kLogLevel_Error) {
+            write(STDERR_FILENO, logstr, cb); /* 2 */
+        }else{
+            write(STDOUT_FILENO, logstr, cb); /* 1 */
+        }
     }
 
     if (target & kLogTarget_Sysmesg) {
@@ -283,7 +288,7 @@ void *log__asnyc_proc(void *argv) {
             posix__pthread_mutex_unlock(&__log_async.lock_);
 
             if (node) {
-                log__printf(node->module_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
+                log__printf(node->module_, node->level_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
             }
         } while (node);
     }
@@ -299,7 +304,7 @@ int log__async_init() {
 
     __log_async.misc_memory = (log__async_node_t *)malloc(MAXIMUM_LOGSAVE_COUNT * sizeof(log__async_node_t));
     if (!__log_async.misc_memory) {
-        return -ENOMEM;
+        return RE_ERROR(ENOMEM);
     }
     __log_async.misc_index = 0;
 
@@ -324,20 +329,20 @@ int log__init() {
 
     retval = 0;
 
-    if (__log_inited >= 0) {
+    if (__inited >= 0) {
         return 0;
     }
 
     pthread_mutex_lock(&__init_locker);
      /* double check if other thread complete the initialize request */
-    if (__log_inited < 0) {
+    if (__inited < 0) {
         /* need to initialize global context */
         posix__pthread_mutex_init(&__log_file_lock);
         retval = log__async_init();
         if (retval < 0) {
             posix__pthread_mutex_release(&__log_file_lock);
         }else{
-            posix__atomic_xchange(&__log_inited, retval);
+            posix__atomic_xchange(&__inited, retval);
         }
     }
     pthread_mutex_unlock(&__init_locker);
@@ -363,10 +368,10 @@ void log__write(const char *module, enum log__levels level, int target, const ch
         char pename[255], *p;
         p = posix__getpename2(pename, sizeof(pename));
         if (p) {
-            log__printf(pename, target, &currst, logstr, (int) strlen(logstr));
+            log__printf(pename, level, target, &currst, logstr, (int) strlen(logstr));
         }
     } else {
-        log__printf(module, target, &currst, logstr, (int) strlen(logstr));
+        log__printf(module, level, target, &currst, logstr, (int) strlen(logstr));
     }
 }
 
@@ -393,6 +398,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
 #endif
     node = (log__async_node_t *)&__log_async.misc_memory[index % MAXIMUM_LOGSAVE_COUNT];
     node->target_ = target;
+    node->level_ = level;
     posix__localtime(&node->logst_);
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
@@ -405,7 +411,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     }
 
     va_start(ap, format);
-    log__format_string(level, posix__gettid(), format, ap, &node->logst_, node->logstr_, sizeof (node->logstr_));
+    log__format_string(node->level_, posix__gettid(), format, ap, &node->logst_, node->logstr_, sizeof (node->logstr_));
     va_end(ap);
 
     posix__pthread_mutex_lock(&__log_async.lock_);

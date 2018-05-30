@@ -1,4 +1,5 @@
-﻿#include "hash.h"
+﻿#include "compiler.h"
+#include "hash.h"
 #include "posix_atomic.h"
 
 #include <string.h>
@@ -133,7 +134,7 @@ int base64__encode(const char *input, int incb, char *output, int *outcb) {
     int k;
 
     if (!input || incb <= 0 || (!output && !outcb)) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     /* 补‘=’个数 */

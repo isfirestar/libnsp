@@ -20,7 +20,7 @@ static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111
 
 int posix__localtime(posix__systime_t *systime) {
     if (!systime) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     systime->epoch = posix__clock_epoch();

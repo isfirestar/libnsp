@@ -75,7 +75,7 @@ int __posix__rmdir(const char *dir) {
     DIR *dirp;
 
     if (!dir) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
     
     dirp = opendir(dir);
@@ -530,7 +530,7 @@ int posix__getpriority(int *priority) {
     DWORD retval;
 
     if (!priority) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     retval = GetPriorityClass(GetCurrentProcess());
@@ -545,7 +545,7 @@ int posix__getpriority(int *priority) {
     int retval;
 
     if (!priority) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     who = 0;
@@ -695,7 +695,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
     int need;
 
     if (!output_bytes) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     min = MultiByteToWideChar(CP_ACP, 0, *from, -1, NULL, 0);
@@ -703,7 +703,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
 
     if (!to || *output_bytes < (size_t) need) {
         *output_bytes = need;
-        return -EAGAIN;
+        return RE_ERROR(EAGAIN);
     }
 
     return MultiByteToWideChar(CP_ACP, 0, *from, -1, (LPWSTR) * to, (int) *output_bytes);
@@ -732,13 +732,13 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
     int min;
 
     if (!output_bytes) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     min = WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, NULL, 0, NULL, FALSE);
     if (!to || *output_bytes < (size_t) min) {
         *output_bytes = min;
-        return -EAGAIN;
+        return RE_ERROR(EAGAIN);
     }
 
     return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, (int) *output_bytes, NULL, FALSE);
@@ -762,7 +762,7 @@ int posix__write_file(int fd, const char *buffer, int size) {
     int wtotal;
 
     if (fd < 0 || size <= 0 || !buffer) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     wtotal = 0;
@@ -893,7 +893,7 @@ int posix__seek_file_offset(int fd, uint64_t offset) {
 
 int posix__file_open(const char *path, void *descriptor) {
     if (!path || !descriptor) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
 #if _WIN32
@@ -916,7 +916,7 @@ int posix__file_open(const char *path, void *descriptor) {
 
 int posix__file_open_always(const char *path, void *descriptor) {
     if (!path || !descriptor) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
 #if _WIN32
@@ -939,7 +939,7 @@ int posix__file_open_always(const char *path, void *descriptor) {
 
 int posix__file_create(const char *path, void *descriptor) {
     if (!path || !descriptor) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
 #if _WIN32
@@ -962,7 +962,7 @@ int posix__file_create(const char *path, void *descriptor) {
 
 int posix__file_create_always(const char *path, void *descriptor) {
     if (!path || !descriptor) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
 #if _WIN32

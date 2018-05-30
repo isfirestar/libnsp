@@ -22,6 +22,11 @@ char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch);
 __extern__
 uint32_t posix__chord32( uint32_t value);
 __extern__
-uint16_t posix__chord16( uint16_t value);
+uint16_t posix__chord16( uint16_t value); 
+
+/*
+ * a common initializer for any module
+ */
+
 
 #endif

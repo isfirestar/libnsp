@@ -21,7 +21,7 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waitable_handle) {
 /*--------------------------------------------------------------------------------------------------------------------------*/
 int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
     if (!waiter) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 
     waiter->sync_ = 1;
@@ -33,7 +33,7 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 #else
     if (__posix_init_waitable_handle(waiter) < 0) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 #endif
     return 0;
@@ -41,7 +41,7 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
 
 int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
     if (!waiter) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
     waiter->sync_ = 0;
 
@@ -52,7 +52,7 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 #else
     if (__posix_init_waitable_handle(waiter) < 0) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
 #endif
     return 0;
@@ -85,7 +85,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
 #endif
 
     if (!waiter) {
-        return -EINVAL;
+        return RE_ERROR(EINVAL);
     }
     retval = 0;
 
@@ -115,21 +115,27 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
            no mater what status it is now */
         if (waiter->sync_) {
             waiter->pass_ = 0;
-        }
-
-        while (!waiter->pass_) {
-            retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
-            /* fail syscall */
-            if (0 != retval) {
-                retval = -1;
-                break;
+            while (!waiter->pass_) {
+                retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
+                /* fail syscall */
+                if (0 != retval) {
+                    retval = -1;
+                    break;
+                }
             }
-        }
 
-        /* reset @pass_ flag to zero immediately after wait syscall,
-            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
-        if (waiter->sync_) {
+            /* reset @pass_ flag to zero immediately after wait syscall,
+                to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
             waiter->pass_ = 0;
+        } else {
+
+            /* for notification waitable handle, 
+                all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
+                the object is always in a state of signal before method @posix__reset_waitable_handle called.
+                */
+            if (!waiter->pass_) {
+                retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
+            }
         }
 
         posix__pthread_mutex_unlock(&waiter->mutex_);
@@ -149,28 +155,32 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
            no mater what status it is now */
         if (waiter->sync_) {
             waiter->pass_ = 0;
-        }
+            while (!waiter->pass_) {
+                retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+                /* timedout, break the loop */
+                if (ETIMEDOUT == retval) {
+                    break;
+                }
 
-        while (!waiter->pass_) {
-            retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-            /* timedout, break the loop */
-            if (ETIMEDOUT == retval) {
-                break;
+    			/* fail syscall */
+                if (0 != retval) {
+                    retval = -1;
+                    break;
+                }
             }
-
-			/* fail syscall */
-            if (0 != retval) {
-                retval = -1;
-                break;
-            }
-        }
 		
-        /* reset @pass_ flag to zero immediately after wait syscall,
-            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
-        if (waiter->sync_) {
+            /* reset @pass_ flag to zero immediately after wait syscall,
+                to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
             waiter->pass_ = 0;
-        }
-
+        } else {
+            /* for notification waitable handle, 
+                all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
+                the object is always in a state of signal before method @posix__reset_waitable_handle called.
+                */
+            if (!waiter->pass_) {
+                retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+            }
+         }
         posix__pthread_mutex_unlock(&waiter->mutex_);
     }
     return retval;
