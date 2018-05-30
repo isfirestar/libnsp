@@ -80,7 +80,7 @@ int __posix__rmdir(const char *dir) {
     
     dirp = opendir(dir);
     if (!dirp) {
-        return make_error_result(errno);
+        return RE_ERROR(errno);
     }
     
     while (NULL != (ent = readdir(dirp))) {
