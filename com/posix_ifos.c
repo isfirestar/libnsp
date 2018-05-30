@@ -900,14 +900,14 @@ int posix__file_open(const char *path, void *descriptor) {
 	HANDLE fd;
     fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
-        return make_error_result(GetLastError());
+        return RE_ERROR(GetLastError());
     }
     *((HANDLE *) descriptor) = fd;
 #else
     int fd;
     fd = open(path, O_RDWR);
     if (fd < 0) {
-        return make_error_result(errno);
+        return RE_ERROR(errno);
     }
     *((int *) descriptor) = fd;
 #endif
@@ -923,14 +923,14 @@ int posix__file_open_always(const char *path, void *descriptor) {
     HANDLE fd;
 	fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
-        return make_error_result(GetLastError());
+        return RE_ERROR(GetLastError());
     }
     *((HANDLE *) descriptor) = fd;
 #else
     int fd;
     fd = open(path, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
-        return make_error_result(errno);
+        return RE_ERROR(errno);
     }
     *((int *) descriptor) = fd;
 #endif
@@ -946,14 +946,14 @@ int posix__file_create(const char *path, void *descriptor) {
     HANDLE fd;
 	fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
-        return make_error_result(GetLastError());
+        return RE_ERROR(GetLastError());
     }
     *((HANDLE *) descriptor) = fd;
 #else
     int fd;
     fd = open(path, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
-        return make_error_result(errno);
+        return RE_ERROR(errno);
     }
     *((int *) descriptor) = fd;
 #endif
@@ -969,14 +969,14 @@ int posix__file_create_always(const char *path, void *descriptor) {
     HANDLE fd;
 	fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
-        return make_error_result(GetLastError());
+        return RE_ERROR(GetLastError());
     }
     *((HANDLE *) descriptor) = fd;
 #else
     int fd;
     fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
-        return make_error_result(errno);
+        return RE_ERROR(errno);
     }
     *((int *) descriptor) = fd;
 #endif
