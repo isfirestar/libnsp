@@ -620,13 +620,15 @@ int posix__getsysmem(sys_memory_t *sysmem) {
     }
 
     memset(sysmem, 0, sizeof ( sys_memory_t));
-    if (s_info.totalhigh > 0) {
+
+    /* in 32bit(arm?) version os, the s_info.*high will be some unknown data */
+    if (s_info.totalhigh > 0 && sizeof(void *) > sizeof(uint32_t)) {
         sysmem->totalram = s_info.totalhigh;
         sysmem->totalram <<= 32;
     }
     sysmem->totalram |= s_info.totalram;
 
-    if (s_info.freehigh > 0) {
+    if (s_info.freehigh > 0 && sizeof(void *) > sizeof(uint32_t)) {
         sysmem->freeram = s_info.freehigh;
         sysmem->freeram <<= 32;
     }
