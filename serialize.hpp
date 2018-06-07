@@ -117,7 +117,7 @@ namespace nsp {
         typedef proto_crt_t<float> proto_float32_t;
         typedef proto_crt_t<double> proto_float64_t;
 
-        template<class T, int ENABLE_BIG_ENDIAN = 0 >
+        template<class T, class NL = uint32_t, int ENABLE_BIG_ENDIAN = 0>
         struct proto_vector_t : public std::vector<T>, public proto_interface {
 
             proto_vector_t() : std::vector<T>() {
@@ -126,14 +126,14 @@ namespace nsp {
 
             virtual const int length() const override {
                 int sum = 0;
-                sum += proto_crt_t<uint32_t>().length();
+                sum += proto_crt_t<NL>().length();
                 for (const T &iter : * this) sum += iter.length();
                 return sum;
             }
 
             virtual unsigned char *serialize(unsigned char *byte_stream) const override {
                 unsigned char *stream_pos = byte_stream;
-                proto_crt_t<uint32_t> element_count((uint32_t)this->size());
+                proto_crt_t<NL> element_count((NL)this->size());
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
                 stream_pos = element_count.serialize(stream_pos);
                 for (const T &iter : * this) {
@@ -145,12 +145,12 @@ namespace nsp {
 
             virtual const unsigned char *build(const unsigned char *byte_stream, int &cb) override {
                 const unsigned char *stream_pos = byte_stream;
-                proto_crt_t<uint32_t> element_count;
+                proto_crt_t<NL> element_count;
                 stream_pos = element_count.build(stream_pos, cb);
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
 				if ( !stream_pos ) return nullptr;
 				if ( !SAFE_VECTOR_SIZE_CHECKING( element_count ) ) return nullptr;
-                for (uint32_t i = 0; i < element_count; i++) {
+                for (NL i = 0; i < element_count; i++) {
                     T item;
                     stream_pos = item.build(stream_pos, cb);
                     if (!stream_pos) return nullptr;
@@ -160,7 +160,7 @@ namespace nsp {
             }
         };
 
-        template<class T, int ENABLE_BIG_ENDIAN = 0 >
+        template<class T, class NL = uint32_t, int ENABLE_BIG_ENDIAN = 0 >
         struct proto_string_t : public std::basic_string<T>, public proto_interface {
 
             proto_string_t() : std::basic_string<T>() {
@@ -177,17 +177,17 @@ namespace nsp {
 
             virtual const int length() const override {
                 int cb = 0;
-                cb += proto_crt_t<uint32_t>().length();
+                cb += proto_crt_t<NL>().length();
                 cb += (int) (std::basic_string<T>::size() * sizeof ( T));
                 return cb;
             }
 
             virtual unsigned char *serialize(unsigned char *byte) const override {
                 unsigned char *stream_pos = byte;
-                proto_crt_t<uint32_t> element_count((uint32_t) std::basic_string<T>::size());
+                proto_crt_t<NL> element_count(static_cast<NL>( std::basic_string<T>::size()));
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
                 stream_pos = element_count.serialize(stream_pos);
-                for (const T &iter : * this) {
+                for (const T &iter : *this) {
                     stream_pos = proto_crt_t<T>(iter).serialize(stream_pos);
                     if (!stream_pos) return nullptr;
                 }
@@ -196,7 +196,7 @@ namespace nsp {
 
             virtual const unsigned char *build(const unsigned char *byte_stream, int &cb) override {
                 const unsigned char *stream_pos = byte_stream;
-                proto_crt_t<uint32_t> element_count;
+                proto_crt_t<NL> element_count;
                 stream_pos = element_count.build(stream_pos, cb);
                 if (ENABLE_BIG_ENDIAN) element_count = toolkit::change_byte_order(element_count.value_);
                 if ( !stream_pos ) return nullptr;
@@ -216,12 +216,12 @@ namespace nsp {
                 return this->c_str();
             }
 
-            proto_string_t<T> &operator=(const T *ptr) {
+            proto_string_t<T, NL, ENABLE_BIG_ENDIAN> &operator=(const T *ptr) {
                 std::basic_string<T>::operator=(ptr);
                 return *this;
             }
 
-            proto_string_t<T> &operator=(const std::basic_string<T> &stdstr) {
+            proto_string_t<T, NL, ENABLE_BIG_ENDIAN> &operator=(const std::basic_string<T> &stdstr) {
                 std::basic_string<T>::operator=(stdstr);
                 return *this;
             }
