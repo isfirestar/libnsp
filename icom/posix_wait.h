@@ -6,12 +6,9 @@
 typedef struct __waitable_handle {
     int sync_; /* as boolean check */
 #if _WIN32
-    HANDLE cond_;
+    HANDLE handle_;
 #else
-    pthread_cond_t cond_;
-    pthread_condattr_t condattr_;
-    int pass_;
-    posix__pthread_mutex_t mutex_;
+    void *handle_;
 #endif
 } posix__waitable_handle_t;
 
