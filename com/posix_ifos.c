@@ -176,47 +176,30 @@ int posix__rm(const char *const target) {
     if (!target) {
         return -1;
     }
-#if _WIN32
+
     if (posix__isdir(target)) {
         return __posix__rmdir(target);
     } else {
         return DeleteFileA(target);
     }
-#else
-    if (posix__isdir(target)) {
-        return __posix__rmdir(target);
-    } else {
-        return remove(target);
-    }
-#endif
 }
 
 void posix__close(int fd) {
-#if _WIN32
     if ((HANDLE) fd != INVALID_HANDLE_VALUE) {
         CloseHandle((HANDLE) fd);
     }
-#else
-    if (fd > 0) {
-        close(fd);
-    }
-#endif
 }
 
 int posix__fflush(int fd) {
     if (fd < 0) {
         return EINVAL;
     }
-#if _WIN32
+
     return convert_boolean_condition_to_retval(FlushFileBuffers((HANDLE) fd));
-#else
-    return fdatasync(fd);
-#endif
 }
 
 const char *posix__fullpath_current() {
     static char fullpath[255];
-#if _WIN32
     uint32_t length;
 
     fullpath[0] = 0;
@@ -227,22 +210,6 @@ const char *posix__fullpath_current() {
     } else {
         return NULL;
     }
-#else
-    long pid;
-    char link[64];
-
-    memset(fullpath, 0, 255);
-    pid = posix__getpid();
-    if (pid < 0) {
-        return NULL;
-    }
-
-    posix__sprintf(link, cchof(link), "/proc/%d/exe", pid);
-    if (readlink(link, fullpath, sizeof ( fullpath)) < 0) {
-        return NULL;
-    }
-    return fullpath;
-#endif
 }
 
 char *posix__fullpath_current2(char *holder, int cb) {
@@ -251,26 +218,13 @@ char *posix__fullpath_current2(char *holder, int cb) {
     }
 
     memset(holder, 0, cb);
-#if _WIN32
+
     uint32_t length;
     length = GetModuleFileNameA(NULL, holder, cb );
     if (0 == length) {
         return NULL;
     }
-#else
-    long pid;
-    char link[64];
 
-    pid = posix__getpid();
-    if (pid < 0) {
-        return NULL;
-    }
-
-    posix__sprintf(link, cchof(link), "/proc/%d/exe", pid);
-    if (readlink(link, holder, cb) < 0) {
-        return NULL;
-    }
-#endif
     return holder;
 }
 
