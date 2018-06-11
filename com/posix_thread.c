@@ -1,13 +1,8 @@
 ﻿#include "posix_thread.h"
 
-#if !_WIN32
-#include <unistd.h>
-#include <syscall.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-#endif
-
 #if _WIN32
+
+#include <windows.h>
 
 struct WIN32_THPAR {
     void*(*start_rtn_)(void*);
@@ -24,10 +19,8 @@ uint32_t WINAPI ThProc(void* parameter) {
     }
     return 0;
 }
-#endif
 
 int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
-#if _WIN32
     HANDLE th;
     struct WIN32_THPAR *thpar = malloc(sizeof ( struct WIN32_THPAR));
     thpar->arg_ = arg;
@@ -40,15 +33,9 @@ int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), voi
     tidp->detached_ = posix__false;
     tidp->pid_ = th;
     return 0;
-#else
-    tidp->detached_ = posix__false;
-    pthread_attr_init(&tidp->attr_);
-    return pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
-#endif
 }
 
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
-#if _WIN32
     HANDLE th;
     struct WIN32_THPAR *thpar = malloc(sizeof ( struct WIN32_THPAR));
 
@@ -67,23 +54,9 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     tidp->detached_ = posix__false;
     tidp->pid_ = th;
     return 0;
-#else
-    if (!tidp) {
-        return -EINVAL;
-    }
-
-    pthread_attr_init(&tidp->attr_);
-    if (pthread_attr_setschedpolicy(&tidp->attr_, SCHED_RR) < 0) {
-        return -1;
-    }
-
-    tidp->detached_ = posix__false;
-    return pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
-#endif
 }
 
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
-#if _WIN32
     HANDLE th;
     struct WIN32_THPAR *thpar = malloc(sizeof ( struct WIN32_THPAR));
 
@@ -100,33 +73,14 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 
     if (SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
         SetThreadPriority(th, 31);
-        ;
     }
 
     tidp->detached_ = posix__false;
     tidp->pid_ = th;
     return 0;
-#else
-    if (!tidp) {
-        return RE_ERROR(EINVAL);
-    }
-
-    pthread_attr_init(&tidp->attr_);
-
-    /* 实时线程直接导致进程优先级提升 */
-    if (0 == nice(-5)) {
-        if (pthread_attr_setschedpolicy(&tidp->attr_, SCHED_FIFO) < 0) {
-            return -1;
-        }
-    }
-
-    tidp->detached_ = posix__false;
-    return pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
-#endif
 }
 
 int posix__pthread_detach(posix__pthread_t * tidp) {
-#if _WIN32
     if (!tidp) {
         return -EINVAL;
     }
@@ -138,7 +92,115 @@ int posix__pthread_detach(posix__pthread_t * tidp) {
     tidp->pid_ = NULL;
     tidp->detached_ = posix__true;
     return 0;
+}
+
+int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
+    if (tidp) {
+        if (posix__pthread_joinable(tidp)) {
+            WaitForSingleObject(tidp->pid_, INFINITE);
+            CloseHandle(tidp->pid_);
+        }
+    }
+    return 0;
+}
+
+void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
+    if (mutex) {
+        InitializeCriticalSection(&mutex->handle_);
+    }
+}
+
+void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex) {
+    if (mutex) {
+        EnterCriticalSection(&mutex->handle_);
+    }
+}
+
+int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex) {
+    if (mutex) {
+        return convert_boolean_condition_to_retval(TryEnterCriticalSection(&mutex->handle_));
+    }
+    return -1;
+}
+
+int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires) {
+    return -1;
+}
+
+void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex) {
+    if (mutex) {
+        LeaveCriticalSection(&mutex->handle_);
+    }
+}
+
+void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex) {
+    if (mutex) {
+        DeleteCriticalSection(&mutex->handle_);
+    }
+}
+
+void posix__pthread_yield() {
+    SwitchToThread();
+}
+
 #else
+
+#include <unistd.h>
+#include <syscall.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+
+int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
+    tidp->detached_ = posix__false;
+    pthread_attr_init(&tidp->attr_);
+    return pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
+}
+
+int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
+    int retval;
+    if (!tidp) {
+        return RE_ERROR(EINVAL);
+    }
+
+    pthread_attr_init(&tidp->attr_);
+    if (pthread_attr_setschedpolicy(&tidp->attr_, SCHED_RR) < 0) {
+        return RE_ERROR(errno);
+    }
+
+    tidp->detached_ = posix__false;
+    retval = pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
+    if (0 == retval) {
+        return 0;
+    }
+    return RE_ERROR(retval);
+}
+
+int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
+    int retval;
+    if (!tidp) {
+        return RE_ERROR(EINVAL);
+    }
+
+    pthread_attr_init(&tidp->attr_);
+
+    /* raiseup policy for realtime thread */
+    if (0 == nice(-5)) {
+        retval = pthread_attr_setschedpolicy(&tidp->attr_, SCHED_FIFO);
+        if ( 0 != retval) {
+            return RE_ERROR(retval);
+        }
+    }
+
+    tidp->detached_ = posix__false;
+
+    retval = pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
+    if (0 == retval) {
+        return 0;
+    }
+    return RE_ERROR(retval);
+}
+
+int posix__pthread_detach(posix__pthread_t * tidp) {
     if (!tidp) {
         return RE_ERROR(EINVAL);
     }
@@ -155,23 +217,9 @@ int posix__pthread_detach(posix__pthread_t * tidp) {
     }
 
     return -1;
-#endif
-}
-
-int posix__pthread_joinable(posix__pthread_t * tidp) {
-    return ((!tidp->detached_) && (tidp->pid_ > 0));
 }
 
 int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
-#if _WIN32
-    UNREFERENCED_PARAMETER(retval);
-    if (tidp) {
-        if (posix__pthread_joinable(tidp)) {
-            WaitForSingleObject(tidp->pid_, INFINITE);
-            CloseHandle(tidp->pid_);
-        }
-    }
-#else
     if (!tidp) {
         return RE_ERROR(EINVAL);
     }
@@ -182,46 +230,29 @@ int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
         }
     }
     tidp->pid_ = 0;
-#endif
     return 0;
 }
 
 void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
-#if _WIN32
-    InitializeCriticalSection(&mutex->handle_);
-#else
     pthread_mutexattr_init(&mutex->attr_);
-    /* 为和 WIN32 的临界区保持语义兼容性， MUTEX 默认为递归锁 */
     pthread_mutexattr_settype(&mutex->attr_, PTHREAD_MUTEX_RECURSIVE_NP);
     pthread_mutex_init(&mutex->handle_, &mutex->attr_);
-#endif
 }
 
 void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex) {
     if (mutex) {
-#if _WIN32
-        EnterCriticalSection(&mutex->handle_);
-#else
         pthread_mutex_lock(&mutex->handle_);
-#endif
     }
 }
 
 int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex) {
     if (mutex) {
-#if _WIN32
-        return convert_boolean_condition_to_retval(TryEnterCriticalSection(&mutex->handle_));
-#else
         return pthread_mutex_trylock(&mutex->handle_);
-#endif
     }
     return -1;
 }
 
 int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires) {
-#if _WIN32
-    return -1;
-#else
     struct timespec abstime;
     if (clock_gettime(CLOCK_REALTIME, &abstime) >= 0) {
         uint64_t nsec = abstime.tv_nsec;
@@ -231,34 +262,27 @@ int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expir
         return pthread_mutex_timedlock(&mutex->handle_, &abstime);
     }
     return -1;
-#endif
 }
 
 void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex) {
     if (mutex) {
-#if _WIN32
-        LeaveCriticalSection(&mutex->handle_);
-#else
         pthread_mutex_unlock(&mutex->handle_);
-#endif
     }
 }
 
 void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex) {
     if (mutex) {
-#if _WIN32
-        DeleteCriticalSection(&mutex->handle_);
-#else
         pthread_mutexattr_destroy(&mutex->attr_);
         pthread_mutex_destroy(&mutex->handle_);
-#endif
     }
 }
 
 void posix__pthread_yield() {
-#if _WIN32
-    SwitchToThread();
-#else
     syscall(__NR_sched_yield);
+}
+
 #endif
+
+int posix__pthread_joinable(posix__pthread_t * tidp) {
+    return ((!tidp->detached_) && (tidp->pid_ > 0));
 }
