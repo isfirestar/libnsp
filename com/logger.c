@@ -49,7 +49,11 @@ typedef struct {
 } log__file_describe_t;
 
 static int __inited = -1;
+#if _WIN32
+static CRITICAL_SECTION __init_locker;
+#else
 static pthread_mutex_t __init_locker = PTHREAD_MUTEX_INITIALIZER;
+#endif
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
 static posix__pthread_mutex_t __log_file_lock;
 
@@ -230,11 +234,15 @@ void log__printf(const char *module, enum log__levels level, int target, const p
     }
 
     if (target & kLogTarget_Stdout) {
+#if _WIN32
+		printf("%s", logstr);
+#else
         if (level == kLogLevel_Error) {
             write(STDERR_FILENO, logstr, cb); /* 2 */
         }else{
             write(STDOUT_FILENO, logstr, cb); /* 1 */
         }
+#endif
     }
 
     if (target & kLogTarget_Sysmesg) {
@@ -273,7 +281,7 @@ void *log__asnyc_proc(void *argv) {
             posix__pthread_mutex_lock(&__log_async.lock_);
 #if _WIN32
             if (!list_empty(&__log_async.items_)) {
-                __sync_sub_and_fetch(&__log_async.pendding_, 1);
+				InterlockedDecrement((volatile LONG *)&__log_async.pendding_);
                 node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
                 if (node) {
                     list_del(&node->link_);
@@ -333,6 +341,27 @@ int log__init() {
         return 0;
     }
 
+#if _WIN32
+	static int mutex_inited = 0;
+	if (!mutex_inited) {
+		InitializeCriticalSection(&__init_locker);
+		mutex_inited = 1;
+	}
+
+	EnterCriticalSection(&__init_locker);
+	/* double check if other thread complete the initialize request */
+	if (__inited < 0) {
+		/* need to initialize global context */
+		posix__pthread_mutex_init(&__log_file_lock);
+		retval = log__async_init();
+		if (retval < 0) {
+			posix__pthread_mutex_release(&__log_file_lock);
+		}else{
+			posix__atomic_xchange(&__inited, retval);
+		}
+	}
+	LeaveCriticalSection(&__init_locker);
+#else
     pthread_mutex_lock(&__init_locker);
      /* double check if other thread complete the initialize request */
     if (__inited < 0) {
@@ -346,6 +375,7 @@ int log__init() {
         }
     }
     pthread_mutex_unlock(&__init_locker);
+#endif
     return retval;
 }
 
