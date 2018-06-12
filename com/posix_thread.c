@@ -35,6 +35,15 @@ int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), voi
     return 0;
 }
 
+int posix__pthread_self(posix__pthread_t *tidp) {
+    if (!tidp) {
+        return RE_ERROR(EINVAL);
+    }
+
+    tidp->pid_ = GetCurrentThread();
+    return 0;
+}
+
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
     HANDLE th;
     struct WIN32_THPAR *thpar = malloc(sizeof ( struct WIN32_THPAR));
@@ -154,6 +163,15 @@ int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), voi
     tidp->detached_ = posix__false;
     pthread_attr_init(&tidp->attr_);
     return pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
+}
+
+int posix__pthread_self(posix__pthread_t *tidp) {
+    if (!tidp) {
+        return RE_ERROR(EINVAL);
+    }
+
+    tidp->pid_ = pthread_self();
+    return 0;
 }
 
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
