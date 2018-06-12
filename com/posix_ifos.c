@@ -366,7 +366,7 @@ int posix__setpriority_critical() {
 }
 
 int posix__setpriority_realtime() {
-    return nice(-10);
+	return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS));
 }
 
 int posix__getnprocs() {

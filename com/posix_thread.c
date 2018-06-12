@@ -15,7 +15,7 @@ uint32_t WINAPI ThProc(void* parameter) {
     void *arg = par->arg_;
     free(par);
     if (start_rtn) {
-        start_rtn(arg);
+        return (uint32_t)start_rtn(arg);
     }
     return 0;
 }
@@ -98,7 +98,12 @@ int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
     if (tidp) {
         if (posix__pthread_joinable(tidp)) {
             WaitForSingleObject(tidp->pid_, INFINITE);
-            CloseHandle(tidp->pid_);
+			if (retval) {
+				DWORD exitCode;
+				GetExitCodeThread(tidp->pid_, &exitCode);
+				*retval = (void *)exitCode;
+			}
+			CloseHandle(tidp->pid_);
         }
     }
     return 0;
