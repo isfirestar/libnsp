@@ -980,7 +980,7 @@ int posix__setpriority_realtime() {
 }
 
 int posix__getnprocs() {
-    return get_nprocs();
+    return sysconf(_SC_NPROCESSORS_CONF);
 }
 
 int posix__getsysmem(sys_memory_t *sysmem) {
