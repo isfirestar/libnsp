@@ -50,6 +50,8 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         return -1;
     }
 
+    /* if t state of the specified object is signaled before wait function called, the return value willbe @WAIT_OBJECT_0
+        either synchronous event or notification event.*/
     if (0 == tsc || tsc < 0x7FFFFFFF) {
         waitRes = WaitForSingleObject(waiter->handle_, tsc);
     } else {
@@ -212,10 +214,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     if (0 == tsc || tsc >= 0x7FFFFFFF) {
         posix__pthread_mutex_lock(&phandle->mutex_);
 
-        /* synchronous wait object need to set @pass_ flag to zero befor wait syscall,
-           no mater what status it is now */
         if (waiter->sync_) {
-            phandle->pass_ = 0;
             while (!phandle->pass_) {
                 retval = pthread_cond_wait(&phandle->cond_, &phandle->mutex_.handle_);
                 /* fail syscall */
@@ -244,7 +243,8 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     }
 
     /* wait with timeout */
-    if (clock_gettime(CLOCK_MONOTONIC, &abstime) >= 0) {
+    retval = clock_gettime(CLOCK_MONOTONIC, &abstime);
+    if (0 == retval ) {
         /* Calculation delay from current time，if tv_nsec >= 1000000000 will cause pthread_cond_timedwait EINVAL, 64 bit overflow */
         uint64_t nsec = abstime.tv_nsec;
         nsec += ((uint64_t) tsc * 1000000); /* convert milliseconds to nanoseconds */
@@ -252,10 +252,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         abstime.tv_nsec = (nsec % 1000000000);
         posix__pthread_mutex_lock(&phandle->mutex_);
 
-        /* synchronous wait object need to set @pass_ flag to zero befor wait syscall,
-           no mater what status it is now */
         if (waiter->sync_) {
-            phandle->pass_ = 0;
             while (!phandle->pass_) {
                 retval = pthread_cond_timedwait(&phandle->cond_, &phandle->mutex_.handle_, &abstime);
                 /* timedout, break the loop */
@@ -282,9 +279,12 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
                 retval = pthread_cond_timedwait(&phandle->cond_, &phandle->mutex_.handle_, &abstime);
             }
          }
+         
         posix__pthread_mutex_unlock(&phandle->mutex_);
+        return retval;
     }
-    return retval;
+    
+    return RE_ERROR(errno);
 }
 
 int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) {
