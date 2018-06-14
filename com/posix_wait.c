@@ -279,7 +279,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
                 retval = pthread_cond_timedwait(&phandle->cond_, &phandle->mutex_.handle_, &abstime);
             }
          }
-         
+
         posix__pthread_mutex_unlock(&phandle->mutex_);
         return retval;
     }
@@ -293,7 +293,7 @@ int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 
     struct __posix__waitable_handle_t *phandle = (struct __posix__waitable_handle_t *)waiter->handle_;
-    if (phandle) {
+    if (!phandle) {
         return RE_ERROR(EINVAL);
     }
 
