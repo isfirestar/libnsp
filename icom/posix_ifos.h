@@ -25,6 +25,8 @@ __extern__
 int posix__dlclose(void *handle);
 __extern__
 const char *posix__dlerror();
+__extern__
+const char *posix__dlerror2(char *estr);
 
 /* ifos-dir/file posix__pmkdir 方法允许递归构建目录树*/
 __extern__

@@ -52,6 +52,8 @@ typedef struct {
 __extern__
 int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 __extern__
+int posix__pthread_self(posix__pthread_t *tidp); 
+__extern__
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 __extern__
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);

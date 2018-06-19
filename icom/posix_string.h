@@ -12,6 +12,8 @@ int posix__strisdigit( const char *str, int len);
 __extern__
 const char *posix__strerror();
 __extern__
+const char *posix__strerror2(char *estr);
+__extern__
 char *posix__strtok(char *s, const char *delim, char **save_ptr);
 __extern__
 wchar_t *posix__wcstok(wchar_t *s, const wchar_t *delim, wchar_t **save_ptr);

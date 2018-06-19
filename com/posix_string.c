@@ -71,6 +71,28 @@ const char *posix__strerror() {
 #endif
 }
 
+const char *posix__strerror2(char *estr) {
+#if _WIN32
+    if (!estr) {
+        return -1;
+    }
+
+    char errmsg[128];
+    DWORD d = GetLastError();
+    DWORD chs;
+    chs = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, 0, d, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), errmsg, 128, 0);
+    if (0 == chs) {
+        posix__strcpy(estr, 128, "syscall fatal.");
+    } else {
+        posix__strcpy(estr, 128, errmsg);
+        posix__trim(estr);
+    }
+    return estr;
+#else
+    return strerror(errno);
+#endif
+}
+
 char *posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt) {
 #if _WIN32
     errno_t e;

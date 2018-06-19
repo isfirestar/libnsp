@@ -12,6 +12,11 @@
 
 #include <time.h>
 
+struct dir_stack_node {
+    struct list_head link;
+    char dir[255];
+};
+
 #if _WIN32
 #include <Windows.h>
 #pragma comment(lib, "Advapi32.lib")
@@ -92,6 +97,13 @@ const char *posix__dlerror() {
     return posix__strerror();
 }
 
+const char *posix__dlerror2(char *estr) {
+    if (estr) {
+        return posix__strerror2(estr);
+    }
+    return NULL;
+}
+
 int posix__mkdir(const char *const dir) {
     if (!dir) {
         return -1;
@@ -108,11 +120,6 @@ int posix__mkdir(const char *const dir) {
     return -1;
 }
 
-struct dir_stack_node {
-    struct list_head link;
-    char dir[255];
-};
-
 int posix__pmkdir(const char *const dir) {
     struct list_head stack;
     struct dir_stack_node *node; /* 不允许使用栈对象 */
@@ -122,6 +129,10 @@ int posix__pmkdir(const char *const dir) {
 
     if (!dir) {
         return -1;
+    }
+
+    if ( 0 == strlen(dir)) {
+        return RE_ERROR(ENOENT);
     }
 
     retval = 0;
@@ -700,23 +711,91 @@ const char *posix__dlerror() {
     return dlerror();
 }
 
+const char *posix__dlerror2(char *estr) {
+    if (estr) {
+        strcpy(estr, posix__dlerror());
+        return estr;
+    }
+    return NULL;
+}
+
 int posix__mkdir(const char *const dir) {
     if (dir) {
-        return mkdir(dir, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH);
+        if (0 == mkdir(dir, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH)) {
+            return 0;
+        }
+
+        int e = errno;
+        if (EEXIST == e) {
+            return 0;
+        }
+
+        return RE_ERROR(e);
     }
     return -1;
 }
 
 int posix__pmkdir(const char *const dir) {
-    FILE *p;
-    char command[255];
-    sprintf(command, "mkdir -p %s", dir);
-    p = popen(command, "r");
-    if (p) {
-        pclose(p);
-        return 0;
+    struct list_head stack;
+    struct dir_stack_node *node; /* 不允许使用栈对象 */
+    struct dir_stack_node *pos;
+    char *p_next_dir_symb;
+    int retval;
+
+    if (!dir) {
+        return -1;
     }
-    return -1;
+
+    if ( 0 == strlen(dir)) {
+        return RE_ERROR(ENOENT);
+    }
+
+    retval = 0;
+    INIT_LIST_HEAD(&stack);
+
+    node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
+    if (!node) {
+        return -1;
+    }
+    posix__strcpy(node->dir, cchof(node->dir), dir);
+    list_add(&node->link, &stack);
+    while (!list_empty(&stack)) {
+        pos = list_first_entry(&stack, struct dir_stack_node, link);
+        retval = posix__mkdir(pos->dir);
+        if ( retval >= 0) {
+            list_del(&pos->link);
+            free(pos);
+        } else {
+            /* 不是目录结构性错误, 一律认定为失败 */
+            if (-ENOENT != retval) {
+                break;
+            }
+            p_next_dir_symb = strrchr(pos->dir, POSIX__DIR_SYMBOL);
+            if (!p_next_dir_symb) {
+                retval = -ENOMEM;
+                break;
+            }
+            *p_next_dir_symb = 0;
+            node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
+            if (!node) {
+                retval = -ENOMEM;
+                break;
+            }
+            posix__strncpy(node->dir, (uint32_t) (cchof(node->dir)), dir, (uint32_t) (p_next_dir_symb - pos->dir));
+            list_add(&node->link, &stack);
+        }
+    }
+
+    /* 返回前， 必须保证所有的内存被清理 
+            无论前置操作是否成功 */
+    while (!list_empty(&stack)) {
+        pos = list_first_entry(&stack, struct dir_stack_node, link);
+        if (posix__mkdir(pos->dir)) {
+            list_del(&pos->link);
+            free(pos);
+        }
+    }
+    return RE_ERROR(retval);
 }
 
 int posix__rm(const char *const target) {
