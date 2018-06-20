@@ -713,8 +713,11 @@ const char *posix__dlerror() {
 
 const char *posix__dlerror2(char *estr) {
     if (estr) {
-        strcpy(estr, posix__dlerror());
-        return estr;
+        const char *p = posix__dlerror();
+        if (p) {
+            strcpy(estr, p);
+            return estr;
+        }
     }
     return NULL;
 }
