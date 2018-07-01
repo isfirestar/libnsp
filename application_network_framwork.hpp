@@ -210,7 +210,7 @@ namespace nsp {
                 on_disconnected(previous);
             }
 
-			// 客户端对象收到连接请求， 肯定是严重错误
+			// syn request in cleint session? this maybe a fatal error.
             virtual void on_accepted(HTCPLINK lnk) override final {
                 abort();
             } 
@@ -230,7 +230,7 @@ namespace nsp {
                 ;
             }
 
-            // 类似于 tcp, 这里也提供 psend 方法支持 proto_interface 的内置流化
+            // like tcp session, support @psend method to send packet which using proto_interface serializer
             int psend(const proto::proto_interface *package, const endpoint &ep) {
                 if (!package) {
                     return -1;
