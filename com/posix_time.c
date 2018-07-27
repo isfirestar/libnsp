@@ -159,8 +159,13 @@ uint64_t posix__clock_epoch() {
 uint64_t posix__clock_gettime() {
     /* gcc -lrt */
     struct timespec tsc;
-    if (clock_gettime(CLOCK_MONOTONIC, &tsc) >= 0) { /* CLOCK_REALTIME */
-        return (uint64_t) tsc.tv_sec * /*10000000*/ET_METHOD_NTKRNL + tsc.tv_nsec / 100; /* 返回 100ns, 兼容windows的KRNL计时 */
+    uint64_t tick;
+
+    /* CLOCK_REALTIME */
+    if (0 == clock_gettime(CLOCK_MONOTONIC, &tsc)) {
+        /* 返回 100ns, 兼容windows的KRNL计时 */
+        tick = (uint64_t) tsc.tv_sec * ET_METHOD_NTKRNL + tsc.tv_nsec / 100;
+        return  tick;
     }
     return 0;
 }
