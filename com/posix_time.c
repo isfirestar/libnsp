@@ -150,8 +150,9 @@ uint64_t posix__gettick() {
 
 uint64_t posix__clock_epoch() {
     struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-        return ((uint64_t) ts.tv_sec * /*10000000*/ET_METHOD_NTKRNL + ts.tv_nsec / 100);
+    if (0 == clock_gettime(CLOCK_REALTIME, &ts)) {
+        /* force format to 10000000 aligned */
+        return ((uint64_t) ts.tv_sec * ET_METHOD_NTKRNL + ts.tv_nsec / 100);
     }
     return 0;
 }

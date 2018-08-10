@@ -14,7 +14,7 @@
 
 struct dir_stack_node {
     struct list_head link;
-    char dir[255];
+    char dir[MAXPATH];
 };
 
 #if _WIN32
@@ -210,7 +210,7 @@ int posix__fflush(int fd) {
 }
 
 const char *posix__fullpath_current() {
-    static char fullpath[255];
+    static char fullpath[MAXPATH];
     uint32_t length;
 
     fullpath[0] = 0;
@@ -256,7 +256,7 @@ const char *posix__getpedir() {
 
 char *posix__getpedir2(char *holder, int cb) {
     char *p;
-    char fullpath[255];
+    char fullpath[MAXPATH];
 
     if (!holder || cb <= 0) {
         return NULL;
@@ -293,7 +293,7 @@ const char *posix__getpename() {
 
 char *posix__getpename2(char *holder, int cb) {
     char *p;
-    char fullpath[255];
+    char fullpath[MAXPATH];
 
     if (!holder || cb <= 0) {
         return NULL;
@@ -660,7 +660,7 @@ int __posix__rmdir(const char *dir) {
             continue;
         }
 
-        char filename[260];
+        char filename[MAXPATH];
         posix__sprintf(filename, cchof(filename), "%s/%s", dir, ent->d_name);
 
         if (posix__isdir(filename)) {
@@ -827,11 +827,11 @@ int posix__fflush(int fd) {
 }
 
 const char *posix__fullpath_current() {
-    static char fullpath[255];
+    static char fullpath[MAXPATH];
     long pid;
     char link[64];
 
-    memset(fullpath, 0, 255);
+    memset(fullpath, 0, sizeof(fullpath));
     pid = posix__getpid();
     if (pid < 0) {
         return NULL;
@@ -882,7 +882,7 @@ const char *posix__getpedir() {
 
 char *posix__getpedir2(char *holder, int cb) {
     char *p;
-    char fullpath[255];
+    char fullpath[MAXPATH];
 
     if (!holder || cb <= 0) {
         return NULL;
@@ -919,7 +919,7 @@ const char *posix__getpename() {
 
 char *posix__getpename2(char *holder, int cb) {
     char *p;
-    char fullpath[255];
+    char fullpath[MAXPATH];
 
     if (!holder || cb <= 0) {
         return NULL;

@@ -191,7 +191,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
         log__close_file(file);
     } while (0);
 
-    char pedir[255];
+    char pedir[MAXPATH];
     posix__getpedir2(pedir, sizeof(pedir));
     posix__getpename2(pename, cchof(pename));
 
@@ -395,7 +395,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     va_end(ap);
 
     if (!module) {
-        char pename[255], *p;
+        char pename[MAXPATH], *p;
         p = posix__getpename2(pename, sizeof(pename));
         if (p) {
             log__printf(pename, level, target, &currst, logstr, (int) strlen(logstr));
@@ -433,7 +433,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
     } else {
-        char pename[255], *p;
+        char pename[MAXPATH], *p;
         p = posix__getpename2(pename, sizeof(pename));
         if (p) {
             posix__strcpy(node->module_, cchof(node->module_), pename);

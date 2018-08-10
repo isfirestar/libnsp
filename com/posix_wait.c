@@ -142,6 +142,7 @@ struct __posix__waitable_handle_t {
     pthread_condattr_t condattr_;
     int pass_;
     posix__pthread_mutex_t mutex_;
+    int pending;
 };
 
 static
@@ -159,6 +160,8 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waiter) {
         pthread_cond_init(&phandle->cond_, &phandle->condattr_);
         /* initialize the pass condition */
         phandle->pass_ = 0;
+        /* initialize the pending count of this object */
+        phandle->pending = 0;
 
         waiter->handle_ = phandle;
         return 0;
@@ -188,6 +191,9 @@ void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) {
     if (waiter) {
         struct __posix__waitable_handle_t *phandle = (struct __posix__waitable_handle_t *)waiter->handle_;
         if ( phandle ) {
+            /* object destory routine will be blocked when the waitting reference count greater then zero
+                destory routine awaken the threads which waitting for this object */
+
             pthread_condattr_destroy(&phandle->condattr_);
             pthread_cond_destroy(&phandle->cond_);
             posix__pthread_mutex_release(&phandle->mutex_);
@@ -214,6 +220,9 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     if (0 == tsc || tsc >= 0x7FFFFFFF) {
         posix__pthread_mutex_lock(&phandle->mutex_);
 
+        /* increase the pending count of this object to protect self memory */
+        ++phandle->pending;
+
         if (waiter->sync_) {
             while (!phandle->pass_) {
                 retval = pthread_cond_wait(&phandle->cond_, &phandle->mutex_.handle_);
@@ -238,6 +247,9 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
             }
         }
 
+        /* decase the pending count when wait method completed */
+        --phandle->pending;
+
         posix__pthread_mutex_unlock(&phandle->mutex_);
         return retval;
     }
@@ -250,7 +262,11 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         nsec += ((uint64_t) tsc * 1000000); /* convert milliseconds to nanoseconds */
         abstime.tv_sec += (nsec / 1000000000);
         abstime.tv_nsec = (nsec % 1000000000);
+
         posix__pthread_mutex_lock(&phandle->mutex_);
+
+        /* increase the pending count of this object to protect self memory */
+        ++phandle->pending;
 
         if (waiter->sync_) {
             while (!phandle->pass_) {
@@ -279,6 +295,9 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
                 retval = pthread_cond_timedwait(&phandle->cond_, &phandle->mutex_.handle_, &abstime);
             }
          }
+
+         /* decase the pending count when wait method completed */
+        --phandle->pending;
 
         posix__pthread_mutex_unlock(&phandle->mutex_);
         return retval;
