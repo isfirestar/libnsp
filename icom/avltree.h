@@ -4,15 +4,10 @@
 #include "compiler.h"
 
 /* avl search tree, by neo-anderson 2012-05-05 copyright(C) shunwang Co,.Ltd*/
-
-#pragma pack(push, 1)
-
 struct avltree_node_t {
     struct avltree_node_t *lchild, *rchild; /* 分别指向左右子树 */
     int height; /* 树的高度 */
-};
-
-#pragma pack(pop)
+} __POSIX_TYPE_ALIGNED__;
 
 /**
  *	结构类型重声明

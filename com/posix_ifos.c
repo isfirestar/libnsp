@@ -645,6 +645,7 @@ int __posix__rmdir(const char *dir) {
     /* > rm -rf dir */
     struct dirent *ent;
     DIR *dirp;
+    char filename[MAXPATH];
 
     if (!dir) {
         return RE_ERROR(EINVAL);
@@ -659,8 +660,7 @@ int __posix__rmdir(const char *dir) {
         if (0 == posix__strcmp(ent->d_name, ".") || 0 == posix__strcmp(ent->d_name, "..")) {
             continue;
         }
-
-        char filename[MAXPATH];
+        
         posix__sprintf(filename, cchof(filename), "%s/%s", dir, ent->d_name);
 
         if (posix__isdir(filename)) {
@@ -869,6 +869,7 @@ const char *posix__getpedir() {
     char *p;
     static char dir[MAXPATH];
     const char *fullpath = posix__fullpath_current();
+
     if (!fullpath) {
         return NULL;
     }
@@ -941,6 +942,7 @@ char *posix__getpename2(char *holder, int cb) {
 
 const char *posix__gettmpdir() {
     static char buffer[MAXPATH];
+
     posix__strcpy(buffer, cchof(buffer), "/tmp");
     return buffer;
 }
@@ -957,7 +959,9 @@ char *posix__gettmpdir2(char *holder, int cb) {
 int posix__isdir(const char *const file) {
     struct stat st;
 
-    if (!file) return -1;
+    if (!file) {
+        return -EINVAL;
+    }
 
     if (stat(file, &st) < 0) {
         return -1;
@@ -1021,6 +1025,11 @@ int posix__getnprocs() {
 
 int posix__getsysmem(sys_memory_t *sysmem) {
     struct sysinfo s_info;
+
+    if (!sysmem) {
+        return -EINVAL;
+    }
+
     if (sysinfo(&s_info) < 0) {
         return -1;
     }
@@ -1140,14 +1149,16 @@ int posix__read_file(int fd, char *buffer, int size) {
  */
 int posix__random(const int range_min, const int range_max) {
     static int rand_begin = 0;
+    int u;
+    int r;
+
     if (1 == posix__atomic_inc(&rand_begin)) {
         srand((unsigned int) time(NULL));
     } else {
         posix__atomic_dec(&rand_begin);
     }
 
-    int u;
-    int r = rand();
+    r = rand();
 
     if (range_min == range_max) {
         u = ((0 == range_min) ? r : range_min);
@@ -1165,6 +1176,7 @@ int posix__random(const int range_min, const int range_max) {
 uint64_t posix__get_filesize(const char *path) {
     uint64_t filesize = (uint64_t) (-1);
     struct stat statbuff;
+
     if (stat(path, &statbuff) < 0) {
         return filesize;
     } else {
@@ -1175,6 +1187,7 @@ uint64_t posix__get_filesize(const char *path) {
 
 int posix__seek_file_offset(int fd, uint64_t offset) {
     __off_t newoff;
+
     newoff = lseek(fd, (__off_t) offset, SEEK_SET);
     if (newoff != offset) {
         return -1;
@@ -1184,11 +1197,12 @@ int posix__seek_file_offset(int fd, uint64_t offset) {
 }
 
 int posix__file_open(const char *path, void *descriptor) {
+    int fd;
+
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-
-    int fd;
+    
     fd = open(path, O_RDWR);
     if (fd < 0) {
         return RE_ERROR(errno);
@@ -1198,11 +1212,12 @@ int posix__file_open(const char *path, void *descriptor) {
 }
 
 int posix__file_open_always(const char *path, void *descriptor) {
+    int fd;
+
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-
-    int fd;
+    
     fd = open(path, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
         return RE_ERROR(errno);
@@ -1212,11 +1227,12 @@ int posix__file_open_always(const char *path, void *descriptor) {
 }
 
 int posix__file_create(const char *path, void *descriptor) {
+    int fd;
+
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-
-    int fd;
+    
     fd = open(path, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
         return RE_ERROR(errno);
@@ -1226,11 +1242,12 @@ int posix__file_create(const char *path, void *descriptor) {
 }
 
 int posix__file_create_always(const char *path, void *descriptor) {
+    int fd;
+
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-
-    int fd;
+    
     fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
         return RE_ERROR(errno);

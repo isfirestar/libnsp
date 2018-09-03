@@ -2,8 +2,6 @@
 
 #if _WIN32
 
-#include <windows.h>
-
 struct WIN32_THPAR {
     void*(*start_rtn_)(void*);
     void *arg_;
@@ -164,26 +162,23 @@ void posix__pthread_yield() {
 #include <sys/syscall.h>
 #include <sys/types.h>
 
-int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
+int posix__pthread_create(posix__pthread_t *tidp, void*(*start_rtn)(void*), void * arg) {
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
     tidp->detached_ = posix__false;
     pthread_attr_init(&tidp->attr_);
     return pthread_create(&tidp->pid_, &tidp->attr_, start_rtn, arg);
 }
 
 int posix__pthread_self(posix__pthread_t *tidp) {
-    if (!tidp) {
-        return RE_ERROR(EINVAL);
-    }
-
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
     tidp->pid_ = pthread_self();
     return 0;
 }
 
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
     int retval;
-    if (!tidp) {
-        return RE_ERROR(EINVAL);
-    }
+    
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
 
     pthread_attr_init(&tidp->attr_);
     if (pthread_attr_setschedpolicy(&tidp->attr_, SCHED_RR) < 0) {
@@ -200,9 +195,8 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg) {
     int retval;
-    if (!tidp) {
-        return RE_ERROR(EINVAL);
-    }
+    
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
 
     pthread_attr_init(&tidp->attr_);
 
@@ -224,9 +218,7 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 }
 
 int posix__pthread_detach(posix__pthread_t * tidp) {
-    if (!tidp) {
-        return RE_ERROR(EINVAL);
-    }
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
 
     if (!posix__pthread_joinable(tidp)) {
         return -1;
@@ -243,9 +235,8 @@ int posix__pthread_detach(posix__pthread_t * tidp) {
 }
 
 int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
-    if (!tidp) {
-        return RE_ERROR(EINVAL);
-    }
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
+    
     if (tidp->pid_ > 0) {
         if (posix__pthread_joinable(tidp)) {
             pthread_join(tidp->pid_, retval);
@@ -256,26 +247,34 @@ int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
     return 0;
 }
 
-void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
-    pthread_mutexattr_init(&mutex->attr_);
+/*------------------------ posix__pthread_mutex_ methods ------------------------*/
+int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
+    int retval;
+
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(mutex);
+
+    retval = pthread_mutexattr_init(&mutex->attr_);
+    if (0 != retval) {
+        return RE_ERROR(retval);
+    }
+
     pthread_mutexattr_settype(&mutex->attr_, PTHREAD_MUTEX_RECURSIVE_NP);
-    pthread_mutex_init(&mutex->handle_, &mutex->attr_);
+    return pthread_mutex_init(&mutex->handle_, &mutex->attr_);
 }
 
 void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex) {
-    if (mutex) {
-        pthread_mutex_lock(&mutex->handle_);
-    }
+    __POSIX_EFFICIENT_ALIGNED_PTR_NR__(mutex);
+    pthread_mutex_lock(&mutex->handle_);
 }
 
 int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex) {
-    if (mutex) {
-        return pthread_mutex_trylock(&mutex->handle_);
-    }
-    return -1;
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(mutex);
+    return pthread_mutex_trylock(&mutex->handle_);
 }
 
 int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires) {
+    __POSIX_EFFICIENT_ALIGNED_PTR_IR__(mutex);
+
     struct timespec abstime;
     if (clock_gettime(CLOCK_REALTIME, &abstime) >= 0) {
         uint64_t nsec = abstime.tv_nsec;
@@ -288,16 +287,14 @@ int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expir
 }
 
 void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex) {
-    if (mutex) {
-        pthread_mutex_unlock(&mutex->handle_);
-    }
+    __POSIX_EFFICIENT_ALIGNED_PTR_NR__(mutex);
+    pthread_mutex_unlock(&mutex->handle_);
 }
 
 void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex) {
-    if (mutex) {
-        pthread_mutexattr_destroy(&mutex->attr_);
-        pthread_mutex_destroy(&mutex->handle_);
-    }
+    __POSIX_EFFICIENT_ALIGNED_PTR_NR__(mutex);
+    pthread_mutexattr_destroy(&mutex->attr_);
+    pthread_mutex_destroy(&mutex->handle_);
 }
 
 void posix__pthread_yield() {

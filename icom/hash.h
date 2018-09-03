@@ -8,6 +8,14 @@
 
 #include "compiler.h"
 
+struct __MD5_CTX {
+    uint32_t state[4];
+    uint32_t count[2];
+    uint8_t buffer[64];
+    uint8_t PADDING[64];
+} __POSIX_TYPE_ALIGNED__;
+typedef struct __MD5_CTX MD5_CTX;
+
 /*--------------------------------------------VFN1/VFN1a--------------------------------------------*/
 __extern__
 uint32_t vfn1_h32( const unsigned char *key, int length );
@@ -44,15 +52,7 @@ int base64__encode(const char *input, int incb, char *output, int *outcb);
 __extern__
 int base64__decode(const char *input, int incb, char *output, int *outcb);
 
-#pragma pack (push, 1)
-typedef struct {
-    uint32_t state[4];
-    uint32_t count[2];
-    uint8_t buffer[64];
-    uint8_t PADDING[64];
-} MD5_CTX;
-#pragma pack(pop)
-
+/* MD5 calc */
 __extern__
 void MD5__Init(MD5_CTX *md5ctx);
 __extern__

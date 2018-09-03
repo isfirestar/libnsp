@@ -1,6 +1,8 @@
 ﻿#if !defined SWNET_DEF_HEADER_2016_5_24
 #define SWNET_DEF_HEADER_2016_5_24
 
+#include "compiler.h"
+
 #if defined __cplusplus
 #define STD_C_FORMAT extern "C"
 #include <cstdint>
@@ -63,9 +65,7 @@ typedef int nis_boolean_t;
 #define LINK_ADDR_LOCAL   (0x0001)   /* get local using endpoint pair */
 #define LINK_ADDR_REMOTE  (0x0002)   /* get remote using endpoint pair */
 
-#pragma pack(push, 1)
-
-typedef struct _nis_event_t {
+struct _nis_event_t {
     int Event; 
 
     union {
@@ -78,7 +78,9 @@ typedef struct _nis_event_t {
             HUDPLINK Link;
         } Udp;
     } Ln;
-} nis_event_t;
+} __POSIX_TYPE_ALIGNED__;
+
+typedef struct _nis_event_t nis_event_t;
 
 /* user callback definition for network events */
 typedef void( STD_CALL *nis_callback_t)(const nis_event_t *naio_event, const void *pParam2);
@@ -105,15 +107,17 @@ typedef nis_callback_t udp_io_callback_t;
 typedef int( STD_CALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
 typedef int( STD_CALL *tcp_ppt_builder_t)(void *data, int cb);
 
-typedef struct _TCP_STREAM_TEMPLATE {
+struct __tcp_stream_template {
     tcp_ppt_parser_t parser_;
     tcp_ppt_builder_t builder_;
     int cb_;
-} tst_t;
+} __POSIX_TYPE_ALIGNED__;
+
+typedef struct __tcp_stream_template tst_t;
 
 typedef int( STD_CALL *nis_sender_maker_t)(void *data, int cb, void *context);
 
-typedef struct {
+struct __tcp_data {
     union {
         struct {
             const char * Data;
@@ -138,7 +142,9 @@ typedef struct {
         } DebugLog;
 
     } e;
-} tcp_data_t;
+}__POSIX_TYPE_ALIGNED__;
+
+typedef struct __tcp_data tcp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     UDP implement
@@ -148,7 +154,7 @@ typedef struct {
 #define UDP_FLAG_BROADCAST      (1)
 #define UDP_FLAG_MULTICAST      (2)
 
-typedef struct {
+struct __udp_data {
     union {
         struct {
             const char * Data;
@@ -170,36 +176,37 @@ typedef struct {
             const char *logstr;
         } DebugLog;
     } e;
+} __POSIX_TYPE_ALIGNED__;
 
-} udp_data_t;
-
+typedef struct __udp_data udp_data_t;
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     GRP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
-typedef struct _packet_grp_node {
+struct __packet_grp_node {
     char *Data;
     int Length;
-} packet_grp_node_t;
+} __POSIX_TYPE_ALIGNED__;
+typedef struct __packet_grp_node packet_grp_node_t;
 
-typedef struct _packet_grp {
+struct __packet_grp {
     packet_grp_node_t *Items;
     int Count;
-} packet_grp_t;
+} __POSIX_TYPE_ALIGNED__;
+typedef struct __packet_grp packet_grp_t;
 
 /* 支持库版本协议	*/
-typedef struct _swnet_version {
+struct __swnet_version {
     short procedure_;
     short main_;
     short sub_;
     short leaf_;
-} swnet_version_t;
+} __POSIX_TYPE_ALIGNED__;
+typedef struct __swnet_version swnet_version_t;
 
 /*  receiving notification text informations from nshost moudle
     version > 9.6.0
 */
 typedef void( STD_CALL *nis_event_callback_t)(const char *host_event, const char *reserved, int rescb);
-
-#pragma pack(pop)
 
 #endif

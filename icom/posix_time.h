@@ -3,9 +3,7 @@
 
 #include "compiler.h"
 
-#pragma pack (push, 1)
-
-typedef struct {
+struct __posix__systime_t {
     int year;
     int month;
     int day;
@@ -14,9 +12,9 @@ typedef struct {
     int second;
     uint64_t low; // 100ns
     uint64_t epoch;
-} posix__systime_t;
+} __POSIX_TYPE_ALIGNED__;
 
-#pragma pack(pop)
+typedef struct __posix__systime_t posix__systime_t;
 
 /* 获取系统时间滴答， 毫秒单位 */
 __extern__

@@ -376,6 +376,22 @@ namespace nsp {
             }, ep);
         }
 
+        int obudp::sendto(const std::string &buffer, const char *epstr) {
+            nsp::tcpip::endpoint ep;
+            if (nsp::tcpip::endpoint::build(epstr, ep) < 0) {
+                return -1;
+            }
+            return this->sendto(buffer, ep);
+        }
+
+        int obudp::sendto(const char *data, int cb, const char *epstr) {
+            nsp::tcpip::endpoint ep;
+            if (nsp::tcpip::endpoint::build(epstr, ep) < 0) {
+                return -1;
+            }
+            return this->sendto(data, cb, ep);
+        }
+
         const endpoint &obudp::local() const {
             return local_;
         }

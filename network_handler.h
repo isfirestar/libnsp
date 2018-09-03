@@ -90,6 +90,8 @@ namespace nsp {
             int sendto(int cb, const std::function<int( void *, int) > &fill, const endpoint &ep);
             int sendto(const std::string &buffer, const endpoint &ep);
             int sendto(const char *data, int cb, const endpoint &ep);
+            int sendto(const std::string &buffer, const char *epstr);
+            int sendto(const char *data, int cb, const char *epstr);
 
             const endpoint &local() const;
             void setlnk(const HUDPLINK lnk);

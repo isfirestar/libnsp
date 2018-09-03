@@ -3,14 +3,26 @@
 
 #include "posix_thread.h"
 
-typedef struct __waitable_handle {
-    int sync_; /* as boolean check */
 #if _WIN32
-    HANDLE handle_;
+
+struct __waitable_handle {
+    int sync_; /* as boolean check */
+    HANDLE cond_;
+};
+
 #else
-    void *handle_;
+
+struct __waitable_handle {
+    int sync_; /* as boolean check */
+    pthread_cond_t cond_;
+    pthread_condattr_t condattr_;
+    int pass_;
+    posix__pthread_mutex_t mutex_;
+}__POSIX_TYPE_ALIGNED__;
+
 #endif
-} posix__waitable_handle_t;
+
+typedef struct __waitable_handle posix__waitable_handle_t;
 
 __extern__
 int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter);

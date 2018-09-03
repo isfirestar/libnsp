@@ -25,6 +25,31 @@
 #endif /*__cplusplus */
 #endif
 
+#if !defined __ALIGNED_SIZE__
+#define __ALIGNED_SIZE__        (sizeof(void *))
+#endif /* !__ALIGNED_SIZE__ */
+
+#if !_WIN32
+#if !defined __POSIX_TYPE_ALIGNED__
+#define __POSIX_TYPE_ALIGNED__ __attribute__((aligned(__ALIGNED_SIZE__)))
+#endif
+#endif
+
+#if !defined __POSIX_POINTER_ALIGNED__
+#define __POSIX_POINTER_ALIGNED__(ptr)   ((0 == ((long)ptr) % __ALIGNED_SIZE__))
+#endif /* !__POSIX_POINTER_ALIGNED__ */
+
+#if !defined __POSIX_EFFICIENT_ALIGNED_PTR__
+#define __POSIX_EFFICIENT_ALIGNED_PTR__(ptr)    ((NULL != ptr) && __POSIX_POINTER_ALIGNED__(ptr))
+#endif /* !__POSIX_EFFICIENT_ALIGNED_PTR__ */
+
+#define __POSIX_EFFICIENT_PTR__(ptr) ((NULL != ptr))
+#define __POSIX_EFFICIENT_PTR_IR__(ptr) do { if (!__POSIX_EFFICIENT_PTR__(ptr)) return -EINVAL; } while (0)
+#define __POSIX_EFFICIENT_PTR_NR__(ptr) do { if (!__POSIX_EFFICIENT_PTR__(ptr)) return; } while (0)
+
+#define __POSIX_EFFICIENT_ALIGNED_PTR_IR__(ptr) do { if (!__POSIX_EFFICIENT_ALIGNED_PTR__(ptr)) return -EINVAL; } while (0)
+#define __POSIX_EFFICIENT_ALIGNED_PTR_NR__(ptr) do { if (!__POSIX_EFFICIENT_ALIGNED_PTR__(ptr)) return; } while (0)
+
 #if !defined UINT64_STRFMT 
 #if _WIN32
 #define UINT64_STRFMT "%I64u"

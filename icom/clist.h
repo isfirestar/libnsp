@@ -3,13 +3,9 @@
 
 #include "compiler.h"
 
-#pragma pack(push,1 )
-
 struct list_head {
     struct list_head *next, *prev;
-};
-
-#pragma pack(pop)
+}__POSIX_TYPE_ALIGNED__;
 
 #define LIST_HEAD_INIT(name) { &(name), &(name) }
 

@@ -1,46 +1,51 @@
-﻿/* gcc -lpthread */
-
-#ifndef POSIX_THREAD_H
+﻿#ifndef POSIX_THREAD_H
 #define POSIX_THREAD_H
 
 #include "compiler.h"
 
 #if _WIN32
+
 #include <Windows.h>
-#else
-#include <pthread.h>
-#endif
 
-typedef struct {
+struct __posix_pthread {
     posix__boolean_t detached_;
-#if _WIN32
     HANDLE pid_;
-#else
-    pthread_t pid_;
-    pthread_attr_t attr_;
-#endif
-} posix__pthread_t;
+};
 
-#if _WIN32
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
             posix__pthread_t name ={ .pid_ = NULL }
 #define POSIX_PTHREAD_TYPE_INIT  { .pid_ = NULL }
+
+struct __posix__pthread_mutex {
+    CRITICAL_SECTION handle_;
+};
+
 #else
+
+/* -lpthread */
+#include <pthread.h>
+
+struct __posix_pthread {
+    posix__boolean_t detached_;
+    pthread_t pid_;
+    pthread_attr_t attr_;
+} __POSIX_TYPE_ALIGNED__;
+
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
             posix__pthread_t name ={ .detached_ = posix__false, .pid_ = 0 }
 
 #define POSIX_PTHREAD_TYPE_INIT \
             {.detached_ = posix__false, .pid_ = 0 }
-#endif
 
-typedef struct {
-#if _WIN32
-    CRITICAL_SECTION handle_;
-#else
+struct __posix__pthread_mutex {
     pthread_mutex_t handle_;
     pthread_mutexattr_t attr_;
-#endif
-} posix__pthread_mutex_t;
+} __POSIX_TYPE_ALIGNED__;
+
+#endif // _WIN32
+
+typedef struct __posix_pthread          posix__pthread_t;
+typedef struct __posix__pthread_mutex   posix__pthread_mutex_t;
 
 /*
  * posix__pthread_create / posix__pthread_critical_create / posix__pthread_realtime_create
@@ -77,11 +82,12 @@ int posix__pthread_join(posix__pthread_t * tidp, void **retval);
 #endif
 
 __extern__
-void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex);
+int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex);
 __extern__
 void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex);
 __extern__
 int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex);
+
 /* try to get lock in @expires milliseconds
  * WIN32 programing not support
  */
