@@ -10,14 +10,32 @@
 #include "log.h"
 #include "old.hpp"
 
+/*
+ *  The application uses the class defined by the header file as the base class to define its own network session
+ *  and instantiate it.
+ *
+ *  notes that whether UDP or TCP client have these attributes:
+ *  1. instantiation must use @shared_ptr object, initial by using @std::make_shared implement
+ *  2. framwork will keep one reference count of object after @create framwork method success, it means
+ *      object can not automatic deconstruction by zeroing reference count in only user layer, unless @close framwork method called
+ *  3. It is strong recommended to use the @proto_interface framework to serialize or build network packets. 
+ *      and than post  the packets by calling framework method @psend, it is simpler and more reliable
+ *  4. receive data by overwrite framework virtual method @on_recvdata(const std::string &) associated TCP protocol or 
+ *      @on_recvdata(const std::string &, const endpoint &) associated UDP protocol
+ *  5. during receive proce, the thread layout of Linux is very difference from MS-WINDOWNS, 
+ *      applications do not need to pay special attention to the way these threads are laid out, 
+ *      however, it is recommended to switch threads to complete the long time-consuming operations, such as disk-IO or any wait method
+ */
+
 namespace nsp {
     namespace tcpip {
 
         template<class T>
         class tcp_application_service : public obtcp {
-            tcp_application_service(HTCPLINK lnk) = delete; // 作为监听对象， 不存在使用链接构造这一说法
+            tcp_application_service(HTCPLINK lnk) = delete;
 
-            // 下层不再需要关注链接建立的任何细节, 这个虚函数到此终止
+            // finalized the virtual function
+            // because inherit class does no need to known how the link created in server.
             virtual void on_accepted(HTCPLINK lnk) override final {
 
                 std::shared_ptr<T> sptr = std::make_shared<T>(lnk);
@@ -29,7 +47,7 @@ namespace nsp {
                 try {
                     sptr->bind_object(shared_from_this());
                     
-                    // 服务端有权在会话初次到达阶段拒绝连接
+                    // the server can declined the establish request when initial connected
                     if (sptr->on_established() < 0){
                         throw -ENETRESET;
                     }
@@ -45,7 +63,7 @@ namespace nsp {
                 }
             }
 
-            // 作为监听对象, 一定不会出现收到实际数据包的情况
+            // as the listening socket, there will be no actual data packets.
             virtual void on_recvdata(const std::string &data) override final {
                 abort();
             }
@@ -63,7 +81,7 @@ namespace nsp {
                 close();
             }
 
-            // 开始服务
+            // begin the services
             int begin(const endpoint &ep) {
                 return ( (create(ep) >= 0) ? listen() : -1);
             }
@@ -78,7 +96,7 @@ namespace nsp {
                 return begin(ep);
             }
 
-            // 客户端关闭后通知服务端
+            // the notification from client closed event
             void on_client_closed(const HTCPLINK lnk) {
                 std::lock_guard < decltype(client_locker_) > guard(client_locker_);
                 auto iter = client_set_.find(lnk);
@@ -140,7 +158,7 @@ namespace nsp {
 
             }
 
-            // 按链接查找一个客户端
+            // search a client object by it's HTCPLINK flag
             int search_client_by_link(const HTCPLINK lnk, std::shared_ptr<T> &client) const {
                 std::lock_guard < decltype(client_locker_) > guard(client_locker_);
                 auto iter = client_set_.find(lnk);
@@ -158,7 +176,6 @@ namespace nsp {
 namespace nsp {
     namespace tcpip {
 
-        /*指定底层协议类型， 定义TCP连接会话*/
         template<class T>
         class tcp_application_client : public obtcp {
             std::weak_ptr<tcp_application_service<tcp_application_client<T>>> tcp_application_server_;
@@ -177,8 +194,9 @@ namespace nsp {
 				;
             }
 
-            // 如果使用 proto::proto_interface 的流化和反流化模型， 则可以直接使用这样的对象进行发包操作
-            // 这种操作是框架最推荐的
+            // if using @proto::proto_interface mode to serialize or deserialize, 
+            // calling thread can send packets direct by @proto::proto_interface object
+            // this operation is recommended by framework
             int psend(const proto::proto_interface *package) {
                 if (!package) return -1;
                 return obtcp::send(package->length(), [&] (void *buffer, int cb) ->int {
@@ -193,12 +211,14 @@ namespace nsp {
                 tcp_application_server_ = std::static_pointer_cast< tcp_application_service<tcp_application_client < T>> >(object);
             }
             
-            // server 创建 session 后， 首次主动通知会话对象
+            // overwrite this virtual method to handle the event of inital connection created
+            // return negative integer value to cancel the enstablished link
             virtual int on_established() {
                 return 0;
             }
         protected:
-            // 如果服务端还在， 则通知服务端,有客户链接断开， 同时允许继续重写下行
+            // finalize the virtual method @on_closed, instead by @on_disconnected
+            // if the server object is still existed, notify it to remove weak pointer of this object.
             virtual void on_closed(HTCPLINK previous) override final {
                 auto sptr = tcp_application_server_.lock();
                 if (sptr) {

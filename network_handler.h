@@ -100,7 +100,7 @@ namespace nsp {
             void on_debug_output(const char *info);
 
             virtual void on_pre_close();
-               
+
         protected:
             std::atomic<HUDPLINK> lnk_{INVALID_HUDPLINK};
             endpoint local_;
