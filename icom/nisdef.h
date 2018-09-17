@@ -65,6 +65,9 @@ typedef int nis_boolean_t;
 #define LINK_ADDR_LOCAL   (0x0001)   /* get local using endpoint pair */
 #define LINK_ADDR_REMOTE  (0x0002)   /* get remote using endpoint pair */
 
+/* option of link attribute for both TCP and UDP */
+#define LINK_MASK_FULL_CALLBACK (1)     /* callback receive data include template header size, val is a bit of byte */
+
 struct _nis_event_t {
     int Event; 
 

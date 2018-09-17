@@ -10,8 +10,8 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 
     waiter->sync_ = 1;
-    waiter->handle_ = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (!waiter->handle_) {
+	waiter->cond_ = CreateEvent(NULL, FALSE, FALSE, NULL);
+	if (!waiter->cond_) {
         return -1;
     }
     return 0;
@@ -23,8 +23,8 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 
     waiter->sync_ = 0;
-    waiter->handle_ = CreateEvent(NULL, TRUE, FALSE, NULL);
-    if (!waiter->handle_) {
+	waiter->cond_ = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (!waiter->cond_) {
         return -1;
     }
     return 0;
@@ -32,9 +32,9 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
 
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) {
     if (waiter) {
-        if (waiter->handle_) {
-            CloseHandle(waiter->handle_);
-            waiter->handle_ = NULL;
+		if (waiter->cond_) {
+			CloseHandle(waiter->cond_);
+			waiter->cond_ = NULL;
         }
     }
 }
@@ -46,16 +46,16 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
         return RE_ERROR(EINVAL);
     }
     
-    if (!waiter->handle_) {
+	if (!waiter->cond_) {
         return -1;
     }
 
     /* if t state of the specified object is signaled before wait function called, the return value willbe @WAIT_OBJECT_0
         either synchronous event or notification event.*/
     if (0 == tsc || tsc < 0x7FFFFFFF) {
-        waitRes = WaitForSingleObject(waiter->handle_, tsc);
+		waitRes = WaitForSingleObject(waiter->cond_, tsc);
     } else {
-        waitRes = WaitForSingleObject(waiter->handle_, INFINITE);
+		waitRes = WaitForSingleObject(waiter->cond_, INFINITE);
     }
 
     if (WAIT_FAILED == waitRes) {
@@ -72,17 +72,17 @@ int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) {
         return RE_ERROR(EINVAL);
     }
 
-    if (!waiter->handle_) {
+	if (!waiter->cond_) {
         return RE_ERROR(EINVAL);
     }
 
-    return SetEvent(waiter->handle_);
+	return SetEvent(waiter->cond_);
 }
 
 void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
     if (waiter) {
-        if (waiter->handle_ && waiter->sync_ == 0) {
-            ResetEvent(waiter->handle_);
+		if (waiter->cond_ && waiter->sync_ == 0) {
+			ResetEvent(waiter->cond_);
         }
     }
 }

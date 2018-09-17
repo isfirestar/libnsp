@@ -33,6 +33,8 @@
 #if !defined __POSIX_TYPE_ALIGNED__
 #define __POSIX_TYPE_ALIGNED__ __attribute__((aligned(__ALIGNED_SIZE__)))
 #endif
+#else
+#define __POSIX_TYPE_ALIGNED__
 #endif
 
 #if !defined __POSIX_POINTER_ALIGNED__

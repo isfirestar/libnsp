@@ -74,7 +74,7 @@ const char *posix__strerror() {
 const char *posix__strerror2(char *estr) {
 #if _WIN32
     if (!estr) {
-        return -1;
+		return NULL;
     }
 
     char errmsg[128];

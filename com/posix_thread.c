@@ -116,10 +116,12 @@ int posix__pthread_join(posix__pthread_t *tidp, void **retval) {
     return 0;
 }
 
-void posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
+int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex) {
     if (mutex) {
         InitializeCriticalSection(&mutex->handle_);
+		return 0;
     }
+	return -EINVAL;
 }
 
 void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex) {
