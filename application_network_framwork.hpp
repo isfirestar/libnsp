@@ -25,6 +25,12 @@
  *  5. during receive proce, the thread layout of Linux is very difference from MS-WINDOWNS, 
  *      applications do not need to pay special attention to the way these threads are laid out, 
  *      however, it is recommended to switch threads to complete the long time-consuming operations, such as disk-IO or any wait method
+ *
+ *  Terminology:
+ *
+ *  Session: 
+ *      A stateful interaction between a Client and a Server. Some Sessions last only as long as the Network
+ *       Connection, others can span multiple consecutive Network Connections between a Client and a Server
  */
 
 namespace nsp {

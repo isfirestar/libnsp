@@ -259,8 +259,12 @@ void objclos(objhld_t hld) {
 		if ( OBJSTAT_CLOSEWAIT == obj->stat_ ) {
 			;
 		} else {
+            obj->stat_ = OBJSTAT_CLOSEWAIT;
+
+            /* if ref-count large than zero, do nothing during this close operation,
+                actual close will take place when the last count dereference */
 			if ( obj->refcnt_ > 0 ) {
-				obj->stat_ = OBJSTAT_CLOSEWAIT;
+				;
 			} else {
 				rmv = 1;
 			}
