@@ -241,8 +241,8 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     memset(obj->user_data_, 0, obj->user_size_);
 
     if (obj->initializer_) {
-        if (obj->initializer_((const void *)obj->user_data_, initctx, cbctx) < 0) {
-            obj->unloader_(-1, (const void *)obj->user_data_);
+        if (obj->initializer_((void *)obj->user_data_, initctx, cbctx) < 0) {
+            obj->unloader_(-1, (void *)obj->user_data_);
             free(obj);
             return -1;
         }
@@ -251,7 +251,7 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     return objtabinst(obj);
 }
 
-const void *objrefr(objhld_t hld) 
+void *objrefr(objhld_t hld) 
 {
     object_t *obj;
     unsigned char *user_data;
@@ -270,7 +270,7 @@ const void *objrefr(objhld_t hld)
     }
     UNLOCK(&g_objmgr.object_locker_);
 
-    return (const void *)user_data;
+    return (void *)user_data;
 }
 
 void objdefr(objhld_t hld) 
