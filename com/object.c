@@ -91,7 +91,7 @@ struct _object_manager {
 static struct _object_manager g_objmgr;
 #else
 static struct _object_manager g_objmgr = {
-    { NULL, NULL }, { NULL, NULL }, 0, PTHREAD_MUTEX_INITIALIZER,
+    .table_odd_ = { { NULL } }, .table_even_ = { { NULL } }, 0, PTHREAD_MUTEX_INITIALIZER,
 };
 #endif
 
@@ -196,7 +196,7 @@ void objtagfree(object_t *taget)
         call the unload routine if not null */
     if ( taget ) {
         if ( taget->unloader_ ) {
-            taget->unloader_( taget->hld_, (const void *)taget->user_data_ );
+            taget->unloader_( taget->hld_, (void *)taget->user_data_ );
         }
         free( taget );
     }
