@@ -273,6 +273,32 @@ void *objrefr(objhld_t hld)
     return (void *)user_data;
 }
 
+void *objreff(objhld_t hld)
+{
+    object_t *obj;
+    unsigned char *user_data;
+
+    obj = NULL;
+    user_data = NULL;
+
+    LOCK(&g_objmgr.object_locker_);
+    obj = objtabsrch(hld);
+    if (obj) {
+        /* object status CLOSE_WAIT will be ignore for @objrefr operation */
+        if (OBJSTAT_NORMAL == obj->stat_) {
+            ++obj->refcnt_;
+            user_data = obj->user_data_;
+
+            /* change the object states to CLOSEWAIT immediately, 
+                so, other reference request will fail, object will be close when ref-count decrease equal to zero. */
+            obj->stat_ = OBJSTAT_CLOSEWAIT;
+        }
+    }
+    UNLOCK(&g_objmgr.object_locker_);
+
+    return (void *)user_data;
+}
+
 void objdefr(objhld_t hld) 
 {
     object_t *obj, *removed;

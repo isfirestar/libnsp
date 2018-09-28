@@ -17,10 +17,12 @@ void objuninit();
 extern
 objhld_t objallo(int user_data_size, objinitfn_t initializer, objuninitfn_t unloader, void *initctx, unsigned int cbctx);
 extern
-void *objrefr(objhld_t hld);
+void *objrefr(objhld_t hld);	/* object reference */
 extern
-void objdefr(objhld_t hld);
+void objdefr(objhld_t hld);		/* object deference */
 extern
-void objclos(objhld_t hld);
-
+void *objreff(objhld_t hld);	/* object reference final */
+extern
+void objclos(objhld_t hld);		/* object mark close */
+	
 #endif
