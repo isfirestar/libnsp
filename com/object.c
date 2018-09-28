@@ -101,7 +101,16 @@ struct list_head *hld2root(objhld_t hld)
     struct list_head *root;
     int idx;
 
+    if (hld <= 0) {
+        return NULL;
+    }
+
+    /* Exclude illegal hld input parameter */
     idx = hld % OBJ_HASHTABLE_SIZE;
+    if (idx < 0 || idx >= OBJ_HASHTABLE_SIZE) {
+        return NULL;
+    }
+
     root = (((hld % 2) == 0) ? &g_objmgr.table_odd_[idx] : &g_objmgr.table_even_[idx]);
     if (!root->next || !root->prev) {
         INIT_LIST_HEAD(root);
@@ -124,7 +133,9 @@ objhld_t objtabinst(object_t *obj)
 
     /* map root pointer from table */
     root = hld2root(obj->hld_);
-    assert(root);
+    if (!root) {
+        return -1;
+    }
 
     /* insert into hash list */
     list_add_tail(&obj->hash_clash_, root);
@@ -143,7 +154,9 @@ int objtabrmve(objhld_t hld, object_t **removed)
 
     do {
         root = hld2root(hld);
-        assert(root);
+        if (!root) {
+            return -1;
+        }
 
         list_for_each_safe(pos, n, root) {
             cursor = containing_record(pos, object_t, hash_clash_);
@@ -174,7 +187,9 @@ object_t *objtabsrch(const objhld_t hld)
 
     do {
         root = hld2root(hld);
-        assert(root);
+        if (!root) {
+            return NULL;
+        }
 
         list_for_each_safe(pos, n, root) {
             cursor = containing_record(pos, object_t, hash_clash_);
