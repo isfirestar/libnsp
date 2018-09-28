@@ -222,7 +222,7 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
 {
     object_t *obj;
 
-    if (0 == user_size) {
+    if (user_size <= 0) {
         return -1;
     }
 
