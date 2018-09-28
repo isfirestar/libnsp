@@ -687,7 +687,9 @@ namespace nsp {
         }
 
         int base64_encode(const char *input, int input_cb, std::string &output) {
-            int outcb;
+            int outcb, retval = -1;
+            char *temp_output = nullptr;
+
             if (::base64__encode(input, input_cb, NULL, &outcb) < 0) {
                 return -1;
             }
@@ -697,16 +699,17 @@ namespace nsp {
             }
 
             try {
-                char *temp_output = new char[outcb];
-                if (::base64__encode(input, input_cb, temp_output, &outcb) < 0) {
-                    delete[]temp_output;
-                    return -1;
+                temp_output = new char[outcb];
+                retval = ::base64__encode(input, input_cb, temp_output, &outcb); 
+                if ( retval >= 0 ) {
+                    output.assign(temp_output, outcb);
                 }
-
-                output.assign(temp_output, outcb);
-                return 0;
             } catch (...) {
-                return -1;
+                ;
+            }
+
+            if (temp_output) {
+                delete []temp_output;
             }
             return 0;
         }
@@ -716,24 +719,28 @@ namespace nsp {
         }
 
         int base64_decode(const std::string &input, std::string &output) {
-            int outcb;
+            int outcb, retval = -1;
+            char *temp_output = nullptr;
+
             if (::base64__decode(input.c_str(), input.size(), NULL, &outcb) < 0) {
                 return -1;
             }
 
             try {
-                char *temp_output = new char[outcb];
-                if (::base64__decode(input.c_str(), input.size(), temp_output, &outcb) < 0) {
-                    delete[]temp_output;
-                    return -1;
+                temp_output = new char[outcb];
+                retval = ::base64__decode(input.c_str(), input.size(), temp_output, &outcb);
+                if (retval >= 0) {
+                    output.assign(temp_output, outcb);
                 }
-
-                output.assign(temp_output, outcb);
-                return 0;
             } catch (...) {
-                return -1;
+                ;
             }
-            return 0;
+
+            if (temp_output) {
+                delete[]temp_output;
+            }
+            
+            return retval;
         }
 
 		template<>

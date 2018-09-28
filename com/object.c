@@ -99,7 +99,7 @@ static
 struct list_head *hld2root(objhld_t hld) 
 {
     struct list_head *root;
-    int idx;
+    objhld_t idx;
 
     if (hld <= 0) {
         return NULL;
