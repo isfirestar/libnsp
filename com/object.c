@@ -122,24 +122,35 @@ struct list_head *hld2root(objhld_t hld)
 static
 objhld_t objtabinst(object_t *obj) 
 {
+    objhld_t hld;
     struct list_head *root;
 
-    assert(obj);
+    if (!obj) {
+        return INVALID_OBJHLD;
+    }
+
+    /* initial/reinitial the object's handle to INVALID */
+    obj->hld_ = INVALID_OBJHLD;
 
     LOCK(&g_objmgr.object_locker_);
 
-    /* automatic increase handle number */
-    obj->hld_ = ++g_objmgr.automatic_id_;
+    do {
+        /* automatic increase handle number */
+        hld = ++g_objmgr.automatic_id_;
 
-    /* map root pointer from table */
-    root = hld2root(obj->hld_);
-    if (!root) {
-        return -1;
-    }
+        /* map root pointer from table */
+        root = hld2root(obj->hld_);
+        if (!root) {
+            break;
+        }
 
-    /* insert into hash list */
-    list_add_tail(&obj->hash_clash_, root);
-
+        /* insert into hash list */
+        list_add_tail(&obj->hash_clash_, root);
+       
+        /* give the handle to object ptr */
+        obj->hld_ = hld;
+    } while (0);
+    
     UNLOCK(&g_objmgr.object_locker_);
     return obj->hld_;
 }
@@ -238,12 +249,12 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     object_t *obj;
 
     if (user_size <= 0) {
-        return -1;
+        return INVALID_OBJHLD;
     }
 
-    obj = (object_t *) malloc(user_size + sizeof ( object_t));
+    obj = (object_t *) malloc(user_size + sizeof(object_t));
     if (!obj) {
-        return -1;
+        return INVALID_OBJHLD;
     }
 
     obj->stat_ = OBJSTAT_NORMAL;
@@ -262,6 +273,31 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
             return -1;
         }
     }
+
+    return objtabinst(obj);
+}
+
+objhld_t objallo2(int user_data_size) 
+{
+    object_t *obj;
+
+    if (user_size <= 0) {
+        return INVALID_OBJHLD;
+    }
+
+    obj = (object_t *) malloc(user_size + sizeof(object_t));
+    if (!obj) {
+        return INVALID_OBJHLD;
+    }
+
+    obj->stat_ = OBJSTAT_NORMAL;
+    obj->refcnt_ = 0;
+    obj->objsizecb_ = user_size + sizeof ( object_t);
+    obj->user_size_ = user_size;
+    INIT_LIST_HEAD(&obj->hash_clash_);
+    obj->initializer_ = NULL;
+    obj->unloader_ = NULL;
+    memset(obj->user_data_, 0, obj->user_size_);
 
     return objtabinst(obj);
 }

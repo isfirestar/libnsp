@@ -12,10 +12,6 @@
 #include "icom/posix_naos.h"
 #include "icom/posix_ifos.h"
 
-#if !defined MAXIMU_TCPIP_PORT_NUMBER
-#define MAXIMU_TCPIP_PORT_NUMBER   (0xFFFF)
-#endif // !MAXIMU_TCPIP_PORT_NUMBER
-
 namespace nsp {
     namespace toolkit {
 

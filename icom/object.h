@@ -3,19 +3,21 @@
 
 #include "compiler.h"
 
-typedef int32_t objhld_t;
+typedef int objhld_t;
 
-#define INVALID_OBJHLD		((objhld_t)(-1))
+#define INVALID_OBJHLD		(~((objhld_t)(0)))
 
-typedef int( *objinitfn_t)(void *udata, void *ctx, int ctxcb);
+typedef int( *objinitfn_t)(void *udata, const void *ctx, int ctxcb);
 typedef void( *objuninitfn_t)(objhld_t hld, void *udata);
 
 extern
-void objinit();
+void objinit(); /* not necessary for Linux/Unix */
 extern
-void objuninit();
+void objuninit();	/* object module life cycle tobe the same with process is recommend  */
 extern
-objhld_t objallo(int user_data_size, objinitfn_t initializer, objuninitfn_t unloader, void *initctx, unsigned int cbctx);
+objhld_t objallo(int user_data_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx);
+extern
+objhld_t objallo2(int user_data_size); /* simple way to allocate a object, calling thread can use @objreff to final reference and unloaded the object user data segment  */
 extern
 void *objrefr(objhld_t hld);	/* object reference */
 extern
