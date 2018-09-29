@@ -244,7 +244,7 @@ void objuninit()
     mutex_uninit(&g_objmgr.object_locker_);
 }
 
-objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, void *initctx, unsigned int cbctx) 
+objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx) 
 {
     object_t *obj;
 
@@ -277,7 +277,7 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     return objtabinst(obj);
 }
 
-objhld_t objallo2(int user_data_size) 
+objhld_t objallo2(int user_size) 
 {
     object_t *obj;
 

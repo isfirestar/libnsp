@@ -15,9 +15,9 @@ void objinit(); /* not necessary for Linux/Unix */
 extern
 void objuninit();	/* object module life cycle tobe the same with process is recommend  */
 extern
-objhld_t objallo(int user_data_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx);
+objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx);
 extern
-objhld_t objallo2(int user_data_size); /* simple way to allocate a object, calling thread can use @objreff to final reference and unloaded the object user data segment  */
+objhld_t objallo2(int user_size); /* simple way to allocate a object, calling thread can use @objreff to final reference and unloaded the object user data segment  */
 extern
 void *objrefr(objhld_t hld);	/* object reference */
 extern
