@@ -139,7 +139,7 @@ objhld_t objtabinst(object_t *obj)
         hld = ++g_objmgr.automatic_id_;
 
         /* map root pointer from table */
-        root = hld2root(obj->hld_);
+        root = hld2root(hld);
         if (!root) {
             break;
         }
