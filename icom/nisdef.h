@@ -118,7 +118,7 @@ struct __tcp_stream_template {
 
 typedef struct __tcp_stream_template tst_t;
 
-typedef int( STD_CALL *nis_sender_maker_t)(void *data, int cb, void *context);
+typedef int( STD_CALL *nis_sender_maker_t)(void *data, int cb, const void *context);
 
 struct __tcp_data {
     union {

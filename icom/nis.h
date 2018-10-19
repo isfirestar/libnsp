@@ -21,7 +21,7 @@ interface_format(void) tcp_destroy(HTCPLINK lnk);
 interface_format(int) tcp_connect(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
 interface_format(int) tcp_connect2(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
 interface_format(int) tcp_listen(HTCPLINK lnk, int block);
-interface_format(int) tcp_write(HTCPLINK lnk, int cb, nis_sender_maker_t maker, void *par);
+interface_format(int) tcp_write(HTCPLINK lnk, int cb, nis_sender_maker_t maker, const void *par);
 interface_format(int) tcp_getaddr(HTCPLINK lnk, int type, uint32_t* ipv4, uint16_t* port);
 interface_format(int) tcp_setopt(HTCPLINK lnk, int level, int opt, const char *val, int len);
 interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, int *len);
@@ -35,8 +35,8 @@ interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const cha
 interface_format(void) udp_destroy(HUDPLINK lnk);
 /* @udp_write interface using direct IO mode 
  * @udp_sendto interface like @tcp_write, push memory block into wpoll cache first */ 
-interface_format(int) udp_write(HUDPLINK lnk, int cb, nis_sender_maker_t maker, void *par, const char* r_ipstr, uint16_t r_port);
-interface_format(int) udp_sendto(HUDPLINK lnk, int cb, nis_sender_maker_t maker, void *par, const char* r_ipstr, uint16_t r_port);
+interface_format(int) udp_write(HUDPLINK lnk, int cb, nis_sender_maker_t maker, const void *par, const char* r_ipstr, uint16_t r_port);
+interface_format(int) udp_sendto(HUDPLINK lnk, int cb, nis_sender_maker_t maker, const void *par, const char* r_ipstr, uint16_t r_port);
 interface_format(int) udp_getaddr(HUDPLINK lnk, uint32_t *ipv4, uint16_t *port_output);
 interface_format(int) udp_setopt(HUDPLINK lnk, int level, int opt, const char *val, int len);
 interface_format(int) udp_getopt(HUDPLINK lnk, int level, int opt, char *val, int *len);

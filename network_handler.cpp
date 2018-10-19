@@ -201,7 +201,7 @@ namespace nsp {
                 return -1;
             }
 
-            return toolkit::singleton<swnet>::instance()->tcp_write(lnk_, cb, [] (void *data, int cb, void *par)->int {
+            return toolkit::singleton<swnet>::instance()->tcp_write(lnk_, cb, [] (void *data, int cb, const void *par)->int {
                 const std::function<int( void *, int) > *user_fill = (const std::function<int( void *, int) > *)par;
                 return ( *user_fill)(data, cb);
             }, (void *) &fill);
@@ -359,8 +359,8 @@ namespace nsp {
         }
 
         int obudp::sendto(int cb, const std::function<int( void *, int) > &fill, const endpoint &ep) {
-            return toolkit::singleton<swnet>::instance()->udp_write(lnk_, cb, [] (void *pkt, int cb, void *par)->int {
-                std::function<int( void *, int) > *fill = (std::function<int( void *, int) > *)par;
+            return toolkit::singleton<swnet>::instance()->udp_write(lnk_, cb, [] (void *pkt, int cb, const void *par)->int {
+                const std::function<int( void *, int) > *fill = (const std::function<int( void *, int) > *)par;
                 return ( *fill)(pkt, cb);
             }, (void *) &fill, ep.ipv4(), ep.port());
         }
