@@ -252,6 +252,10 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
         return INVALID_OBJHLD;
     }
 
+#if _WIN32
+	objinit();
+#endif
+
     obj = (object_t *) malloc(user_size + sizeof(object_t));
     if (!obj) {
         return INVALID_OBJHLD;
@@ -284,6 +288,10 @@ objhld_t objallo2(int user_size)
     if (user_size <= 0) {
         return INVALID_OBJHLD;
     }
+
+#if _WIN32
+    objinit();
+#endif
 
     obj = (object_t *) malloc(user_size + sizeof(object_t));
     if (!obj) {

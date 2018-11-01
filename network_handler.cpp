@@ -268,7 +268,7 @@ namespace nsp {
         }
         
         void obtcp::on_lowlevel_debug(const char *info) {
-            log__save("libnshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
+            log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
         }
 
         void obtcp::on_recvdata(const char *data, const int cb) {
@@ -426,7 +426,7 @@ namespace nsp {
         }
         
         void obudp::on_lowlevel_debug(const char *info) {
-            log__save("libnshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
+            log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
         }
 
         void obudp::setlnk(const HUDPLINK lnk) {
