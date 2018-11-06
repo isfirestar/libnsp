@@ -308,12 +308,17 @@ void *log__asnyc_proc(void *argv) {
 
 static
 int log__async_init() {
-    __log_async.pendding_ = 0;
+    int misc_memory_size;
 
-    __log_async.misc_memory = (log__async_node_t *)malloc(MAXIMUM_LOGSAVE_COUNT * sizeof(log__async_node_t));
+    __log_async.pendding_ = 0;
+    misc_memory_size = MAXIMUM_LOGSAVE_COUNT * sizeof(log__async_node_t);
+
+    __log_async.misc_memory = (log__async_node_t *)malloc(misc_memory_size);
     if (!__log_async.misc_memory) {
         return RE_ERROR(ENOMEM);
     }
+    memset(__log_async.misc_memory, 0, misc_memory_size);
+
     __log_async.misc_index = 0;
 
     INIT_LIST_HEAD(&__log_async.items_);
@@ -410,7 +415,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     log__async_node_t *node;
     int index;
 
-    if (log__init() < 0 || !format) {
+    if (log__init() < 0 || !format || level >= kLogLevel_Maximum ) {
         return;
     }
 
@@ -430,6 +435,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     node->target_ = target;
     node->level_ = level;
     posix__localtime(&node->logst_);
+
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
     } else {
