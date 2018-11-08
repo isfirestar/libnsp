@@ -41,5 +41,38 @@
 
 #endif
 
+#define POSIX__ATOMIC_INIT_FAILED		((volatile long)-2)
+#define POSIX__ATOMIC_INIT_RUNNING		((volatile long)-1)
+#define POSIX__ATOMIC_INIT_TODO			((volatile long)0)
+#define POSIX__ATOMIC_INIT_SUCCESS		((volatile long)1)
+
+#define posix__atomic_initial_declare_variable(initial_variable_name)	static volatile long initial_variable_name
+/*
+ * if return value is POSIX__ATOMIC_INIT_TODO, means need initial now
+ * if return value is POSIX__ATOMIC_INIT_RUNNING, means initial operation is in progress
+ * if return value is POSIX__ATOMIC_INIT_SUCCESS, means initial has been completed
+ * if return value is POSIX__ATOMIC_INIT_FAILED, means initial has been completed, but some error happended in progress
+ */
+#define posix__atomic_initial_test(initial_variable_pointer) \
+	posix__atomic_compare_xchange((volatile long *)initial_variable_pointer, POSIX__ATOMIC_INIT_TODO, POSIX__ATOMIC_INIT_RUNNING)
+
+#define posix__atomic_initial_try(initial_variable_pointer) \
+	(POSIX__ATOMIC_INIT_TODO == posix__atomic_initial_test(initial_variable_pointer))
+
+#define posix__atomic_initial_complete(initial_variable_pointer)	\
+	posix__atomic_compare_xchange((volatile long *)initial_variable_pointer, POSIX__ATOMIC_INIT_RUNNING, POSIX__ATOMIC_INIT_SUCCESS)
+
+#define posix__atomic_initial_exception(initial_variable_pointer) \
+	posix__atomic_compare_xchange((volatile long *)initial_variable_pointer, POSIX__ATOMIC_INIT_RUNNING, POSIX__ATOMIC_INIT_FAILED)
+
+#define posix__atomic_initial_rtest(initial_variable_pointer) \
+	posix__atomic_compare_xchange((volatile long *)initial_variable_pointer, POSIX__ATOMIC_INIT_SUCCESS, POSIX__ATOMIC_INIT_TODO)
+
+#define posix__atomic_initial_regress(initial_variable_pointer) \
+	(POSIX__ATOMIC_INIT_SUCCESS == posix__atomic_initial_rtest(initial_variable_pointer))
+
+#define posix__atomic_initial_passed(initial_variable) \
+	(POSIX__ATOMIC_INIT_SUCCESS == initial_variable)
+
 #endif /* POSIX_ATOMIC_H */
 

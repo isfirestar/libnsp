@@ -4,8 +4,8 @@
 #if _WIN32
 #include <windows.h>
 #else
-#include <unistd.h>
 #include <fcntl.h>
+#include <unistd.h>
 #endif
 
 #include <stdarg.h>
@@ -48,12 +48,6 @@ typedef struct {
     char module_[LOG_MODULE_NAME_LEN];
 } log__file_describe_t;
 
-static int __inited = -1;
-#if _WIN32
-static CRITICAL_SECTION __init_locker;
-#else
-static pthread_mutex_t __init_locker = PTHREAD_MUTEX_INITIALIZER;
-#endif
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
 static posix__pthread_mutex_t __log_file_lock;
 
@@ -74,7 +68,7 @@ typedef struct {
     posix__pthread_t thread_;
     posix__waitable_handle_t alert_;
     log__async_node_t *misc_memory;
-    int misc_index;
+    uint64_t misc_index;    /* it must be unsigned int, if not, increase it may be get a negative number and cause the addressing of @misc_memory crash */
 } log__async_context_t;
 
 static log__async_context_t __log_async;
@@ -336,52 +330,23 @@ int log__async_init() {
     return 0;
 }
 
-static
-int log__init() {
-    int retval;
+static int log__init() {
+    posix__atomic_initial_declare_variable(__inited__);
 
-    retval = 0;
-
-    if (__inited >= 0) {
-        return 0;
-    }
-
-#if _WIN32
-	static int mutex_inited = 0;
-	if (!mutex_inited) {
-		InitializeCriticalSection(&__init_locker);
-		mutex_inited = 1;
-	}
-
-	EnterCriticalSection(&__init_locker);
-	/* double check if other thread complete the initialize request */
-	if (__inited < 0) {
-		/* need to initialize global context */
-		posix__pthread_mutex_init(&__log_file_lock);
-		retval = log__async_init();
-		if (retval < 0) {
-			posix__pthread_mutex_release(&__log_file_lock);
-		}else{
-			posix__atomic_xchange(&__inited, retval);
-		}
-	}
-	LeaveCriticalSection(&__init_locker);
-#else
-    pthread_mutex_lock(&__init_locker);
-     /* double check if other thread complete the initialize request */
-    if (__inited < 0) {
-        /* need to initialize global context */
+    if (posix__atomic_initial_try(&__inited__)) {
+       /* initial global context */
         posix__pthread_mutex_init(&__log_file_lock);
-        retval = log__async_init();
-        if (retval < 0) {
+
+        /* allocate the async node pool */
+        if ( log__async_init() < 0 ) {
             posix__pthread_mutex_release(&__log_file_lock);
-        }else{
-            posix__atomic_xchange(&__inited, retval);
+            posix__atomic_initial_exception(&__inited__);
+        } else {
+            posix__atomic_initial_complete(&__inited__);
         }
     }
-    pthread_mutex_unlock(&__init_locker);
-#endif
-    return retval;
+
+    return __inited__;
 }
 
 void log__write(const char *module, enum log__levels level, int target, const char *format, ...) {
@@ -389,7 +354,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
     posix__systime_t currst;
 
-    if (log__init() < 0 || !format) {
+    if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
     }
 
