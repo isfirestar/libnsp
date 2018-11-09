@@ -10,7 +10,7 @@ struct __posix__systime_t {
     int hour;
     int minute;
     int second;
-    uint64_t low; // 100ns
+    uint64_t low; /* 100ns */
     uint64_t epoch;
 } __POSIX_TYPE_ALIGNED__;
 

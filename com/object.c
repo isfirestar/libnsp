@@ -384,7 +384,9 @@ void objdefr(objhld_t hld)
     }
     UNLOCK(&g_objmgr.object_locker_);
 
-    removed ? objtagfree(removed) : 0;
+    if (removed) {
+        objtagfree(removed);
+    }
 }
 
 void objclos(objhld_t hld) 
@@ -408,5 +410,7 @@ void objclos(objhld_t hld)
     }
     UNLOCK(&g_objmgr.object_locker_);
 
-    removed ? objtagfree(removed) : 0;
+    if (removed) {
+        objtagfree(removed);
+    }
 }

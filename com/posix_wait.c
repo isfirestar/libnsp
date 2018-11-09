@@ -113,7 +113,7 @@ int posix__delay_execution( uint64_t us ) {
     return -1;
 }
 
-#else  // _WIN32
+#else  /* POSIX */
 
 /*
 class stack of pthread_cond_wait

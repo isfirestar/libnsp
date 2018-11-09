@@ -20,7 +20,7 @@ struct __posix__pthread_mutex {
     CRITICAL_SECTION handle_;
 };
 
-#else
+#else /* POSIX */
 
 /* -lpthread */
 #include <pthread.h>
@@ -42,7 +42,7 @@ struct __posix__pthread_mutex {
     pthread_mutexattr_t attr_;
 } __POSIX_TYPE_ALIGNED__;
 
-#endif // _WIN32
+#endif /* _WIN32 */
 
 typedef struct __posix_pthread          posix__pthread_t;
 typedef struct __posix__pthread_mutex   posix__pthread_mutex_t;

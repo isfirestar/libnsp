@@ -171,7 +171,7 @@ int base64__encode(const char *input, int incb, char *output, int *outcb) {
     }
 
     for (i = 0, t = 0; i < page; i++, t++) {
-        unsigned char src[4]; // force 4 bytes aligned
+        unsigned char src[4]; /* force 4 bytes aligned */
         memcpy(src, &src_buffer[i * 3], 3);
 
         unsigned char dst[4];
