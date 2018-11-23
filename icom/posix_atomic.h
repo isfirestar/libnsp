@@ -41,10 +41,10 @@
 
 #endif
 
-#define POSIX__ATOMIC_INIT_FAILED		((volatile long)-2)
-#define POSIX__ATOMIC_INIT_RUNNING		((volatile long)-1)
-#define POSIX__ATOMIC_INIT_TODO			((volatile long)0)
-#define POSIX__ATOMIC_INIT_SUCCESS		((volatile long)1)
+#define POSIX__ATOMIC_INIT_FAILED		((volatile long)-2L)
+#define POSIX__ATOMIC_INIT_RUNNING		((volatile long)-1L)
+#define POSIX__ATOMIC_INIT_TODO			((volatile long)0L)
+#define POSIX__ATOMIC_INIT_SUCCESS		((volatile long)1L)
 
 #define posix__atomic_initial_declare_variable(initial_variable_name)	static volatile long initial_variable_name
 /*
