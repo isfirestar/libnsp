@@ -330,9 +330,9 @@ int log__async_init() {
     return 0;
 }
 
-posix__atomic_initial_declare_variable(__inited__) = POSIX__ATOMIC_INIT_TODO;
-
 int log__init() {
+    posix__atomic_initial_declare_variable(__inited__);
+    
     if (posix__atomic_initial_try(&__inited__)) {
        /* initial global context */
         posix__pthread_mutex_init(&__log_file_lock);
