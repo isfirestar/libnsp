@@ -10,6 +10,11 @@ __extern__
 long posix__gettid();
 __extern__
 long posix__getpid();
+
+/* ifos-getspnam */
+__extern__
+int posix__syslogin(const char *user, const char *key);
+
 /*
  * posix__sleep 过程在 linux 无法精确到毫秒， 如果需要精确到毫秒， 则使用 waitable_handle 的超时机制
  */

@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include <time.h>
 
 struct dir_stack_node {
@@ -62,6 +61,10 @@ long posix__gettid() {
 
 long posix__getpid() {
     return (int) GetCurrentProcessId();       
+}
+
+int posix__syslogin(const char *user, const char *key) {
+    return -1;
 }
 
 void posix__sleep(uint64_t ms) {
@@ -639,6 +642,12 @@ int posix__file_create_always(const char *path, void *descriptor) {
 #include <iconv.h>
 #include <locale.h>
 #include <unistd.h>
+#include <shadow.h>  
+#include <pwd.h>
+
+/* -lcrypt */
+#define __USE_GNU
+#include <crypt.h>
 
 static
 int __posix__rmdir(const char *dir) {
@@ -683,6 +692,65 @@ long posix__gettid() {
 
 long posix__getpid() {
     return syscall(SYS_getpid);
+}
+
+int posix__syslogin(const char *user, const char *key) {
+    char salt[13], *encrypt, buf[1024];
+    int i, j, retval;
+    struct crypt_data crd;
+    struct spwd spbuf, *spbufp;
+
+    if (!user || !key) {
+        return -EINVAL;
+    }
+
+    /* must be root */
+    if (geteuid() != 0) {
+        return -EACCES;
+    }
+
+    /*
+     The getspnam_r() function is like getspnam() but stores the retrieved shadow password structure in the space pointed to by spbuf.  
+     This shadow password structure contains pointers to strings, and these strings are stored in the buffer buf of size buflen.  
+     A pointer to the result (in case of success) or NULL (in case no entry was found or an error occurred) is  stored  in *spbufp
+    */
+    retval = getspnam_r(user, &spbuf, buf, sizeof(buf), &spbufp);
+    if ((0 != retval) || !spbufp) {
+        return -ENOENT;
+    }
+
+    i = j = 0;
+    while ( spbufp->sp_pwdp[i] ) {
+        salt[i] = spbufp->sp_pwdp[i];
+        if(salt[i] == '$') {
+            j++;
+            if ( j == 3 ) {
+                salt[i] = 0;
+                break;
+            }
+        }
+        i++;
+    }
+
+    if ( j < 3 ) {
+        return -EACCES;
+    }
+
+    /* crypt_r() is a reentrant version of crypt().  
+        The structure pointed to by data is used to store result data and bookkeeping information.  
+        Other than allocating it, the only thing that the caller should do with this structure is to set data->initialized to zero before the first call to crypt_r(). 
+    */
+    crd.initialized = 0;
+    encrypt = crypt_r(key, salt, &crd);
+    if (!encrypt) {
+        return -EACCES;
+    }
+
+    if (0 == strcmp(encrypt, spbufp->sp_pwdp)) {
+        return 0;
+    }
+
+    return -EACCES;
 }
 
 void posix__sleep(uint64_t ms) {
