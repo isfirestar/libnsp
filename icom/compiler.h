@@ -26,7 +26,7 @@
 #endif
 
 #if !defined __ALIGNED_SIZE__
-#define __ALIGNED_SIZE__        (sizeof(void *))
+#define __ALIGNED_SIZE__        4/*(sizeof(void *))*/
 #endif /* !__ALIGNED_SIZE__ */
 
 #if !_WIN32
