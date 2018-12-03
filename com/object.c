@@ -202,14 +202,14 @@ static object_t *objtabsrch(const objhld_t hld) {
     return target;
 }
 
-static void objtagfree(object_t *taget) {
+static void objtagfree(object_t *target) {
     /* release the object context and free target memory when object removed from table
         call the unload routine if not null */
-    if ( taget ) {
-        if ( taget->unloader_ ) {
-            taget->unloader_( taget->hld_, (void *)taget->user_data_ );
+    if ( target ) {
+        if ( target->unloader_ ) {
+            target->unloader_( target->hld_, (void *)target->user_data_ );
         }
-        free( taget );
+        free( target );
     }
 }
 

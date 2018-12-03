@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#if !defined ENDPOINT_H
+#define ENDPOINT_H
 
 #include <string>
 #include <cstdint>
@@ -74,3 +75,5 @@ namespace nsp {
 
     } // namespace tcpip
 } // nsp
+
+#endif
