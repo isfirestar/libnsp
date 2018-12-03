@@ -26,15 +26,13 @@ typedef CRITICAL_SECTION MUTEX_T;
 
 #define INCREASEMENT(n)    InterlockedIncrement(n)
 
-static void mutex_init(MUTEX_T *mutex)
-{
+static void mutex_init(MUTEX_T *mutex) {
     if (mutex) {
         InitializeCriticalSection(mutex);
     }
 }
 
-static void mutex_uninit(MUTEX_T *mutex)
-{
+static void mutex_uninit(MUTEX_T *mutex) {
     if (mutex) {
         DeleteCriticalSection(mutex);
     }
@@ -49,8 +47,7 @@ typedef pthread_mutex_t MUTEX_T;
 
 #define INCREASEMENT(n)    __sync_add_and_fetch(n, 1)
 
-static void mutex_init(MUTEX_T *mutex)
-{
+static void mutex_init(MUTEX_T *mutex) {
     pthread_mutexattr_t attr;
     if (mutex) {
         pthread_mutexattr_init(&attr);
@@ -59,8 +56,7 @@ static void mutex_init(MUTEX_T *mutex)
     }
 }
 
-static void mutex_uninit(MUTEX_T *mutex)
-{
+static void mutex_uninit(MUTEX_T *mutex) {
     if (mutex) {
         pthread_mutex_destroy(mutex);
     }
@@ -81,8 +77,7 @@ typedef struct _object_t {
 } object_t;
 
 struct _object_manager {
-    struct list_head table_odd_[OBJ_HASHTABLE_SIZE];
-    struct list_head table_even_[OBJ_HASHTABLE_SIZE];
+    struct list_head object_table_[OBJ_HASHTABLE_SIZE];
     objhld_t automatic_id_;
     MUTEX_T object_locker_;
 };
@@ -91,13 +86,11 @@ struct _object_manager {
 static struct _object_manager g_objmgr;
 #else
 static struct _object_manager g_objmgr = {
-    .table_odd_ = { { NULL } }, .table_even_ = { { NULL } }, 0, PTHREAD_MUTEX_INITIALIZER,
+    .object_table_ = { { NULL } }, 0, PTHREAD_MUTEX_INITIALIZER,
 };
 #endif
 
-static
-struct list_head *hld2root(objhld_t hld) 
-{
+static struct list_head *hld2root(objhld_t hld) {
     struct list_head *root;
     objhld_t idx;
 
@@ -111,7 +104,7 @@ struct list_head *hld2root(objhld_t hld)
         return NULL;
     }
 
-    root = (((hld % 2) == 0) ? &g_objmgr.table_odd_[idx] : &g_objmgr.table_even_[idx]);
+    root = &g_objmgr.object_table_[idx];
     if (!root->next || !root->prev) {
         INIT_LIST_HEAD(root);
     }
@@ -119,9 +112,7 @@ struct list_head *hld2root(objhld_t hld)
     return root;
 }
 
-static
-objhld_t objtabinst(object_t *obj) 
-{
+static objhld_t objtabinst(object_t *obj) {
     objhld_t hld;
     struct list_head *root;
 
@@ -155,9 +146,7 @@ objhld_t objtabinst(object_t *obj)
     return obj->hld_;
 }
 
-static
-int objtabrmve(objhld_t hld, object_t **removed) 
-{
+static int objtabrmve(objhld_t hld, object_t **removed) {
 	object_t *target, *cursor;
     struct list_head *root, *pos, *n;
 
@@ -188,9 +177,7 @@ int objtabrmve(objhld_t hld, object_t **removed)
     return ((NULL == target) ? (-1) : (0));
 }
 
-static
-object_t *objtabsrch(const objhld_t hld) 
-{
+static object_t *objtabsrch(const objhld_t hld) {
     object_t *target, *cursor;
     struct list_head *root, *pos, *n;
 
@@ -215,9 +202,7 @@ object_t *objtabsrch(const objhld_t hld)
     return target;
 }
 
-static
-void objtagfree(object_t *taget)
-{
+static void objtagfree(object_t *taget) {
     /* release the object context and free target memory when object removed from table
         call the unload routine if not null */
     if ( taget ) {
@@ -228,24 +213,20 @@ void objtagfree(object_t *taget)
     }
 }
 
-void objinit() 
-{
+void objinit() {
     static long inited = 0;
     if ( 1 == INCREASEMENT(&inited)) {
-        memset(g_objmgr.table_odd_, 0, sizeof ( g_objmgr.table_odd_));
-        memset(g_objmgr.table_even_, 0, sizeof ( g_objmgr.table_even_));
+        memset(g_objmgr.object_table_, 0, sizeof ( g_objmgr.object_table_));
         g_objmgr.automatic_id_ = 0;
         mutex_init(&g_objmgr.object_locker_);
     }
 }
 
-void objuninit()
-{
+void objuninit() {
     mutex_uninit(&g_objmgr.object_locker_);
 }
 
-objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx) 
-{
+objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx) {
     object_t *obj;
 
     if (user_size <= 0) {
@@ -278,40 +259,19 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
         }
     }
 
-    return objtabinst(obj);
-}
-
-objhld_t objallo2(int user_size) 
-{
-    object_t *obj;
-
-    if (user_size <= 0) {
+    if (INVALID_OBJHLD == objtabinst(obj)) {
+        free(obj);
         return INVALID_OBJHLD;
     }
 
-#if _WIN32
-    objinit();
-#endif
-
-    obj = (object_t *) malloc(user_size + sizeof(object_t));
-    if (!obj) {
-        return INVALID_OBJHLD;
-    }
-
-    obj->stat_ = OBJSTAT_NORMAL;
-    obj->refcnt_ = 0;
-    obj->objsizecb_ = user_size + sizeof ( object_t);
-    obj->user_size_ = user_size;
-    INIT_LIST_HEAD(&obj->hash_clash_);
-    obj->initializer_ = NULL;
-    obj->unloader_ = NULL;
-    memset(obj->user_data_, 0, obj->user_size_);
-
-    return objtabinst(obj);
+    return obj->hld_;
 }
 
-void *objrefr(objhld_t hld) 
-{
+objhld_t objallo2(int user_size) {
+    return objallo(user_size, NULL, NULL, NULL, 0);
+}
+
+void *objrefr(objhld_t hld) {
     object_t *obj;
     unsigned char *user_data;
 
@@ -332,8 +292,7 @@ void *objrefr(objhld_t hld)
     return (void *)user_data;
 }
 
-void *objreff(objhld_t hld)
-{
+void *objreff(objhld_t hld) {
     object_t *obj;
     unsigned char *user_data;
 
@@ -358,8 +317,7 @@ void *objreff(objhld_t hld)
     return (void *)user_data;
 }
 
-void objdefr(objhld_t hld) 
-{
+void objdefr(objhld_t hld) {
     object_t *obj, *removed;
 
     obj = NULL;
@@ -389,8 +347,7 @@ void objdefr(objhld_t hld)
     }
 }
 
-void objclos(objhld_t hld) 
-{
+void objclos(objhld_t hld) {
     object_t *obj, *removed;
 
     obj = NULL;
