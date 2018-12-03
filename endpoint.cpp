@@ -82,7 +82,7 @@ namespace nsp {
 			uint32_t ip;
 
 			// "localhost" 可以得到正确解析
-			if ( toolkit::singleton<tcpip::swnet>::instance()->nis_gethost( domain.c_str(), &ip ) < 0 ) {
+			if (::nis_gethost( domain.c_str(), &ip ) < 0 ) {
 				return -1;
 			}
 			char iptxt[16] = { 0 };

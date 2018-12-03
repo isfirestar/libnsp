@@ -18,7 +18,7 @@ namespace nsp {
 
         obtcp::obtcp() {
             if (1 == ++__tcp_refcnt) {
-                toolkit::singleton<swnet>::instance()->tcp_init();
+                ::tcp_init();
             } else {
                 --__tcp_refcnt;
             }
@@ -34,7 +34,7 @@ namespace nsp {
 
         void obtcp::settst(tst_t *tst) {
             if (INVALID_HTCPLINK != lnk_ && tst) {
-                toolkit::singleton<swnet>::instance()->tcp_settst(lnk_, tst);
+                ::tcp_settst(lnk_, tst);
             }
         }
 
@@ -63,7 +63,7 @@ namespace nsp {
                 return -1;
             }
 
-            toolkit::singleton<swnet>::instance()->tcp_settst(lnk_, &tst_);
+            ::tcp_settst(lnk_, &tst_);
             return 0;
         }
 
@@ -74,18 +74,18 @@ namespace nsp {
         std::weak_ptr<obtcp> obtcp::attach() {
             try {
                 auto sptr = shared_from_this();
-                if (toolkit::singleton<swnet>::instance()->tcp_attach(lnk_, sptr) < 0) {
+                if (nsp::toolkit::singleton<swnet>::instance()->tcp_attach(lnk_, sptr) < 0) {
                     return std::weak_ptr<obtcp>();
                 }
 
                 // 客户连接, 需要拿到对端和本地的地址信息
                 uint32_t actip;
                 port_t actport;
-                toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
+                ::tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
                 remote_.ipv4(actip);
                 remote_.port(actport);
 
-                toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
+                ::tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
                 local_.ipv4(actip);
                 local_.port(actport);
 
@@ -99,7 +99,7 @@ namespace nsp {
 
         void obtcp::close() {
             if (INVALID_HTCPLINK != lnk_) {
-                toolkit::singleton<swnet>::instance()->tcp_destroy(lnk_);
+                ::tcp_destroy(lnk_);
             }
         }
 
@@ -127,17 +127,17 @@ namespace nsp {
             if (ipstr.length() <= 0 && port <= 0) {
                 return -1;
             }
-            if (toolkit::singleton<swnet>::instance()->tcp_connect(lnk_, ipstr.c_str(), port) < 0) {
+            if (::tcp_connect(lnk_, ipstr.c_str(), port) < 0) {
                 return -1;
             }
 
             // 成功连接后, 可以取出对端和本地的地址信息
             uint32_t actip;
             port_t actport;
-            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
+            ::tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
             remote_.ipv4(actip);
             remote_.port(actport);
-            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
+            ::tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
             local_.ipv4(actip);
             local_.port(actport);
             return 0;
@@ -167,7 +167,7 @@ namespace nsp {
 			if (ipstr.length() <= 0 && port <= 0) {
 				return -1;
 			}
-			if (toolkit::singleton<swnet>::instance()->tcp_connect2(lnk_, ipstr.c_str(), port) < 0) {
+			if (::tcp_connect2(lnk_, ipstr.c_str(), port) < 0) {
 				return -1;
 			}
 
@@ -179,7 +179,7 @@ namespace nsp {
                 return -1;
             }
 
-            if (toolkit::singleton<swnet>::instance()->tcp_listen(lnk_, 5) < 0) {
+            if (::tcp_listen(lnk_, 5) < 0) {
                 return -1;
             }
 
@@ -189,7 +189,7 @@ namespace nsp {
             remote_.port(0);
             uint32_t actip;
             port_t actport;
-            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
+            ::tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
             local_.ipv4(actip);
             local_.port(actport);
             return 0;
@@ -201,7 +201,7 @@ namespace nsp {
                 return -1;
             }
 
-            return toolkit::singleton<swnet>::instance()->tcp_write(lnk_, cb, [] (void *data, int cb, const void *par)->int {
+            return ::tcp_write(lnk_, cb, [] (void *data, int cb, const void *par)->int {
                 const std::function<int( void *, int) > *user_fill = (const std::function<int( void *, int) > *)par;
                 return ( *user_fill)(data, cb);
             }, (void *) &fill);
@@ -240,7 +240,7 @@ namespace nsp {
         void obtcp::on_closed() {
             HTCPLINK previous = lnk_.exchange(INVALID_HTCPLINK);
             if (INVALID_HTCPLINK != previous) {
-                toolkit::singleton<swnet>::instance()->tcp_detach(previous);
+                nsp::toolkit::singleton<swnet>::instance()->tcp_detach(previous);
                 on_closed(previous);
             }
         }
@@ -249,10 +249,10 @@ namespace nsp {
             // when connected by asynchronous, get address information
             uint32_t actip;
             port_t actport;
-            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
+            ::tcp_getaddr(lnk_, LINK_ADDR_REMOTE, &actip, &actport);
             remote_.ipv4(actip);
             remote_.port(actport);
-            toolkit::singleton<swnet>::instance()->tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
+            ::tcp_getaddr(lnk_, LINK_ADDR_LOCAL, &actip, &actport);
             local_.ipv4(actip);
             local_.port(actport);
 
@@ -304,7 +304,7 @@ namespace nsp {
 
         obudp::obudp() {
             if (1 == ++__udp_refcnt) {
-                toolkit::singleton<swnet>::instance()->udp_init();
+                ::udp_init();
             } else {
                 --__udp_refcnt;
             }
@@ -327,7 +327,8 @@ namespace nsp {
             }
 
             try {
-                if (toolkit::singleton<swnet>::instance()->udp_create(shared_from_this(), ipstr.size() > 0 ? ipstr.c_str() : nullptr, port, flag) < 0) {
+                if (nsp::toolkit::singleton<swnet>::instance()->
+                        udp_create(shared_from_this(), ipstr.size() > 0 ? ipstr.c_str() : nullptr, port, flag) < 0) {
                     return -1;
                 }
             } catch (...) {
@@ -336,7 +337,7 @@ namespace nsp {
 
             uint32_t actip;
             port_t actport;
-            toolkit::singleton<swnet>::instance()->udp_getaddr(lnk_, &actip, &actport);
+            ::udp_getaddr(lnk_, &actip, &actport);
             local_.ipv4(actip);
             local_.port(actport);
             return 0;
@@ -354,12 +355,12 @@ namespace nsp {
 
         void obudp::close() {
             if (INVALID_HUDPLINK != lnk_) {
-                toolkit::singleton<swnet>::instance()->udp_destroy(lnk_);
+                ::udp_destroy(lnk_);
             }
         }
 
         int obudp::sendto(int cb, const std::function<int( void *, int) > &fill, const endpoint &ep) {
-            return toolkit::singleton<swnet>::instance()->udp_write(lnk_, cb, [] (void *pkt, int cb, const void *par)->int {
+            return ::udp_write(lnk_, cb, [] (void *pkt, int cb, const void *par)->int {
                 const std::function<int( void *, int) > *fill = (const std::function<int( void *, int) > *)par;
                 return ( *fill)(pkt, cb);
             }, (void *) &fill, ep.ipv4(), ep.port());
@@ -416,7 +417,7 @@ namespace nsp {
         void obudp::on_closed() {
             HUDPLINK previous = lnk_.exchange(INVALID_HUDPLINK);
             if (INVALID_HUDPLINK != previous) {
-                toolkit::singleton<swnet>::instance()->udp_detach(previous);
+                nsp::toolkit::singleton<swnet>::instance()->udp_detach(previous);
                 on_closed(previous);
             }
         }

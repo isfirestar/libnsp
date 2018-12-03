@@ -2,6 +2,7 @@
 #define SWNET_DEF_HEADER_2016_5_24
 
 #include "compiler.h"
+#include "object.h"
 
 #if defined __cplusplus
 #define STD_C_FORMAT extern "C"
@@ -19,9 +20,9 @@
 #define TCP_P_SIZE      	(20)   /* 20 bytes of TCP Layer */
 
 /* types of nshost handle */
-typedef uint32_t HLNK;
-typedef uint32_t HTCPLINK;
-typedef int32_t HUDPLINK;
+typedef objhld_t HLNK;
+typedef HLNK HTCPLINK;
+typedef HLNK HUDPLINK;
 
 #if !defined STD_CALL
 #if _WIN32

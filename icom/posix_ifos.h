@@ -158,7 +158,5 @@ int posix__file_create(const char *path, void *descriptor);
 __extern__
 int posix__file_create_always(const char *path, void *descriptor);
 
-
-
 #endif /* POSIX_IFOS_H */
 

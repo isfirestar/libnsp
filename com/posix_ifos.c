@@ -1338,3 +1338,7 @@ int posix__iconv(const char *from_encode, const char *to_encode, char **from, si
 const char *posix__getelfname() {
     return posix__getpename();
 }
+
+char *posix__getelfname2(char *holder, int cb) {
+    return posix__getpename2(holder, cb);
+}
