@@ -41,12 +41,12 @@
 
 #endif
 
-#define POSIX__ATOMIC_INIT_FAILED		((volatile long)-2L)
-#define POSIX__ATOMIC_INIT_RUNNING		((volatile long)-1L)
-#define POSIX__ATOMIC_INIT_TODO			((volatile long)0L)
-#define POSIX__ATOMIC_INIT_SUCCESS		((volatile long)1L)
+#define POSIX__ATOMIC_INIT_FAILED		((long)-2L)
+#define POSIX__ATOMIC_INIT_RUNNING		((long)-1L)
+#define POSIX__ATOMIC_INIT_TODO			((long)0L)
+#define POSIX__ATOMIC_INIT_SUCCESS		((long)1L)
 
-#define posix__atomic_initial_declare_variable(initial_variable_name)	static volatile long (initial_variable_name) = POSIX__ATOMIC_INIT_TODO
+#define posix__atomic_initial_declare_variable(initial_variable_name)	static long (initial_variable_name) = POSIX__ATOMIC_INIT_TODO
 /*
  * if return value is POSIX__ATOMIC_INIT_TODO, means need initial now
  * if return value is POSIX__ATOMIC_INIT_RUNNING, means initial operation is in progress
