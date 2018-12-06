@@ -201,10 +201,9 @@ typedef struct __packet_grp packet_grp_t;
 
 /* 支持库版本协议	*/
 struct __swnet_version {
-    short procedure_;
-    short main_;
-    short sub_;
-    short leaf_;
+    short major_;
+    short minor_;
+    short revision_;
 } __POSIX_TYPE_ALIGNED__;
 typedef struct __swnet_version swnet_version_t;
 
