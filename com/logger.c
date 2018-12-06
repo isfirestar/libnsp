@@ -378,7 +378,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
 void log__save(const char *module, enum log__levels level, int target, const char *format, ...) {
     va_list ap;
     log__async_node_t *node;
-    int index;
+    uint64_t index;
 
     if (log__init() < 0 || !format || level >= kLogLevel_Maximum ) {
         return;
