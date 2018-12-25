@@ -25,6 +25,8 @@ interface_format(int) tcp_write(HTCPLINK lnk, int cb, nis_sender_maker_t maker, 
 interface_format(int) tcp_getaddr(HTCPLINK lnk, int type, uint32_t* ipv4, uint16_t* port);
 interface_format(int) tcp_setopt(HTCPLINK lnk, int level, int opt, const char *val, int len);
 interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, int *len);
+interface_format(int) tcp_setattr(HTCPLINK lnk, int attr, int enable);
+interface_format(int) tcp_getattr(HTCPLINK lnk, int attr, int *enabled);
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
   UDP procedure definition																				
@@ -57,19 +59,11 @@ interface_format(int) udp_write_grp(HUDPLINK lnk, packet_grp_t *grp);
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
  object/global functions
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-interface_format(int) nis_setctx(HLNK lnk, const void * user_context, int user_context_size);
-interface_format(int) nis_getctx(HLNK lnk, void * user_context, int *user_context_size/*opt*/);
-interface_format(void *) nis_refctx(HLNK lnk, int *user_context_size);
-interface_format(int) nis_ctxsize(HLNK lnk);
 interface_format(int) nis_getver(swnet_version_t *version);
-interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); /* parse the domain name, get the first parse result of obtained, convert it to Little-Endian*/
+/* parse the domain name, get the first parse result of obtained, convert it to Little-Endian*/
+interface_format(int) nis_gethost(const char *name, uint32_t *ipv4); 
 interface_format(char *) nis_lgethost(char *name, int cb);
-interface_format(int) nis_setmask(HLNK lnk, int mask);
-interface_format(int) nis_getmask(HLNK lnk, int *mask);
-
-/* set/change ECR(event callback routine) for nshost use, return the previous ecr address.
-	version > 9.6.0
-*/
-interface_format(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr);
+/* set/change ECR(event callback routine) for nshost use, return the previous ecr address. */
+interface_format(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr); 
 
 #endif

@@ -58,16 +58,9 @@ typedef int nis_boolean_t;
 #define EVT_DEBUG_LOG   (0x0006)    /* report debug information */
 #define EVT_EXCEPTION   (0xFFFF)    /* exceptions*/
 
-/* TCP events */
-#define EVT_TCP_ACCEPTED  (0x0013)   /* has been Accepted */
-#define EVT_TCP_CONNECTED  (0x0014)  /* success connect to remote */
-
 /* option to get link address */
 #define LINK_ADDR_LOCAL   (0x0001)   /* get local using endpoint pair */
 #define LINK_ADDR_REMOTE  (0x0002)   /* get remote using endpoint pair */
-
-/* option of link attribute for both TCP and UDP */
-#define LINK_MASK_FULL_CALLBACK (1)     /* callback receive data include template header size, val is a bit of byte */
 
 struct _nis_event_t {
     int Event; 
@@ -95,18 +88,26 @@ typedef nis_callback_t udp_io_callback_t;
     TCP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+/* TCP events */
+#define EVT_TCP_ACCEPTED  (0x0013)   /* has been Accepted */
+#define EVT_TCP_CONNECTED  (0x0014)  /* success connect to remote */
+
+/* TCP attributes of link */
+#define LINKATTR_TCP_FULLY_RECEIVE                      (1) /* receive fully packet include low-level head */
+#define LINKATTR_TCP_NO_BUILD                           (2) /* not use @tst::builder when calling @tcp_write */
+#define LINKATTR_TCP_UPDATE_ACCEPT_CONTEXT              (4) /* copy tst and attr to accepted link when syn */
+
 /*  private protocol template(PPT,) support
+    protocol parse template: tcp_ppt_parser_t
+            @data               data stream
+            @cb                 bytes of data stream
+            @user_data_size     bytes of user data stream (eliminate length of protocol)
 
-        protocol parse template: tcp_ppt_parser_t
-                @data               data stream
-                @cb                 bytes of data stream
-                @user_data_size     bytes of user data stream (eliminate length of protocol)
+    protocol builder template: tcp_ppt_builder_t
+            @data               data stream
+            @cb                 bytes of data stream for build
 
-        protocol builder template: tcp_ppt_builder_t
-                @data               data stream
-                @cb                 bytes of data stream for build
-
-        Any negative return of PPT templates will terminate the subsequent operation
+    Any negative return of PPT templates will terminate the subsequent operation
  */
 typedef int( STD_CALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
 typedef int( STD_CALL *tcp_ppt_builder_t)(void *data, int cb);
@@ -133,18 +134,8 @@ struct __tcp_data {
         } Accept;
 
         struct {
-            int SubEvent;
-            uint32_t ErrorCode;
-        } Exception;
-
-        struct {
             HTCPLINK OptionLink;
         } LinkOption;
-
-        struct {
-            const char *logstr;
-        } DebugLog;
-
     } e;
 }__POSIX_TYPE_ALIGNED__;
 
@@ -168,17 +159,8 @@ struct __udp_data {
         } Packet;
 
         struct {
-            int SubEvent;
-            uint32_t ErrorCode;
-        } Exception;
-
-        struct {
             HUDPLINK OptionLink;
         } LinkOption;
-
-        struct {
-            const char *logstr;
-        } DebugLog;
     } e;
 } __POSIX_TYPE_ALIGNED__;
 
