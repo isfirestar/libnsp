@@ -50,17 +50,13 @@ typedef int nis_boolean_t;
 #endif
 
 /* common network events */
-#define EVT_CREATED     (0x0001)    /* created */
 #define EVT_PRE_CLOSE   (0x0002)    /* ready to close*/
 #define EVT_CLOSED      (0x0003)    /* has been closed */
 #define EVT_RECEIVEDATA (0x0004)    /* receive data*/
-#define EVT_SENDDATA    (0x0005)    /* sent data*/
-#define EVT_DEBUG_LOG   (0x0006)    /* report debug information */
-#define EVT_EXCEPTION   (0xFFFF)    /* exceptions*/
 
 /* option to get link address */
-#define LINK_ADDR_LOCAL   (0x0001)   /* get local using endpoint pair */
-#define LINK_ADDR_REMOTE  (0x0002)   /* get remote using endpoint pair */
+#define LINK_ADDR_LOCAL   (1)   /* get local using endpoint pair */
+#define LINK_ADDR_REMOTE  (2)   /* get remote using endpoint pair */
 
 struct _nis_event_t {
     int Event; 
@@ -89,8 +85,8 @@ typedef nis_callback_t udp_io_callback_t;
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 /* TCP events */
-#define EVT_TCP_ACCEPTED  (0x0013)   /* has been Accepted */
-#define EVT_TCP_CONNECTED  (0x0014)  /* success connect to remote */
+#define EVT_TCP_ACCEPTED    (0x0013)   /* has been Accepted */
+#define EVT_TCP_CONNECTED   (0x0014)  /* success connect to remote */
 
 /* TCP attributes of link */
 #define LINKATTR_TCP_FULLY_RECEIVE                      (1) /* receive fully packet include low-level head */
