@@ -98,7 +98,9 @@ int posix__setpriority_realtime();
  * linux 系统调用不使用位或，windows系统调用使用位或
  * 为了统一平台接口， 这里一律使用位或
  */
+__extern__
 int posix__setaffinity_process(int mask);
+__extern__
 int posix__getaffinity_process(int *mask);
 
 /* 获取CPU核心数量 */

@@ -22,6 +22,10 @@ struct __posix__pthread_mutex {
 
 #else /* POSIX */
 
+#if !defined __USE_GNU
+#define __USE_GNU
+#endif
+
 /* -lpthread */
 #include <pthread.h>
 
@@ -62,6 +66,12 @@ __extern__
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 __extern__
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
+
+/* 设置线程的CPU亲和性, windows暂不支持get 方法 */
+__extern__
+int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask);
+__extern__
+int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask);
 
 /* posix__pthread_detach 分离线程和 posix__pthread_t 对象， 分离后对象不可用
  * posix__pthread_joinable 检查线程对象是否处于分离状态， 分离返回-1， 否则返回>=0

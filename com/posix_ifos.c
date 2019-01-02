@@ -647,7 +647,9 @@ int posix__file_create_always(const char *path, void *descriptor) {
 
 #else
 
+#if !defined __USE_GNU
 #define __USE_GNU
+#endif
 
 #include <sched.h>
 #include <sys/types.h>
