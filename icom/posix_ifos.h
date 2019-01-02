@@ -94,6 +94,13 @@ int posix__setpriority_critical();
 __extern__
 int posix__setpriority_realtime();
 
+/* 调整进程亲和性
+ * linux 系统调用不使用位或，windows系统调用使用位或
+ * 为了统一平台接口， 这里一律使用位或
+ */
+int posix__setaffinity_process(int mask);
+int posix__getaffinity_process(int *mask);
+
 /* 获取CPU核心数量 */
 __extern__
 int posix__getnprocs();

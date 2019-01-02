@@ -389,6 +389,27 @@ int posix__getnprocs() {
     return (int) sysinfo.dwNumberOfProcessors;
 }
 
+int posix__setaffinity_process(int mask) {
+    if (0 == mask) {
+        return -1;
+    }
+    if (SetProcessAffinityMask(GetCurrentProcess(), mask)) {
+        return 0;
+    }
+    return -1;
+}
+
+int posix__getaffinity_process(int *mask) {
+    DWORD_PTR ProcessAffinityMask, SystemAffinityMask;
+    if (GetProcessAffinityMask(GetCurrentProcess(), &ProcessAffinityMask, &SystemAffinityMask)) {
+        if (mask) {
+            mask = (int)ProcessAffinityMask;
+        }
+        return 0;
+    }
+    return -1;
+}
+
 int posix__getsysmem(sys_memory_t *sysmem) {
     MEMORYSTATUSEX s_info;
     if (!GlobalMemoryStatusEx(&s_info)) {
@@ -626,6 +647,9 @@ int posix__file_create_always(const char *path, void *descriptor) {
 
 #else
 
+#define __USE_GNU
+
+#include <sched.h>
 #include <sys/types.h>
 #include <syscall.h>
 #include <sys/syscall.h>
@@ -646,7 +670,6 @@ int posix__file_create_always(const char *path, void *descriptor) {
 #include <pwd.h>
 
 /* -lcrypt */
-#define __USE_GNU
 #include <crypt.h>
 
 static
@@ -1089,6 +1112,49 @@ int posix__setpriority_realtime() {
 
 int posix__getnprocs() {
     return sysconf(_SC_NPROCESSORS_CONF);
+}
+
+int posix__setaffinity_process(int mask) {
+    int i;
+    cpu_set_t cpus;
+
+    if (0 == mask) {
+        return -1;
+    }
+
+    CPU_ZERO(&cpus);
+
+    for (i = 0; i < 32; i++) {
+        if (mask & (1 << i)) {
+            CPU_SET(i, &cpus);
+        }
+    }
+
+    return sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
+}
+
+int posix__getaffinity_process(int *mask) {
+    int i;
+    cpu_set_t cpus;
+    int n;
+
+    n = 0;
+    CPU_ZERO(&cpus);
+    if (sched_getaffinity(0, sizeof(cpu_set_t), &cpus) < 0) {
+        return -1;
+    }
+
+    for (i = 0; i < 32; i++) {
+        if(CPU_ISSET(i, &cpus)) {
+            n |= (1 << i);
+        }
+    }
+
+    if (mask) {
+        *mask = n;
+    }
+
+    return 0;
 }
 
 int posix__getsysmem(sys_memory_t *sysmem) {

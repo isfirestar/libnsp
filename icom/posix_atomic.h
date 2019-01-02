@@ -5,8 +5,6 @@
 
 #if _WIN32
 
-#include <Windows.h>
-
 #define posix__atomic_inc(ptr)                  InterlockedIncrement(( LONG volatile *)ptr)
 #define posix__atomic_dec(ptr)                  InterlockedDecrement(( LONG volatile *) ptr)
 #define posix__atomic_xchange(ptr, val)       InterlockedExchange(( LONG volatile *) ptr, (LONG)val)
