@@ -99,7 +99,7 @@ int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask) {
     return -1;
 }
 
-int posix__pthread_getaffinity(const posix__pthread_t *tidp, int mask) {
+int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask) {
     return -1;
 }
 

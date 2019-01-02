@@ -403,7 +403,7 @@ int posix__getaffinity_process(int *mask) {
     DWORD_PTR ProcessAffinityMask, SystemAffinityMask;
     if (GetProcessAffinityMask(GetCurrentProcess(), &ProcessAffinityMask, &SystemAffinityMask)) {
         if (mask) {
-            mask = (int)ProcessAffinityMask;
+            *mask = (int)ProcessAffinityMask;
         }
         return 0;
     }
