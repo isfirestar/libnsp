@@ -258,19 +258,11 @@ namespace nsp {
 
             this->on_connected();
         }
-        
-        void obtcp::on_debug_output(const char *info){
-            on_lowlevel_debug(info);
-        }
 
         void obtcp::on_recvdata(const std::string &pkt) {
             ;
         }
         
-        void obtcp::on_lowlevel_debug(const char *info) {
-            log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
-        }
-
         void obtcp::on_recvdata(const char *data, const int cb) {
             if (data && cb > 0) {
                 on_recvdata(std::string(data, cb));
@@ -422,14 +414,6 @@ namespace nsp {
             }
         }
         
-        void obudp::on_debug_output(const char *info){
-            on_lowlevel_debug(info);
-        }
-        
-        void obudp::on_lowlevel_debug(const char *info) {
-            log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", info);
-        }
-
         void obudp::setlnk(const HUDPLINK lnk) {
             lnk_ = lnk;
         }

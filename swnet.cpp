@@ -39,11 +39,6 @@ namespace nsp {
                         object->on_closed();
                     });
                     break;
-                case EVT_DEBUG_LOG:
-                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
-                        object->on_debug_output(tcp_dat->e.DebugLog.logstr);
-                    });
-                    break;
                 default:
                     break;
             }
@@ -72,20 +67,15 @@ namespace nsp {
                         object->on_closed();
                     });
                     break;
-                case EVT_DEBUG_LOG:
-                     toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&] (const std::shared_ptr<obudp> &object) {
-                        object->on_debug_output(udp_dat->e.DebugLog.logstr);
-                    });
-                    break;
                 default:
                     break;
             }
         }
 
         void STD_CALL swnet::ecr(const char *host_event, const char *reserved, int rescb) {
-            if (!host_event) return;
-
-            log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", host_event);
+            if (host_event) {
+                log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", host_event);
+            }
         }
 
         swnet::swnet() {

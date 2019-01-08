@@ -52,7 +52,6 @@ namespace nsp {
             void on_recvdata(const char *data, const int cb);
             void on_accepted(HTCPLINK srv, HTCPLINK client);
             void on_closed();
-            void on_debug_output(const char *info);
             void on_connected2();
 
             virtual void on_connected();
@@ -63,7 +62,6 @@ namespace nsp {
             virtual void on_closed(HTCPLINK previous);
             virtual void on_recvdata(const std::string &pkt);
             virtual void on_accepted(HTCPLINK lnk);
-            virtual void on_lowlevel_debug(const char *info);
 
             std::atomic<HTCPLINK> lnk_{INVALID_HTCPLINK};
             endpoint remote_;
@@ -97,8 +95,6 @@ namespace nsp {
             void setlnk(const HUDPLINK lnk);
             void on_recvdata(const char *data, const int cb, const char *ipaddr, const port_t port);
             void on_closed();
-            void on_debug_output(const char *info);
-
             virtual void on_pre_close();
 
         protected:
@@ -107,7 +103,6 @@ namespace nsp {
 
             virtual void on_recvdata(const std::string &data, const endpoint &r_ep);
             virtual void on_closed(HUDPLINK previous);
-            virtual void on_lowlevel_debug(const char *info);
             
         private:
             obudp(const obudp &) = delete;

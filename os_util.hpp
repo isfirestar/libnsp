@@ -153,8 +153,10 @@ namespace nsp {
 		// 获取系统启动到目前时间节点流逝的tick
 		// gettick			返回应用层滴答精度， 精度单位为  ms,
 		// clock_gettime	返回内核级滴答精度， 单位为     100ns
+		// clock_epoch		返回EPOCH时间， 单位为 100ns
 		uint64_t gettick();
 		uint64_t clock_gettime();
+		uint64_t clock_epoch();
 
 		// 动态库加载例程 gcc -ldl
 		void *dlopen( const char *file );

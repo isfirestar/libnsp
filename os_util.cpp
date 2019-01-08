@@ -194,6 +194,10 @@ namespace nsp {
             return ::posix__clock_gettime();
         }
 
+        uint64_t clock_epoch() {
+            return ::posix__clock_epoch();
+        }
+
         uint64_t gettick() {
             return ::posix__gettick();
         }
