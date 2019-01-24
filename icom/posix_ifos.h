@@ -15,9 +15,6 @@ long posix__getpid();
 __extern__
 int posix__syslogin(const char *user, const char *key);
 
-/*
- * posix__sleep 过程在 linux 无法精确到毫秒， 如果需要精确到毫秒， 则使用 waitable_handle 的超时机制
- */
 __extern__
 void posix__sleep(uint64_t ms);
 
@@ -33,13 +30,13 @@ const char *posix__dlerror();
 __extern__
 const char *posix__dlerror2(char *estr);
 
-/* ifos-dir/file posix__pmkdir 方法允许递归构建目录树*/
+/* @posix__pmkdir Allow recursive construction of directory trees */
 __extern__
 int posix__mkdir(const char *const dir);
 __extern__
 int posix__pmkdir(const char *const dir);
 
-/* 如果 @target 指定目录， 则对该目录执行递归删除 rm -rf */
+/* if @target is a directory, this method is the same as rm -fr */
 __extern__
 int posix__rm(const char *const target);
 __extern__
@@ -168,4 +165,3 @@ __extern__
 int posix__file_create_always(const char *path, void *descriptor);
 
 #endif /* POSIX_IFOS_H */
-

@@ -8,7 +8,9 @@
 #include <Windows.h>
 
 #define posix__atomic_inc(ptr)                  InterlockedIncrement(( LONG volatile *)ptr)
+#define posix__atomic_inc64(ptr)                InterlockedIncrement64(( LONG64 volatile *)ptr)
 #define posix__atomic_dec(ptr)                  InterlockedDecrement(( LONG volatile *) ptr)
+#define posix__atomic_dec64(ptr)                 InterlockedDecrement64(( LONG64 volatile *) ptr)
 #define posix__atomic_xchange(ptr, val)       InterlockedExchange(( LONG volatile *) ptr, (LONG)val)
 #define posix__atomic_xchange64(ptr, val)       InterlockedExchange64(( LONG64 volatile *) ptr, (LONG64)val)
 #define posix__atomic_compare_xchange(ptr, oldval,  newval) InterlockedCompareExchange( ( LONG volatile *)ptr, (LONG)newval, (LONG)oldval )
@@ -19,7 +21,9 @@
 #else
 
 #define posix__atomic_inc(ptr)                  __sync_add_and_fetch(ptr, 1)
+#define posix__atomic_inc64(ptr)                  __sync_add_and_fetch(ptr, 1)
 #define posix__atomic_dec(ptr)                  __sync_sub_and_fetch(ptr, 1)
+#define posix__atomic_dec64(ptr)                  __sync_sub_and_fetch(ptr, 1)
 #define posix__atomic_xchange(ptr, val)       __sync_lock_test_and_set(ptr, val)
 #define posix__atomic_xchange64(ptr, val)       __sync_lock_test_and_set(ptr, val)
 #define posix__atomic_compare_xchange(ptr, oldval,  newval)   __sync_val_compare_and_swap(ptr, oldval, newval )

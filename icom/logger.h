@@ -23,10 +23,10 @@ void log__write(const char *module, enum log__levels level, int target, const ch
 __extern__
 void log__save(const char *module, enum log__levels level, int target, const char *format, ...);
 
-/* 最大允许指定日志模块名称长度 */
+/* Maximum allowable specified log module name length */
 #define  LOG_MODULE_NAME_LEN   (128)
 
-/* 最大允许单次日志写入数据长度 */
+/* Maximum allowable single log write data length  */
 #define  MAXIMUM_LOG_BUFFER_SIZE  (2048)
 
 #endif

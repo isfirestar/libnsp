@@ -391,4 +391,6 @@ enum byte_order_t {
 #define RE_ERRNO    RE_ERROR(errno)
 #endif
 
+#define posix__mkerror(e)   ((int)(~((int)(e)) + 1))
+
 #endif

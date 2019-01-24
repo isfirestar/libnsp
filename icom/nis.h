@@ -65,5 +65,31 @@ interface_format(int) nis_gethost(const char *name, uint32_t *ipv4);
 interface_format(char *) nis_lgethost(char *name, int cb);
 /* set/change ECR(event callback routine) for nshost use, return the previous ecr address. */
 interface_format(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr); 
+/* use @nis_getifmisc to view all local network adapter information
+	the @ifv pointer must large enough and specified by @*cbifv to storage all device interface info,
+	if byte size of @*cbifv not enough to save data, the return value will be -EAGAIN, and @*cbifv is the total byte size that required.
+	 on success, the return value is zero, otherwise, set by posix__mkerror(errno) if syscall fatal.
+	 demo code:
+	 [
+	 	int i;
+	 	ifmisc_t *ifv;
+		int cbifv;
+
+		cbifv = 0;
+		i = nis_getifmisc(NULL, &cbifv);
+		if (i == -EAGAIN && cbifv > 0)
+		{
+			if (NULL != (ifv = (ifmisc_t *)malloc(cbifv))) {
+				i = nis_getifmisc(ifv, &cbifv);
+			}
+		}
+
+		if (i >= 0) {
+			for (i = 0; i < cbifv / sizeof(ifmisc_t); i++) {
+				printf(" interface:%s:\n INET:0x%08X\n netmask:0x%08X\n boardcast:0x%08X\n\n", ifv[i].interface_, ifv[i].addr_, ifv[i].netmask_, ifv[i].boardcast_);
+			}
+		}
+	 ] */
+interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
 
 #endif

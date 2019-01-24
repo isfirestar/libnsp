@@ -2,31 +2,24 @@
 #define POSIX_NAOS_H
 
 /*
- * posix_naos.h 定義一些于操作系统无关的工具函数
+ * posix_naos.h Define some OS-independent functions
  * anderson 2017-05-08
  */
 
 #include "compiler.h"
 
-/*
- * ipv4tou ipv4tos 方法， 执行IPv4在字符串和32位无符号整形之间的转换， 可以指定大端或者小端
+/* Switching IPv4 representation method between Dotted-Decimal-Notation and integer 
  */
 __extern__
 uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t byte_order);
 __extern__
 char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch);
 
-/*
- * chord32 / chrod16 例程提供32位/16位的字节序转换操作
- *  */
+/* the same as htonl(3)/ntohl(3)/ntohs(3)/htons(3)
+ */
 __extern__
 uint32_t posix__chord32( uint32_t value);
 __extern__
 uint16_t posix__chord16( uint16_t value); 
-
-/*
- * a common initializer for any module
- */
-
 
 #endif

@@ -9,6 +9,7 @@
 #endif
 
 #include <stdarg.h>
+#include <assert.h>
 
 #include "logger.h"
 #include "clist.h"
@@ -213,6 +214,32 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 }
 
 static
+int log__writestd(enum log__levels level, const char* logstr, int cb) {
+    int n;
+#if _WIN32
+    HANDLE std;
+    DWORD written;
+    
+    if (level == kLogLevel_Error) {
+        std = GetStdHandle(STD_ERROR_HANDLE);
+    }else{
+        std = GetStdHandle(STD_OUTPUT_HANDLE);
+    }
+
+    if (INVALID_HANDLE_VALUE != std) {
+        n = WriteFile(std, logstr, cb, &written, NULL);
+    }
+#else
+    if (level == kLogLevel_Error) {
+        n = write(STDERR_FILENO, logstr, cb); /* 2 */
+    }else{
+        n = write(STDOUT_FILENO, logstr, cb); /* 1 */
+    }
+#endif
+    return n;
+}
+
+static
 void log__printf(const char *module, enum log__levels level, int target, const posix__systime_t *currst, const char* logstr, int cb) {
     log__file_describe_t *fileptr;
 
@@ -228,15 +255,7 @@ void log__printf(const char *module, enum log__levels level, int target, const p
     }
 
     if (target & kLogTarget_Stdout) {
-#if _WIN32
-		printf("%s", logstr);
-#else
-        if (level == kLogLevel_Error) {
-            write(STDERR_FILENO, logstr, cb); /* 2 */
-        }else{
-            write(STDOUT_FILENO, logstr, cb); /* 1 */
-        }
-#endif
+        log__writestd(level, logstr, cb);
     }
 
     if (target & kLogTarget_Sysmesg) {
@@ -273,20 +292,12 @@ void *log__asnyc_proc(void *argv) {
             node = NULL;
 
             posix__pthread_mutex_lock(&__log_async.lock_);
-#if _WIN32
             if (!list_empty(&__log_async.items_)) {
-				InterlockedDecrement((volatile LONG *)&__log_async.pendding_);
+                posix__atomic_dec(&__log_async.pendding_);
                 node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
-                if (node) {
-                    list_del(&node->link_);
-                }
-            }
-#else
-            if (NULL != (node = list_first_entry_or_null(&__log_async.items_, log__async_node_t, link_))) {
-                __sync_sub_and_fetch(&__log_async.pendding_, 1);
+                assert(node);
                 list_del(&node->link_);
             }
-#endif
             posix__pthread_mutex_unlock(&__log_async.lock_);
 
             if (node) {
@@ -353,6 +364,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     va_list ap;
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
     posix__systime_t currst;
+    char pename[MAXPATH], *p;
 
     if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
@@ -365,7 +377,6 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     va_end(ap);
 
     if (!module) {
-        char pename[MAXPATH], *p;
         p = posix__getpename2(pename, sizeof(pename));
         if (p) {
             log__printf(pename, level, target, &currst, logstr, (int) strlen(logstr));
@@ -379,8 +390,9 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     va_list ap;
     log__async_node_t *node;
     uint64_t index;
+    char pename[MAXPATH], *p;
 
-    if (log__init() < 0 || !format || level >= kLogLevel_Maximum ) {
+    if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
     }
 
@@ -391,11 +403,8 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     }
 
     /* atomic increase index */
-#if _WIN32
-    index = InterlockedIncrement(( LONG volatile *)&__log_async.misc_index);
-#else
-    index = __sync_fetch_and_add(&__log_async.misc_index, 1);
-#endif
+    index = posix__atomic_inc64(&__log_async.misc_index);
+    /* hash node at index of memory block */
     node = (log__async_node_t *)&__log_async.misc_memory[index % MAXIMUM_LOGSAVE_COUNT];
     node->target_ = target;
     node->level_ = level;
@@ -404,7 +413,6 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
     } else {
-        char pename[MAXPATH], *p;
         p = posix__getpename2(pename, sizeof(pename));
         if (p) {
             posix__strcpy(node->module_, cchof(node->module_), pename);
