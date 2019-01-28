@@ -195,30 +195,19 @@ namespace nsp {
             return 0;
         }
 
-        // 发送例程
-        int obtcp::send(int cb, const std::function<int( void *, int) > &fill) {
-            if (cb <= 0 || INVALID_HTCPLINK == lnk_ || !fill) {
-                return -1;
+        // 直接发送或者组包发送的基本方法
+        int obtcp::send(const unsigned char *data, int cb) {
+            if (INVALID_HTCPLINK != lnk_ && cb > 0 && data) {
+                return ::tcp_write(lnk_, data, cb, NULL);
             }
-
-            return ::tcp_write(lnk_, cb, [] (void *data, int cb, const void *par)->int {
-                const std::function<int( void *, int) > *user_fill = (const std::function<int( void *, int) > *)par;
-                return ( *user_fill)(data, cb);
-            }, (void *) &fill);
+            return -1;
         }
 
-        int obtcp::send(const std::string &buffer) {
-            return send((int) buffer.size(), [&] (void *pkt, int cb) ->int {
-                memcpy(pkt, buffer.data(), cb);
-                return 0;
-            });
-        }
-
-        int obtcp::send(const void *data, int cb) {
-            return send(cb, [&] (void *pkt, int cb) ->int {
-                memcpy(pkt, data, cb);
-                return 0;
-            });
+        int obtcp::send(const void *origin, int cb, const nis_serializer_t serializer) {
+            if (INVALID_HTCPLINK != lnk_ && cb > 0 && origin && serializer) {
+                return ::tcp_write(lnk_, origin, cb, serializer);
+            }
+            return -1;
         }
 
         const endpoint &obtcp::local() const {
@@ -259,13 +248,13 @@ namespace nsp {
             this->on_connected();
         }
 
-        void obtcp::on_recvdata(const std::string &pkt) {
+        void obtcp::on_recvdata(const std::basic_string<unsigned char> &pkt) {
             ;
         }
-        
-        void obtcp::on_recvdata(const char *data, const int cb) {
+
+        void obtcp::on_recvdata(const unsigned char *data, const int cb) {
             if (data && cb > 0) {
-                on_recvdata(std::string(data, cb));
+                on_recvdata(std::basic_string<unsigned char>(data, cb));
             }
         }
 
@@ -351,50 +340,30 @@ namespace nsp {
             }
         }
 
-        int obudp::sendto(int cb, const std::function<int( void *, int) > &fill, const endpoint &ep) {
-            return ::udp_write(lnk_, cb, [] (void *pkt, int cb, const void *par)->int {
-                const std::function<int( void *, int) > *fill = (const std::function<int( void *, int) > *)par;
-                return ( *fill)(pkt, cb);
-            }, (void *) &fill, ep.ipv4(), ep.port());
-        }
-
-        int obudp::sendto(const std::string &buffer, const endpoint &ep) {
-            return sendto(buffer.data(), (int) buffer.size(), ep);
-        }
-
-        int obudp::sendto(const char *data, int cb, const endpoint &ep) {
-            return sendto(cb, [&] (void *pkt, int cb) ->int {
-                memcpy(pkt, data, cb);
-                return 0;
-            }, ep);
-        }
-
-        int obudp::sendto(const std::string &buffer, const char *epstr) {
-            nsp::tcpip::endpoint ep;
-            if (nsp::tcpip::endpoint::build(epstr, ep) < 0) {
-                return -1;
+        int obudp::sendto(const unsigned char *data, int cb, const endpoint &ep) {
+            if (INVALID_HUDPLINK != lnk_ && data && cb > 0) {
+                return ::udp_write(lnk_, data, cb, ep.ipv4(), ep.port(), NULL);
             }
-            return this->sendto(buffer, ep);
+            return -1;
         }
 
-        int obudp::sendto(const char *data, int cb, const char *epstr) {
-            nsp::tcpip::endpoint ep;
-            if (nsp::tcpip::endpoint::build(epstr, ep) < 0) {
-                return -1;
+        int obudp::sendto(const void *origin, int cb, const endpoint &ep, const nis_serializer_t serializer) {
+            if (INVALID_HUDPLINK != lnk_ && cb > 0 && origin && serializer) {
+                return ::udp_write(lnk_, origin, cb, ep.ipv4(), ep.port(), serializer);
             }
-            return this->sendto(data, cb, ep);
+            return -1;
         }
 
         const endpoint &obudp::local() const {
             return local_;
         }
 
-        void obudp::on_recvdata(const std::string &data, const endpoint &r_ep) {
+        void obudp::on_recvdata(const std::basic_string<unsigned char> &data, const endpoint &r_ep) {
         }
 
-        void obudp::on_recvdata(const char *data, const int cb, const char *ipaddr, const port_t port) {
+        void obudp::on_recvdata(const unsigned char *data, const int cb, const char *ipaddr, const port_t port) {
             if (INVALID_HUDPLINK != lnk_ && data && cb > 0 && ipaddr && port > 0) {
-                on_recvdata(std::string(data, cb), endpoint(ipaddr, port));
+                on_recvdata(std::basic_string<unsigned char>(data, cb), endpoint(ipaddr, port));
             }
         }
 

@@ -1,4 +1,5 @@
-﻿#pragma once
+﻿#if !defined APPLICATION_NETWORK_FRAMEWORK_H
+#define APPLICATION_NETWORK_FRAMEWORK_H
 
 #include <memory>
 #include <map>
@@ -36,6 +37,11 @@
 namespace nsp {
     namespace tcpip {
 
+        inline int STD_CALL packet_serialize(unsigned char *dest, const void *origin, int cb) {
+            const proto::proto_interface *package = (const proto::proto_interface *)origin;
+            return (NULL != package->serialize(dest)) ? 0 : -1;
+        }
+
         template<class T>
         class tcp_application_service : public obtcp {
             tcp_application_service(HTCPLINK lnk) = delete;
@@ -70,7 +76,7 @@ namespace nsp {
             }
 
             // as the listening socket, there will be no actual data packets.
-            virtual void on_recvdata(const std::string &data) override final {
+            virtual void on_recvdata(const std::basic_string<unsigned char> &data) override final {
                 abort();
             }
 
@@ -78,9 +84,8 @@ namespace nsp {
             mutable std::recursive_mutex client_locker_;
 
         public:
-
             tcp_application_service() : obtcp() {
-				;
+                ;
             }
 
             ~tcp_application_service() {
@@ -204,13 +209,11 @@ namespace nsp {
             // calling thread can send packets direct by @proto::proto_interface object
             // this operation is recommended by framework
             int psend(const proto::proto_interface *package) {
-                if (!package) return -1;
-                return obtcp::send(package->length(), [&] (void *buffer, int cb) ->int {
-					if (!package->serialize((unsigned char *) buffer)) {
-						return -1;
-					}
-					return 0;
-                });
+                if (!package) {
+                    return -1;
+                }
+
+                return obtcp::send(package, package->length(), &nsp::tcpip::packet_serialize);
             }
 
             virtual void bind_object(const std::shared_ptr<obtcp> &object) override final {
@@ -262,12 +265,7 @@ namespace nsp {
                     return -1;
                 }
 
-                return obudp::sendto(package->length(), [&] (void *buffer, int cb) ->int {
-                    if (!package->serialize((unsigned char *) buffer)) {
-                        return -1;
-                    }
-                    return 0;
-                }, ep);
+                return obudp::sendto(package, package->length(), ep, &nsp::tcpip::packet_serialize);
             }
         };
 
@@ -275,3 +273,5 @@ namespace nsp {
 
     } // namespace tcpip
 } // namespace nsp
+
+#endif

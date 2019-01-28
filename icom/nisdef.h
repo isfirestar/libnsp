@@ -116,12 +116,12 @@ struct __tcp_stream_template {
 
 typedef struct __tcp_stream_template tst_t;
 
-typedef int( STD_CALL *nis_sender_maker_t)(void *data, int cb, const void *context);
+typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *origin, int cb);
 
 struct __tcp_data {
     union {
         struct {
-            const char * Data;
+            const unsigned char *Data;
             int Size; 
         } Packet;
 
@@ -148,7 +148,7 @@ typedef struct __tcp_data tcp_data_t;
 struct __udp_data {
     union {
         struct {
-            const char * Data;
+            const unsigned char *Data;
             int Size;
             char RemoteAddress[16];
             uint16_t RemotePort;

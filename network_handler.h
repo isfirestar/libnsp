@@ -33,9 +33,8 @@ namespace nsp {
             int connect2(const char *epstr);
             int connect2(const endpoint &ep);
             int listen();
-            int send(int cb, const std::function<int( void *, int) > &fill);
-            int send(const std::string &buffer);
-            int send(const void *data, int cb);
+            int send(const void *origin, int cb, const nis_serializer_t serializer);
+            int send(const unsigned char *data, int cb);
             const endpoint &local() const;
             const endpoint &remote() const;
 
@@ -49,7 +48,7 @@ namespace nsp {
 
             void setlnk(const HTCPLINK lnk);
 
-            void on_recvdata(const char *data, const int cb);
+            void on_recvdata(const unsigned char *data, const int cb);
             void on_accepted(HTCPLINK srv, HTCPLINK client);
             void on_closed();
             void on_connected2();
@@ -60,7 +59,7 @@ namespace nsp {
 
         protected:
             virtual void on_closed(HTCPLINK previous);
-            virtual void on_recvdata(const std::string &pkt);
+            virtual void on_recvdata(const std::basic_string<unsigned char> &pkt);
             virtual void on_accepted(HTCPLINK lnk);
 
             std::atomic<HTCPLINK> lnk_{INVALID_HTCPLINK};
@@ -85,15 +84,12 @@ namespace nsp {
             int create(const endpoint &ep, const int flag = UDP_FLAG_NONE);
             int create(const char *epstr, const int flag = UDP_FLAG_NONE);
             void close();
-            int sendto(int cb, const std::function<int( void *, int) > &fill, const endpoint &ep);
-            int sendto(const std::string &buffer, const endpoint &ep);
-            int sendto(const char *data, int cb, const endpoint &ep);
-            int sendto(const std::string &buffer, const char *epstr);
-            int sendto(const char *data, int cb, const char *epstr);
+            int sendto(const unsigned char *data, int cb, const endpoint &ep);
+            int sendto(const void *origin, int cb, const endpoint &ep, const nis_serializer_t serializer);
 
             const endpoint &local() const;
             void setlnk(const HUDPLINK lnk);
-            void on_recvdata(const char *data, const int cb, const char *ipaddr, const port_t port);
+            void on_recvdata(const unsigned char *data, const int cb, const char *ipaddr, const port_t port);
             void on_closed();
             virtual void on_pre_close();
 
@@ -101,7 +97,7 @@ namespace nsp {
             std::atomic<HUDPLINK> lnk_{INVALID_HUDPLINK};
             endpoint local_;
 
-            virtual void on_recvdata(const std::string &data, const endpoint &r_ep);
+            virtual void on_recvdata(const std::basic_string<unsigned char> &data, const endpoint &r_ep);
             virtual void on_closed(HUDPLINK previous);
             
         private:
