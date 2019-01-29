@@ -88,7 +88,7 @@ namespace nsp {
                 ;
             }
 
-            ~tcp_application_service() {
+            virtual ~tcp_application_service() {
                 close();
             }
 
@@ -255,7 +255,7 @@ namespace nsp {
                 ;
             }
 
-            ~udp_application_client() {
+            virtual ~udp_application_client() {
                 ;
             }
 
