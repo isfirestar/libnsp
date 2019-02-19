@@ -393,4 +393,17 @@ enum byte_order_t {
 
 #define posix__mkerror(e)   ((int)(~((int)(e)) + 1))
 
+/* the maximum of integer */
+#define NSP_MAX_UINT8       (0xFF)
+#define NSP_MAX_INT8        (0x7f)
+
+#define NSP_MAX_UINT16      (0xFFFF)
+#define NSP_MAX_INT16       (0x7FFF)
+
+#define NSP_MAX_UINT32      (0xFFFFFFFF)
+#define NSP_MAX_INT32       (0x7FFFFFFF)
+
+#define NSP_MAX_UINT64      (0xFFFFFFFFFFFFFFFF)
+#define NSP_MAX_INT64       (0x7FFFFFFFFFFFFFFF)
+
 #endif

@@ -78,4 +78,12 @@ int DES__encrypt(const char* input,size_t cb,const char key[8], char* output);
 __extern__
 int DES__decrypt(const char* input,size_t cb,const char key[8], char* output);
 
+/**
+ sha256 过程对 @orilen 长度的 @input 数据进行sha256加密， 加密结果通过 @out反馈给调用线程
+ 操作成功返回值等于 @out 的指针， 否则为NULL
+ http://www.ttmd5.com/hash.php?type=9 这里可以在线验证
+ **/
+__extern__
+unsigned char* sha256(const unsigned char* input, int orilen, unsigned char out[32]);
+
 #endif
