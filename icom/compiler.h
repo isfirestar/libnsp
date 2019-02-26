@@ -406,4 +406,13 @@ enum byte_order_t {
 #define NSP_MAX_UINT64      (0xFFFFFFFFFFFFFFFF)
 #define NSP_MAX_INT64       (0x7FFFFFFFFFFFFFFF)
 
+#define sal(n, b)               ((n) << (b))
+#define set_sal(n, b)           ((n) <<= (b))
+#define sar(n, b)               ((n) >> (b))
+#define set_sar(n, b)           ((n) >>= (b))
+#define set_bit(n, b)           ((n) |= sal(1, b))
+#define unset_bit(n, b)         ((n) &= ~sal(1, b))
+#define is_bit_set(n, b)        ((n) & sal(1, b))
+#define is_bit_unset(n, b)      ((~(n)) & sal(1, b))
+
 #endif
