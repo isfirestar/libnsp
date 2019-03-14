@@ -12,7 +12,7 @@
 #include "object.h"
 #include "clist.h"
 
-#define OBJ_HASHTABLE_SIZE   (599)
+#define OBJ_HASHTABLE_SIZE   (99)
 
 #define OBJSTAT_NORMAL    (0)
 #define OBJSTAT_CLOSEWAIT   (1)

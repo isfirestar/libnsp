@@ -52,7 +52,7 @@
 #define __POSIX_EFFICIENT_ALIGNED_PTR_IR__(ptr) do { if (!__POSIX_EFFICIENT_ALIGNED_PTR__(ptr)) return -EINVAL; } while (0)
 #define __POSIX_EFFICIENT_ALIGNED_PTR_NR__(ptr) do { if (!__POSIX_EFFICIENT_ALIGNED_PTR__(ptr)) return; } while (0)
 
-#if !defined UINT64_STRFMT 
+#if !defined UINT64_STRFMT
 #if _WIN32
 #define UINT64_STRFMT "%I64u"
 #else
@@ -60,7 +60,7 @@
 #endif
 #endif
 
-#if !defined INT64_STRFMT 
+#if !defined INT64_STRFMT
 #if _WIN32
 #define INT64_STRFMT "%I64d"
 #else
@@ -80,7 +80,7 @@
 #endif
 #endif
 
-typedef int posix__boolean_t; 
+typedef int posix__boolean_t;
 
 #if !defined posix__true
 #define posix__true ((posix__boolean_t)1)
@@ -208,7 +208,7 @@ typedef int posix__boolean_t;
 #else /* _GNU_ */
 
 #if !defined smp_mb
-#define smp_mb() /* asm volatile("mfence" ::: "memory") */  
+#define smp_mb() /* asm volatile("mfence" ::: "memory") */
 #endif
 
 #if !defined smp_rmb
@@ -407,12 +407,14 @@ enum byte_order_t {
 #define NSP_MAX_INT64       (0x7FFFFFFFFFFFFFFF)
 
 #define sal(n, b)               ((n) << (b))
-#define set_sal(n, b)           ((n) <<= (b))
+#define sal_set(n, b)           ((n) <<= (b))
 #define sar(n, b)               ((n) >> (b))
-#define set_sar(n, b)           ((n) >>= (b))
-#define set_bit(n, b)           ((n) |= sal(1, b))
-#define unset_bit(n, b)         ((n) &= ~sal(1, b))
+#define sar_set(n, b)           ((n) >>= (b))
+#define bit_set(n, b)           ((n) |= sal(1, b))
+#define bit_unset(n, b)         ((n) &= ~sal(1, b))
 #define is_bit_set(n, b)        ((n) & sal(1, b))
 #define is_bit_unset(n, b)      ((~(n)) & sal(1, b))
+#define bit_mask(n, m)          ((n) |= (m))
+#define bit_unmask(n, m)        ((n) &= ~(m))
 
 #endif

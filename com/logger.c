@@ -28,7 +28,7 @@
 /* 最大异步日志存储数量， 达到次数量， 将无法进行异步日志存储 
  * 按每个节点 2KB + 180 字节算， 进程允许最大阻塞 53.5MB 虚拟内存
  */
-#define MAXIMUM_LOGSAVE_COUNT       (30000)
+#define MAXIMUM_LOGSAVE_COUNT       (3000)
 
 /* maximum number of concurrent threads for log_safe */
 #define MAXIMUM_NUMBEROF_CONCURRENT_THREADS   (2000)
