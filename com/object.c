@@ -12,7 +12,7 @@
 #include "object.h"
 #include "clist.h"
 
-#define OBJ_HASHTABLE_SIZE   (99)
+#define OBJ_HASHTABLE_SIZE   (399)
 
 #define OBJSTAT_NORMAL    (0)
 #define OBJSTAT_CLOSEWAIT   (1)
@@ -137,11 +137,11 @@ static objhld_t objtabinst(object_t *obj) {
 
         /* insert into hash list */
         list_add_tail(&obj->hash_clash_, root);
-       
+
         /* give the handle to object ptr */
         obj->hld_ = hld;
     } while (0);
-    
+
     UNLOCK(&g_objmgr.object_locker_);
     return obj->hld_;
 }
@@ -307,7 +307,7 @@ void *objreff(objhld_t hld) {
             ++obj->refcnt_;
             user_data = obj->user_data_;
 
-            /* change the object states to CLOSEWAIT immediately, 
+            /* change the object states to CLOSEWAIT immediately,
                 so, other reference request will fail, object will be close when ref-count decrease equal to zero. */
             obj->stat_ = OBJSTAT_CLOSEWAIT;
         }
@@ -333,7 +333,7 @@ void objdefr(objhld_t hld) {
             /* decrease the ref-count */
             --obj->refcnt_;
 
-           /* if this object is waitting for close and ref-count decrease equal to zero, 
+           /* if this object is waitting for close and ref-count decrease equal to zero,
 				close it */
 			if ( ( 0 == obj->refcnt_ ) && ( OBJSTAT_CLOSEWAIT == obj->stat_ ) ) {
                 objtabrmve(obj->hld_, &removed);
@@ -357,7 +357,7 @@ void objclos(objhld_t hld) {
     obj = objtabsrch(hld);
     if (obj) {
         /* if this object is already in CLOSE_WAIT status, maybe trying an "double close" operation, do nothing.
-           if ref-count large than zero, do nothing during this close operation, actual close will take place when the last count dereference. 
+           if ref-count large than zero, do nothing during this close operation, actual close will take place when the last count dereference.
            if ref-count equal to zero, close canbe finish immediately */
         if ((0 == obj->refcnt_) && (OBJSTAT_NORMAL == obj->stat_)){
             objtabrmve(obj->hld_, &removed);

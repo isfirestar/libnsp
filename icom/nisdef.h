@@ -13,11 +13,9 @@
 #endif
 
 /* bytes size of network protocol layer */
-#define MTU       			(1500)   
-#define ETHERNET_P_SIZE     (14)   /*14 bytes of ethrent layer */
-#define IP_P_SIZE      		(20)   /* 20 bytes of IP layer */
-#define UDP_P_SIZE      	(8)   /* 8 bytes of UDP layer */
-#define TCP_P_SIZE      	(20)   /* 20 bytes of TCP Layer */
+#define MTU       			(1500)
+#define IP_TCP_HEAD_SZIE    (54)
+#define IP_UDP_HEAD_SIZE    (42)
 
 /* types of nshost handle */
 typedef objhld_t HLNK;
@@ -59,7 +57,7 @@ typedef int nis_boolean_t;
 #define LINK_ADDR_REMOTE  (2)   /* get remote using endpoint pair */
 
 struct _nis_event_t {
-    int Event; 
+    int Event;
 
     union {
 
@@ -122,7 +120,7 @@ struct __tcp_data {
     union {
         struct {
             const unsigned char *Data;
-            int Size; 
+            int Size;
         } Packet;
 
         struct {

@@ -22,12 +22,10 @@
 #include "posix_ifos.h"
 #include "posix_atomic.h"
 
-
+/* the upper limit of the number of rows in a log file  */
 #define  MAXIMUM_LOGFILE_LINE    (5000)
 
-/* 最大异步日志存储数量， 达到次数量， 将无法进行异步日志存储 
- * 按每个节点 2KB + 180 字节算， 进程允许最大阻塞 53.5MB 虚拟内存
- */
+/* maximum asynchronous cache */
 #define MAXIMUM_LOGSAVE_COUNT       (3000)
 
 /* maximum number of concurrent threads for log_safe */
@@ -135,7 +133,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
 
 static
 log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module) {
-    char name[128], path[512], pename[128];
+    char name[128], path[512], pename[128], pedir[MAXPATH];
     int retval;
     struct list_head *pos;
     log__file_describe_t *file;
@@ -174,7 +172,8 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
             break;
         }
 
-        /* 没有发生日期切换 且 该文件内容记载没有超过限制行数, 则直接复用该文件 */
+        /* If no date switch occurs and the file content record does not exceed the limit number of rows,
+            the file is reused directly.  */
         if (file->filest_.day == currst->day &&
                 file->filest_.month == currst->month &&
                 file->filest_.day == currst->day &&
@@ -182,16 +181,14 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
             return file;
         }
 
-        /* 切换日志文件， 并不回收日志对象指针，仅仅是关闭文件描述符即可 */
+        /* Switching the log file does not reclaim the log object pointer, just closing the file descriptor  */
         log__close_file(file);
     } while (0);
 
-    char pedir[MAXPATH];
     posix__getpedir2(pedir, sizeof(pedir));
     posix__getpename2(pename, cchof(pename));
 
-
-    /* 日志发件发生新建或任何形式的文件切换 */
+    /* New or any form of file switching occurs in log posts  */
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", module,
             currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
     posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR, pedir, pename );
@@ -203,9 +200,8 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
         posix__strcpy(file->module_, cchof(file->module_), module);
         file->line_count_ = 0;
     } else {
-        /* bug fixed:
-         * 如果文件创建失败, 则需要移除链表节点 */
-        list_del(&file->link_);
+        /* If file creation fails, the linked list node needs to be removed  */
+        list_del_init(&file->link_);
         free(file);
         file = NULL;
     }
@@ -219,7 +215,7 @@ int log__writestd(enum log__levels level, const char* logstr, int cb) {
 #if _WIN32
     HANDLE std;
     DWORD written;
-    
+
     if (level == kLogLevel_Error) {
         std = GetStdHandle(STD_ERROR_HANDLE);
     }else{
@@ -296,7 +292,7 @@ void *log__asnyc_proc(void *argv) {
                 posix__atomic_dec(&__log_async.pendding_);
                 node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
                 assert(node);
-                list_del(&node->link_);
+                list_del_init(&node->link_);
             }
             posix__pthread_mutex_unlock(&__log_async.lock_);
 
@@ -306,7 +302,6 @@ void *log__asnyc_proc(void *argv) {
         } while (node);
     }
 
-    /* 如果异步线程退出，则可能导致 log__save 内存堆积, 因为此时无法准确进行日志记录， 因此投递系统记录 */
     posix__syslog("nsplog asynchronous thread has been terminated.");
     return NULL;
 }
@@ -343,7 +338,7 @@ int log__async_init() {
 
 int log__init() {
     posix__atomic_initial_declare_variable(__inited__);
-    
+
     if (posix__atomic_initial_try(&__inited__)) {
        /* initial global context */
         posix__pthread_mutex_init(&__log_file_lock);

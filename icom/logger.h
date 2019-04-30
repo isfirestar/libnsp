@@ -3,6 +3,12 @@
 
 #include "compiler.h"
 
+/*
+ *	bug:
+ *	1. Log file switching rows are 5000 lines with a minimum switching interval of 1 second.
+ *		If more than 5000 rows of logs are continuously output in one second, the log information will be saved in the same log file
+ */
+
 enum log__levels {
     kLogLevel_Info = 0,
     kLogLevel_Warning,
