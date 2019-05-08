@@ -14,8 +14,7 @@
 
 /* bytes size of network protocol layer */
 #define MTU       			(1500)
-#define IP_TCP_HEAD_SZIE    (54)
-#define IP_UDP_HEAD_SIZE    (42)
+#define MAX_UDP_UNIT        (1472)
 
 /* types of nshost handle */
 typedef objhld_t HLNK;
