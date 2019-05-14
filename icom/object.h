@@ -26,5 +26,10 @@ extern
 void *objreff(objhld_t hld);	/* object reference final */
 extern
 void objclos(objhld_t hld);		/* object mark close */
+extern
+void objregs();	/* clean up the current object set and make object manager regress to initial status, 
+					all objects will be going to try to close,
+					Be careful! this operation will cause object manager global locked, 
+					unload method for each object are all maybe running inside the global locker  */
 	
 #endif
