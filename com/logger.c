@@ -133,7 +133,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
                 return -1;
             }
         } else {
-            if (0 == n) {
+            if (0 == written) {
                 break;
             }
             offset += written;
