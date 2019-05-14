@@ -121,9 +121,25 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
         return -1;
     }
 #else
-    if (write(file->fd_, buf, count) <= 0) {
-        return -1;
+    int offset, written;
+    const unsigned char *p;
+
+    offset = 0;
+    p = (const unsigned char *)buf;
+    while (offset < count) {
+        written = write(file->fd_, p + offset, count - offset);
+        if (written < 0) {
+            if (errno != EINTR) {
+                return -1;
+            }
+        } else {
+            if (0 == n) {
+                break;
+            }
+            offset += written;
+        }
     }
+
 #endif
 
     /* posix__fflush(file->fd_) */
