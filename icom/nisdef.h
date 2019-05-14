@@ -13,8 +13,14 @@
 #endif
 
 /* bytes size of network protocol layer */
-#define MTU       			(1500)
-#define MAX_UDP_UNIT        (1472)
+#define MTU       			               (1500)
+#define UDP_PROTOCOL_LAYER_SIZE             (28)
+#define TCP_PROTOCOL_LAYER_SIZE             (40)
+
+#define MAX_UDP_UNIT        ((MTU - UDP_PROTOCOL_LAYER_SIZE))
+
+#define IIS_MTU             (576)
+#define IIS_MAX_UDP_UNIT    ((IIS_MTU - UDP_PROTOCOL_LAYER_SIZE))
 
 /* types of nshost handle */
 typedef objhld_t HLNK;

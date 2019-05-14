@@ -60,7 +60,7 @@ long posix__gettid() {
 }
 
 long posix__getpid() {
-    return (int) GetCurrentProcessId();       
+    return (int) GetCurrentProcessId();
 }
 
 int posix__syslogin(const char *user, const char *key) {
@@ -87,7 +87,7 @@ void* posix__dlsym(void* handle, const char* symbol) {
 int posix__dlclose(void *handle) {
     if (!handle){
         return -1;
-    } 
+    }
 
     if (FreeLibrary((HMODULE) handle)) {
         return 0;
@@ -174,7 +174,7 @@ int posix__pmkdir(const char *const dir) {
         }
     }
 
-    /* 返回前， 必须保证所有的内存被清理 
+    /* 返回前， 必须保证所有的内存被清理
             无论前置操作是否成功 */
     while (!list_empty(&stack)) {
         pos = list_first_entry(&stack, struct dir_stack_node, link);
@@ -321,7 +321,7 @@ const char *posix__gettmpdir() {
     if (0 == GetTempPathA(_countof(buffer), buffer)) {
         return buffer;
     }
-    return NULL;   
+    return NULL;
 }
 
 char *posix__gettmpdir2(char *holder, int cb) {
@@ -368,7 +368,7 @@ int posix__getpriority(int *priority) {
 }
 
 int posix__setpriority_below() {
-    return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS)); 
+    return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS));
 }
 
 int posix__setpriority_normal() {
@@ -412,6 +412,7 @@ int posix__getaffinity_process(int *mask) {
 
 int posix__getsysmem(sys_memory_t *sysmem) {
     MEMORYSTATUSEX s_info;
+    s_info.dwLength = sizeof(s_info);
     if (!GlobalMemoryStatusEx(&s_info)) {
         return -1;
     }
@@ -657,7 +658,7 @@ int posix__file_create_always(const char *path, void *descriptor) {
 #include <sys/syscall.h>
 #include <sys/sysinfo.h>
 #include <sys/syslog.h>
-#include <dlfcn.h> 
+#include <dlfcn.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -668,7 +669,7 @@ int posix__file_create_always(const char *path, void *descriptor) {
 #include <iconv.h>
 #include <locale.h>
 #include <unistd.h>
-#include <shadow.h>  
+#include <shadow.h>
 #include <pwd.h>
 
 /* -lcrypt */
@@ -684,17 +685,17 @@ int __posix__rmdir(const char *dir) {
     if (!dir) {
         return RE_ERROR(EINVAL);
     }
-    
+
     dirp = opendir(dir);
     if (!dirp) {
         return RE_ERROR(errno);
     }
-    
+
     while (NULL != (ent = readdir(dirp))) {
         if (0 == posix__strcmp(ent->d_name, ".") || 0 == posix__strcmp(ent->d_name, "..")) {
             continue;
         }
-        
+
         posix__sprintf(filename, cchof(filename), "%s/%s", dir, ent->d_name);
 
         if (posix__isdir(filename)) {
@@ -735,8 +736,8 @@ int posix__syslogin(const char *user, const char *key) {
     }
 
     /*
-     The getspnam_r() function is like getspnam() but stores the retrieved shadow password structure in the space pointed to by spbuf.  
-     This shadow password structure contains pointers to strings, and these strings are stored in the buffer buf of size buflen.  
+     The getspnam_r() function is like getspnam() but stores the retrieved shadow password structure in the space pointed to by spbuf.
+     This shadow password structure contains pointers to strings, and these strings are stored in the buffer buf of size buflen.
      A pointer to the result (in case of success) or NULL (in case no entry was found or an error occurred) is  stored  in *spbufp
     */
     retval = getspnam_r(user, &spbuf, buf, sizeof(buf), &spbufp);
@@ -761,9 +762,9 @@ int posix__syslogin(const char *user, const char *key) {
         return -EACCES;
     }
 
-    /* crypt_r() is a reentrant version of crypt().  
-        The structure pointed to by data is used to store result data and bookkeeping information.  
-        Other than allocating it, the only thing that the caller should do with this structure is to set data->initialized to zero before the first call to crypt_r(). 
+    /* crypt_r() is a reentrant version of crypt().
+        The structure pointed to by data is used to store result data and bookkeeping information.
+        Other than allocating it, the only thing that the caller should do with this structure is to set data->initialized to zero before the first call to crypt_r().
     */
     crd.initialized = 0;
     encrypt = crypt_r(key, salt, &crd);
@@ -789,7 +790,7 @@ void *posix__dlopen(const char *file) {
 void* posix__dlsym(void* handle, const char* symbol) {
     if (!handle || !symbol) {
         return NULL;
-    } 
+    }
     return dlsym(handle, symbol);
 }
 
@@ -882,7 +883,7 @@ int posix__pmkdir(const char *const dir) {
         }
     }
 
-    /* 返回前， 必须保证所有的内存被清理 
+    /* 返回前， 必须保证所有的内存被清理
             无论前置操作是否成功 */
     while (!list_empty(&stack)) {
         pos = list_first_entry(&stack, struct dir_stack_node, link);
@@ -1063,10 +1064,10 @@ int posix__isdir(const char *const file) {
     /* 如果符号链接目标是一个目录， 同样会解释为一个目录， 而不是 __S_IFLNK
      * __S_IFLNK 仅针对指向文件的符号链接
      * 使用符号链接目录的相对路径同样可以正常open文件
-     * 例如： 
+     * 例如：
      * /home/Julie/escape/configs -> /etc
      * int fd = open("/home/Julie/escape/configs/passwd", O_RDONLY); 可以正常打开文件
-     * 
+     *
      * shell 中查找所有符号链接的命令:
      * find . -type l
      * 删除所有的符号链接
@@ -1338,7 +1339,7 @@ int posix__file_open(const char *path, void *descriptor) {
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-    
+
     fd = open(path, O_RDWR);
     if (fd < 0) {
         return RE_ERROR(errno);
@@ -1353,7 +1354,7 @@ int posix__file_open_always(const char *path, void *descriptor) {
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-    
+
     fd = open(path, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
         return RE_ERROR(errno);
@@ -1368,7 +1369,7 @@ int posix__file_create(const char *path, void *descriptor) {
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-    
+
     fd = open(path, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
         return RE_ERROR(errno);
@@ -1383,7 +1384,7 @@ int posix__file_create_always(const char *path, void *descriptor) {
     if (!path || !descriptor) {
         return RE_ERROR(EINVAL);
     }
-    
+
     fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     if (fd < 0) {
         return RE_ERROR(errno);

@@ -34,15 +34,15 @@
 /*
  * type __sync_lock_test_and_set (type *ptr, type value, ...)
  *          行为: *ptr = value, 返回 *ptr交换前的值
- * 
+ *
  * bool __sync_bool_compare_and_swap (type*ptr, type oldval, type newval, ...)
  *          行为: 如果 (*ptr == oldval) 则 *ptr = newval, 返回1
  *                否则 返回 0, ptr/ *ptr不变
- * 
+ *
  * type __sync_val_compare_and_swap (type *ptr, type oldval,  type newval, ...)
  *          行为: 如果 (*ptr == oldval) 则 *ptr = newval, 返回 *ptr 交换前的值
  *                否则 返回 *ptr, ptr/ *ptr不变
- * 
+ *
  * void __sync_lock_release (type *ptr, ...)
  *          行为: *ptr = 0
  *  */
@@ -81,6 +81,9 @@
 
 #define posix__atomic_initial_passed(initial_variable) \
 	(POSIX__ATOMIC_INIT_SUCCESS == initial_variable)
+
+#define posix__atomic_initial_awaiting(initial_variable) \
+	(POSIX__ATOMIC_INIT_TODO == initial_variable)
 
 #endif /* POSIX_ATOMIC_H */
 
