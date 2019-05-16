@@ -83,6 +83,12 @@ typedef void( STD_CALL *nis_callback_t)(const nis_event_t *naio_event, const voi
 typedef nis_callback_t tcp_io_callback_t;
 typedef nis_callback_t udp_io_callback_t;
 
+/* the definition control types for @nis_cntl */
+#define NI_SETATTR      (1)
+#define NI_GETATTR      (2)
+#define NI_SETCTX       (3)
+#define NI_GETCTX       (4)
+
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     TCP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -135,6 +141,10 @@ struct __tcp_data {
         struct {
             HTCPLINK OptionLink;
         } LinkOption;
+
+        struct {
+            const void *Context;
+        } ContextPreClose;
     } e;
 }__POSIX_TYPE_ALIGNED__;
 
@@ -160,6 +170,10 @@ struct __udp_data {
         struct {
             HUDPLINK OptionLink;
         } LinkOption;
+
+        struct {
+            const void *Context;
+        } ContextPreClose;
     } e;
 } __POSIX_TYPE_ALIGNED__;
 
