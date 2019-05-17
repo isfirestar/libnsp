@@ -22,8 +22,6 @@
 interface_format(int) tcp_init();
 interface_format(void) tcp_uninit();
 interface_format(HTCPLINK) tcp_create(tcp_io_callback_t user_callback, const char* l_ipstr, uint16_t l_port);
-interface_format(int) tcp_settst(HTCPLINK lnk, const tst_t *tst);
-interface_format(int) tcp_gettst(HTCPLINK lnk, tst_t *tst);
 interface_format(void) tcp_destroy(HTCPLINK lnk);
 interface_format(int) tcp_connect(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
 interface_format(int) tcp_connect2(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
@@ -33,9 +31,15 @@ interface_format(int) tcp_getaddr(HTCPLINK lnk, int type, uint32_t* ipv4, uint16
 interface_format(int) tcp_setopt(HTCPLINK lnk, int level, int opt, const char *val, int len);
 interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, int *len);
 
-/*  obsolete interface definition
+/*  the following are some obsolete interface definition:
 	NOTE: New applications should use the @nis_cntl interface (available since version 9.8.1),
-	which provides a much superior interface for user control operation for every link*/
+	which provides a much superior interface for user control operation for every link.
+	@NI_SETTST to instead @tcp_settst
+	@NI_GETTST to instead @tcp_gettst
+	@NI_SETATTR to instead @tcp_setattr
+	@NI_GETATTR to instead @tcp_getattr */
+interface_format(int) tcp_settst(HTCPLINK lnk, const tst_t *tst);
+interface_format(int) tcp_gettst(HTCPLINK lnk, tst_t *tst);
 interface_format(int) tcp_setattr(HTCPLINK lnk, int cmd, int enable);
 interface_format(int) tcp_getattr(HTCPLINK lnk, int cmd, int *enabled);
 
@@ -115,6 +119,10 @@ interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
  *		set the user define context pointer and binding with target object
  *	NI_GETCTX(void **)
  *		get the user define context pointer which is binding with target object
+ *	NI_SETTST(tst_t *)
+ *		set the tcp stream template of specify object
+ *	NI_GETTST(tst_t *)
+ *		get the tcp stream template of specify object current set
  */
 interface_format(int) nis_cntl(objhld_t lnk, int cmd, ...);
 

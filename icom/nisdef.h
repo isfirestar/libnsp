@@ -65,7 +65,6 @@ struct _nis_event_t {
     int Event;
 
     union {
-
         struct {
             HTCPLINK Link;
         } Tcp;
@@ -88,6 +87,8 @@ typedef nis_callback_t udp_io_callback_t;
 #define NI_GETATTR      (2)
 #define NI_SETCTX       (3)
 #define NI_GETCTX       (4)
+#define NI_SETTST       (5)
+#define NI_GETTST       (6)
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     TCP implement
