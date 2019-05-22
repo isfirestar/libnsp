@@ -117,8 +117,13 @@ interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
  *		get the attributes of speicfy object, return the object attributes in current on successful, otherwise, -1 willbe return
  *	NI_SETCTX(void *)
  *		set the user define context pointer and binding with target object
+ *		NOTEs: that @NI_GETCTX failure to take effect during neither EVT_PRE_CLOSE nor EVT_CLOSED,
  *	NI_GETCTX(void **)
  *		get the user define context pointer which is binding with target object
+ *		NOTEs: that @NI_GETCTX failure to take effect during neither EVT_PRE_CLOSE nor EVT_CLOSED,
+ *				calling thread should use ContextPreClose::Context to use or save or free the context pointer when event EVT_PRE_CLOSE arrived
+ *				EVT_PRE_CLOSE is the last chance to safely handle user context pointers
+ *				in EVT_CLOSED, ContextPreClose::Context is NULL.
  *	NI_SETTST(tst_t *)
  *		set the tcp stream template of specify object
  *	NI_GETTST(tst_t *)
