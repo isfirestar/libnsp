@@ -49,6 +49,7 @@ typedef struct {
 
 static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
 static posix__pthread_mutex_t __log_file_lock;
+static char __log_root_directory[MAXPATH] = { 0 };
 
 typedef struct {
     struct list_head link_;
@@ -149,7 +150,7 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
 
 static
 log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module) {
-    char name[128], path[512], pename[128], pedir[MAXPATH];
+    char name[128], path[512], pename[128];
     int retval;
     struct list_head *pos;
     log__file_describe_t *file;
@@ -201,15 +202,14 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
         log__close_file(file);
     } while (0);
 
-    posix__getpedir2(pedir, sizeof(pedir));
     posix__getpename2(pename, cchof(pename));
 
     /* New or any form of file switching occurs in log posts  */
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", module,
             currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
-    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR, pedir, pename );
+    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR, __log_root_directory, pename );
     posix__pmkdir(path);
-    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR"%s", pedir, pename, name);
+    posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR"%s", __log_root_directory, pename, name);
     retval = log__create_file(file, path);
     if (retval >= 0) {
         memcpy(&file->filest_, currst, sizeof ( posix__systime_t));
@@ -352,6 +352,29 @@ int log__async_init() {
     return 0;
 }
 
+static
+void log__create_log_directory(const char *rootdir)
+{
+    int pos, i;
+
+    if (rootdir) {
+        strcpy(__log_root_directory, rootdir);
+
+        pos = strlen(__log_root_directory);
+        for (i = pos - 1; i >= 0; i--) {
+            if (__log_root_directory[i] == POSIX__DIR_SYMBOL) {
+                __log_root_directory[i] = 0;
+            } else {
+                break;
+            }
+        }
+    }
+
+    if( posix__pmkdir(__log_root_directory) < 0) {
+        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+    }
+}
+
 int log__init() {
     posix__atomic_initial_declare_variable(__inited__);
 
@@ -371,6 +394,12 @@ int log__init() {
     return __inited__;
 }
 
+int log__init2(const char *rootdir)
+{
+    log__create_log_directory(rootdir);
+    return log__init();
+}
+
 void log__write(const char *module, enum log__levels level, int target, const char *format, ...) {
     va_list ap;
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
@@ -382,6 +411,10 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     }
 
     posix__localtime(&currst);
+
+    if (0 == __log_root_directory[0]) {
+        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+    }
 
     va_start(ap, format);
     log__format_string(level, posix__gettid(), format, ap, &currst, logstr, cchof(logstr));
@@ -420,6 +453,10 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     node->target_ = target;
     node->level_ = level;
     posix__localtime(&node->logst_);
+
+    if (0 == __log_root_directory[0]) {
+        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+    }
 
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);

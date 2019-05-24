@@ -818,7 +818,7 @@ const char *posix__dlerror2(char *estr) {
 
 int posix__mkdir(const char *const dir) {
     if (dir) {
-        if (0 == mkdir(dir, S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH)) {
+        if (0 == mkdir(dir, 0755)) {
             return 0;
         }
 

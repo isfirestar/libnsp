@@ -11,25 +11,21 @@
     	other IO-independent interfaces still may return success and establishing legitimate internal object.
 	2. When call to @tcp_connect in synchronous mode, cause by the mutlithreading reason,
 		the order of arrival of callback events may be in chaos, for example, EVT_CLOSED is earlier than EVT_TCP_CONNECTED.
-
 */
 
 #include "nisdef.h"
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------
-  TCP procedure definition
------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) tcp_init();
 interface_format(void) tcp_uninit();
-interface_format(HTCPLINK) tcp_create(tcp_io_callback_t user_callback, const char* l_ipstr, uint16_t l_port);
-interface_format(void) tcp_destroy(HTCPLINK lnk);
-interface_format(int) tcp_connect(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
-interface_format(int) tcp_connect2(HTCPLINK lnk, const char* r_ipstr, uint16_t port_remote);
-interface_format(int) tcp_listen(HTCPLINK lnk, int block);
-interface_format(int) tcp_write(HTCPLINK lnk, const void *origin, int cb, const nis_serializer_t serializer);
-interface_format(int) tcp_getaddr(HTCPLINK lnk, int type, uint32_t* ipv4, uint16_t* port);
-interface_format(int) tcp_setopt(HTCPLINK lnk, int level, int opt, const char *val, int len);
-interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, int *len);
+interface_format(HTCPLINK) tcp_create(tcp_io_callback_t callback, const char* ipstr, uint16_t port);
+interface_format(void) tcp_destroy(HTCPLINK link);
+interface_format(int) tcp_connect(HTCPLINK link, const char* ipstr, uint16_t port);
+interface_format(int) tcp_connect2(HTCPLINK link, const char* ipstr, uint16_t port);
+interface_format(int) tcp_listen(HTCPLINK link, int block);
+interface_format(int) tcp_write(HTCPLINK link, const void *origin, int size, const nis_serializer_t serializer);
+interface_format(int) tcp_getaddr(HTCPLINK link, int type, uint32_t* ip, uint16_t* port);
+interface_format(int) tcp_setopt(HTCPLINK link, int level, int opt, const char *val, int len);
+interface_format(int) tcp_getopt(HTCPLINK link, int level, int opt, char *val, int *len);
 
 /*  the following are some obsolete interface definition:
 	NOTE: New applications should use the @nis_cntl interface (available since version 9.8.1),
@@ -38,41 +34,38 @@ interface_format(int) tcp_getopt(HTCPLINK lnk, int level, int opt, char *val, in
 	@NI_GETTST to instead @tcp_gettst
 	@NI_SETATTR to instead @tcp_setattr
 	@NI_GETATTR to instead @tcp_getattr */
-interface_format(int) tcp_settst(HTCPLINK lnk, const tst_t *tst);
-interface_format(int) tcp_gettst(HTCPLINK lnk, tst_t *tst);
-interface_format(int) tcp_setattr(HTCPLINK lnk, int cmd, int enable);
-interface_format(int) tcp_getattr(HTCPLINK lnk, int cmd, int *enabled);
+interface_format(int) tcp_settst(HTCPLINK link, const tst_t *tst);
+interface_format(int) tcp_gettst(HTCPLINK link, tst_t *tst);
+interface_format(int) tcp_setattr(HTCPLINK link, int cmd, int enable);
+interface_format(int) tcp_getattr(HTCPLINK link, int cmd, int *enabled);
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------
-  UDP procedure definition
----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) udp_init();
 interface_format(void) udp_uninit();
-interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* l_ipstr, uint16_t l_port, int flag);
-interface_format(void) udp_destroy(HUDPLINK lnk);
+
+/* NOTE: New applications should NOT set the @flag when calling @udp_create  (available since version 9.8.1),
+ *			every udp link can change the attributes(flag) any time when calling interface @nis_cntl with @NI_SETATTR,
+ *			more useful is that broadcast attributes can now be cancelled.
+ */
+interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* ipstr, uint16_t port, int flag);
+interface_format(void) udp_destroy(HUDPLINK link);
+
 /* @udp_write interface using direct IO mode
  * @udp_sendto interface like @tcp_write, push memory block into wpoll cache first */
-interface_format(int) udp_write(HUDPLINK lnk, const void *origin, int cb, const char* r_ipstr, uint16_t r_port, const nis_serializer_t serializer);
-interface_format(int) udp_getaddr(HUDPLINK lnk, uint32_t *ipv4, uint16_t *port_output);
-interface_format(int) udp_setopt(HUDPLINK lnk, int level, int opt, const char *val, int len);
-interface_format(int) udp_getopt(HUDPLINK lnk, int level, int opt, char *val, int *len);
-interface_format(int) udp_joingrp(HUDPLINK lnk, const char *g_ipstr, uint16_t g_port);
-interface_format(int) udp_dropgrp(HUDPLINK lnk);
+interface_format(int) udp_write(HUDPLINK link, const void *origin, int cb, const char* ipstr, uint16_t port, const nis_serializer_t serializer);
+interface_format(int) udp_getaddr(HUDPLINK link, uint32_t *ipv4, uint16_t *port);
+interface_format(int) udp_setopt(HUDPLINK link, int level, int opt, const char *val, int len);
+interface_format(int) udp_getopt(HUDPLINK link, int level, int opt, char *val, int *len);
+interface_format(int) udp_joingrp(HUDPLINK link, const char *ipstr, uint16_t port);
+interface_format(int) udp_dropgrp(HUDPLINK link);
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------
-  UDP GRP procedure definition
----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #if _WIN32
-interface_format(int) udp_initialize_grp(HUDPLINK lnk, packet_grp_t *grp);
+interface_format(int) udp_initialize_grp(HUDPLINK link, packet_grp_t *grp);
 interface_format(void) udp_release_grp(packet_grp_t *grp);
-interface_format(int) udp_raise_grp(HUDPLINK lnk, const char *r_ipstr, uint16_t r_port);
-interface_format(void) udp_detach_grp(HUDPLINK lnk);
-interface_format(int) udp_write_grp(HUDPLINK lnk, packet_grp_t *grp);
+interface_format(int) udp_raise_grp(HUDPLINK link, const char *ipstr, uint16_t port);
+interface_format(void) udp_detach_grp(HUDPLINK link);
+interface_format(int) udp_write_grp(HUDPLINK link, packet_grp_t *grp);
 #endif
 
-/*---------------------------------------------------------------------------------------------------------------------------------------------------------
- object/global functions
----------------------------------------------------------------------------------------------------------------------------------------------------------*/
 interface_format(int) nis_getver(swnet_version_t *version);
 /* parse the domain name, get the first parse result of obtained, convert it to Little-Endian*/
 interface_format(int) nis_gethost(const char *name, uint32_t *ipv4);
@@ -117,18 +110,18 @@ interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
  *		get the attributes of speicfy object, return the object attributes in current on successful, otherwise, -1 willbe return
  *	NI_SETCTX(void *)
  *		set the user define context pointer and binding with target object
- *		NOTEs: that @NI_GETCTX failure to take effect during neither EVT_PRE_CLOSE nor EVT_CLOSED,
+ *		NOTE: 	that @NI_SETCTX with @nis_cntl call failure during neither EVT_PRE_CLOSE nor EVT_CLOSED
  *	NI_GETCTX(void **)
  *		get the user define context pointer which is binding with target object
- *		NOTEs: that @NI_GETCTX failure to take effect during neither EVT_PRE_CLOSE nor EVT_CLOSED,
- *				calling thread should use ContextPreClose::Context to use or save or free the context pointer when event EVT_PRE_CLOSE arrived
- *				EVT_PRE_CLOSE is the last chance to safely handle user context pointers
- *				in EVT_CLOSED, ContextPreClose::Context is NULL.
+ *		NOTE: 	that @NI_GETCTX with @nis_cntl call failure during neither EVT_PRE_CLOSE nor EVT_CLOSED,
+ *				calling thread should use PreClose::Context to use or save or free the context pointer when event EVT_PRE_CLOSE arrived,
+ *					and EVT_PRE_CLOSE is the last chance to safely handle user context pointers
+ *				in EVT_CLOSED, PreClose::Context it's SURE be NULL.
  *	NI_SETTST(tst_t *)
  *		set the tcp stream template of specify object
  *	NI_GETTST(tst_t *)
  *		get the tcp stream template of specify object current set
  */
-interface_format(int) nis_cntl(objhld_t lnk, int cmd, ...);
+interface_format(int) nis_cntl(objhld_t link, int cmd, ...);
 
 #endif

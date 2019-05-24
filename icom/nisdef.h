@@ -56,12 +56,30 @@ typedef int nis_boolean_t;
 #define EVT_PRE_CLOSE   (0x0002)    /* ready to close*/
 #define EVT_CLOSED      (0x0003)    /* has been closed */
 #define EVT_RECEIVEDATA (0x0004)    /* receive data*/
+/* TCP events */
+#define EVT_TCP_ACCEPTED    (0x0013)   /* has been Accepted */
+#define EVT_TCP_CONNECTED   (0x0014)  /* success connect to remote */
 
 /* option to get link address */
 #define LINK_ADDR_LOCAL   (1)   /* get local using endpoint pair */
 #define LINK_ADDR_REMOTE  (2)   /* get remote using endpoint pair */
 
-struct _nis_event_t {
+/* optional  attributes of tcp link */
+#define LINKATTR_TCP_FULLY_RECEIVE                      (1) /* receive fully packet include low-level head */
+#define LINKATTR_TCP_NO_BUILD                           (2) /* not use @tst::builder when calling @tcp_write */
+#define LINKATTR_TCP_UPDATE_ACCEPT_CONTEXT              (4) /* copy tst and attr to accepted link when syn */
+#define LINKATTR_UDP_BAORDCAST                          (1)
+#define LINKATTR_UDP_MULTICAST                          (2)
+
+/* the definition control types for @nis_cntl */
+#define NI_SETATTR      (1)
+#define NI_GETATTR      (2)
+#define NI_SETCTX       (3)
+#define NI_GETCTX       (4)
+#define NI_SETTST       (5)
+#define NI_GETTST       (6)
+
+struct nis_event {
     int Event;
 
     union {
@@ -75,33 +93,16 @@ struct _nis_event_t {
     } Ln;
 } __POSIX_TYPE_ALIGNED__;
 
-typedef struct _nis_event_t nis_event_t;
+typedef struct nis_event nis_event_t;
 
 /* user callback definition for network events */
-typedef void( STD_CALL *nis_callback_t)(const nis_event_t *naio_event, const void *pParam2);
+typedef void( STD_CALL *nis_callback_t)(const struct nis_event *event, const void *data);
 typedef nis_callback_t tcp_io_callback_t;
 typedef nis_callback_t udp_io_callback_t;
-
-/* the definition control types for @nis_cntl */
-#define NI_SETATTR      (1)
-#define NI_GETATTR      (2)
-#define NI_SETCTX       (3)
-#define NI_GETCTX       (4)
-#define NI_SETTST       (5)
-#define NI_GETTST       (6)
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     TCP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
-/* TCP events */
-#define EVT_TCP_ACCEPTED    (0x0013)   /* has been Accepted */
-#define EVT_TCP_CONNECTED   (0x0014)  /* success connect to remote */
-
-/* TCP attributes of link */
-#define LINKATTR_TCP_FULLY_RECEIVE                      (1) /* receive fully packet include low-level head */
-#define LINKATTR_TCP_NO_BUILD                           (2) /* not use @tst::builder when calling @tcp_write */
-#define LINKATTR_TCP_UPDATE_ACCEPT_CONTEXT              (4) /* copy tst and attr to accepted link when syn */
 
 /*  private protocol template(PPT,) support
     protocol parse template: tcp_ppt_parser_t
@@ -128,7 +129,7 @@ typedef struct __tcp_stream_template tst_t;
 
 typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *origin, int cb);
 
-struct __tcp_data {
+struct nis_tcp_data {
     union {
         struct {
             const unsigned char *Data;
@@ -140,26 +141,22 @@ struct __tcp_data {
         } Accept;
 
         struct {
-            HTCPLINK OptionLink;
-        } LinkOption;
-
-        struct {
-            const void *Context;
-        } ContextPreClose;
+            void *Context;
+        } PreClose;
     } e;
 }__POSIX_TYPE_ALIGNED__;
 
-typedef struct __tcp_data tcp_data_t;
+typedef struct nis_tcp_data tcp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     UDP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
 #define UDP_FLAG_NONE           (0)
 #define UDP_FLAG_UNITCAST       (UDP_FLAG_NONE)
-#define UDP_FLAG_BROADCAST      (1)
-#define UDP_FLAG_MULTICAST      (2)
+#define UDP_FLAG_BROADCAST      (LINKATTR_UDP_BAORDCAST)
+#define UDP_FLAG_MULTICAST      (LINKATTR_UDP_MULTICAST)
 
-struct __udp_data {
+struct nis_udp_data {
     union {
         struct {
             const unsigned char *Data;
@@ -169,16 +166,12 @@ struct __udp_data {
         } Packet;
 
         struct {
-            HUDPLINK OptionLink;
-        } LinkOption;
-
-        struct {
-            const void *Context;
-        } ContextPreClose;
+            void *Context;
+        } PreClose;
     } e;
 } __POSIX_TYPE_ALIGNED__;
 
-typedef struct __udp_data udp_data_t;
+typedef struct nis_udp_data udp_data_t;
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     GRP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
