@@ -645,9 +645,9 @@ uint64_t posix__file_getsize(const char *path)
         return (uint64_t)INVALID_FILE_SIZE;
     }
 
-    size = nFileSizeHigh;
+	size = wfd.nFileSizeHigh;
     size <<= 32;
-    size |= nFileSizeLow;
+	size |= wfd.nFileSizeLow;
 
     FindClose(find);
     return size;
