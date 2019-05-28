@@ -358,7 +358,11 @@ void log__create_log_directory(const char *rootdir)
     int pos, i;
 
     if (rootdir) {
+#if _WIN32
+		strcpy_s(__log_root_directory, cchof(__log_root_directory), rootdir);
+#else
         strcpy(__log_root_directory, rootdir);
+#endif
 
         pos = strlen(__log_root_directory);
         for (i = pos - 1; i >= 0; i--) {
@@ -368,14 +372,16 @@ void log__create_log_directory(const char *rootdir)
                 break;
             }
         }
-    }
 
-    if( posix__pmkdir(__log_root_directory) < 0) {
-        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
-    }
+		if (posix__pmkdir(__log_root_directory) < 0) {
+			posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+		}
+	} else {
+		posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+	}
 }
 
-int log__init() {
+static int __log__init() {
     posix__atomic_initial_declare_variable(__inited__);
 
     if (posix__atomic_initial_try(&__inited__)) {
@@ -394,10 +400,15 @@ int log__init() {
     return __inited__;
 }
 
+int log__init()
+{
+	return log__init2(NULL);
+}
+
 int log__init2(const char *rootdir)
 {
     log__create_log_directory(rootdir);
-    return log__init();
+	return __log__init();
 }
 
 void log__write(const char *module, enum log__levels level, int target, const char *format, ...) {

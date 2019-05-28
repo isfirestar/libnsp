@@ -162,4 +162,8 @@ void posix__file_close(const void *descriptor);
 __extern__
 int posix__file_flush(const void *descriptor);
 
+#if !defined EBADFD
+#define EBADFD	77
+#endif
+
 #endif /* POSIX_IFOS_H */

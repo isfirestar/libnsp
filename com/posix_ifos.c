@@ -563,7 +563,6 @@ int posix__file_open(const char *path, int flag, int mode, void *descriptor)
         return -EINVAL;
     }
 
-    fflags = 0;
     if (flag & FF_WRACCESS) {
         dwDesiredAccess |= (GENERIC_READ | GENERIC_WRITE);
     } else {
