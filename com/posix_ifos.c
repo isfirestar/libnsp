@@ -519,6 +519,7 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
         return -EINVAL;
     }
 
+	dwDesiredAccess = 0;
     if (flag & FF_WRACCESS) {
         dwDesiredAccess |= (GENERIC_READ | GENERIC_WRITE);
     } else {
@@ -575,7 +576,7 @@ int posix__file_write(file_descriptor_t fd, const unsigned char *buffer, int siz
 {
     int offset, n;
 
-    if (!descriptor || !buffer) {
+    if (!buffer) {
         return -EINVAL;
     }
 

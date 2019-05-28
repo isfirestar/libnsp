@@ -5,6 +5,10 @@
 
 #include "compiler.h"
 
+#if _WIN32
+#include <Windows.h>
+#endif
+
 /* ifos-ps */
 __extern__
 long posix__gettid();
@@ -137,7 +141,7 @@ int posix__random(const int range_min, const int range_max);
 
 #if _WIN32
 	typedef HANDLE file_descriptor_t;
-	#define INVALID_FILE_DESCRIPTOR		(INVALID_HANDLE)
+	#define INVALID_FILE_DESCRIPTOR		(INVALID_HANDLE_VALUE)
 #else
 	typedef int file_descriptor_t;
 	#define INVALID_FILE_DESCRIPTOR		((int)-1)
