@@ -167,11 +167,11 @@ int posix__random(const int range_min, const int range_max);
 #define FF_RDACCESS			(0)
 #define FF_WRACCESS			(1)
 /* next 3 bit to describe open method */
-#define FF_OPEN_EXISTING	(2)
-#define FF_OPEN_ALWAYS		(4)
-#define FF_CREATE_NEWONE	(6)
-#define FF_CREATE_ALWAYS	(8)
-#define FF_TRUNCTE_ALWAYS	(10)
+#define FF_OPEN_EXISTING	(2)		/* failed on file NOT existed */
+#define FF_OPEN_ALWAYS		(4)		/* create a new file when file NOT existed, otherwise open existing */
+#define FF_CREATE_NEWONE	(6)		/* failed on file existed  */
+#define FF_CREATE_ALWAYS	(8)		/* append to file when it is existed, otherwise create new one with zero size */
+#define FF_TRUNCATE_ALWAYS	(10)	/* create new file when it does NOT existed, otherwise truncate existing one. */
 /* windows application ignore @mode parameter
    @descriptor return the file-descriptor/file-handle when all syscall successed */
 __extern__

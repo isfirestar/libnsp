@@ -540,7 +540,7 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
         case FF_CREATE_ALWAYS:
             dwCreationDisposition = CREATE_ALWAYS;
             break;
-        case FF_TRUNCTE_ALWAYS:
+        case FF_TRUNCATE_ALWAYS:
             dwCreationDisposition = (CREATE_ALWAYS | TRUNCATE_EXISTING);
             break;
         default:
@@ -1305,7 +1305,7 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
         case FF_CREATE_ALWAYS:
             fflags |= (O_CREAT | O_APPEND);
             break;
-        case FF_TRUNCTE_ALWAYS:
+        case FF_TRUNCATE_ALWAYS:
             fflags |= (O_CREAT | O_TRUNC);
             break;
         default:
