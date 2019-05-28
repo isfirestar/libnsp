@@ -198,20 +198,6 @@ int posix__rm(const char *const target) {
     }
 }
 
-void posix__close(int fd) {
-    if ((HANDLE) fd != INVALID_HANDLE_VALUE) {
-        CloseHandle((HANDLE) fd);
-    }
-}
-
-int posix__fflush(int fd) {
-    if (fd < 0) {
-        return EINVAL;
-    }
-
-    return convert_boolean_condition_to_retval(FlushFileBuffers((HANDLE) fd));
-}
-
 const char *posix__fullpath_current() {
     static char fullpath[MAXPATH];
     uint32_t length;
@@ -490,46 +476,6 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
     return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, (int) *output_bytes, NULL, FALSE);
 }
 
-int posix__write_file(int fd, const char *buffer, int size) {
-    int wcb;
-    int n;
-    int wtotal;
-
-    if (fd < 0 || size <= 0 || !buffer) {
-        return RE_ERROR(EINVAL);
-    }
-
-    wtotal = 0;
-    n = size;
-    while (n > 0) {
-        if (!WriteFile((HANDLE) fd, (buffer + (size - n)), n, (LPDWORD) & wcb, NULL)) {
-            break;
-        }
-        n -= wcb;
-        wtotal += wcb;
-    }
-    return wtotal;
-}
-
-int posix__read_file(int fd, char *buffer, int size) {
-
-    int rcb;
-    int rtotal;
-    int n;
-
-    rtotal = 0;
-    n = size;
-    while (n > 0) {
-        if (!ReadFile((HANDLE) fd, (buffer + (size - n)), n, (LPDWORD) & rcb, NULL)) {
-            break;
-        }
-        n -= rcb;
-        rtotal += rcb;
-    }
-
-    return rtotal;
-}
-
 /*  Generate random numbers in the half-closed interva
  *  [range_min, range_max). In other words,
  *  range_min <= random number < range_max
@@ -563,26 +509,43 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
-uint64_t posix__get_filesize(const char *path) {
+uint64_t posix__file_getsize(const void *descriptor) {
     uint64_t filesize = (uint64_t) (-1);
     LARGE_INTEGER size;
     HANDLE fd;
 
-    fd = CreateFileA(path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (fd == INVALID_HANDLE_VALUE) {
-        return filesize;
+    if (!descriptor) {
+        return -EINVAL;
     }
+
+    fd = *((HANDLE *)descriptor);
+    if (INVALID_HANDLE_VALUE == fd) {
+        return -EBADFD;
+    }
+
     if (GetFileSizeEx(fd, &size)) {
         filesize = size.HighPart;
         filesize <<= 32;
         filesize |= size.LowPart;
-        CloseHandle(fd);
+    } else {
+        return (int)((int)GetLastError() * -1);
     }
     return filesize;
 }
 
-int posix__seek_file_offset(int fd, uint64_t offset) {
+int posix__file_seek(const void *descriptor, uint64_t offset) {
     LARGE_INTEGER move, pointer;
+    HANDLE fd;
+
+    if (!descriptor) {
+        return -EINVAL;
+    }
+
+    fd = *((HANDLE *)descriptor);
+    if (INVALID_HANDLE_VALUE == fd) {
+        return -EBADFD;
+    }
+
     move.QuadPart = offset;
     if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)) {
         return -1;
@@ -590,59 +553,120 @@ int posix__seek_file_offset(int fd, uint64_t offset) {
     return 0;
 }
 
-int posix__file_open(const char *path, void *descriptor) {
+int posix__file_open(const char *path, int flag, int mode, void *descriptor)
+{
+    HANDLE fd;
+    DWORD dwDesiredAccess;
+    DWORD dwCreationDisposition;
+
     if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
-    HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    fflags = 0;
+    if (flag & FF_WRACCESS) {
+        dwDesiredAccess |= (GENERIC_READ | GENERIC_WRITE);
+    } else {
+        dwDesiredAccess |= GENERIC_READ;
+    }
+
+    dwCreationDisposition = 0;
+    switch(flag) {
+        case FF_OPEN_EXISTING:
+            dwCreationDisposition = OPEN_EXISTING;
+            break;
+        case FF_OPEN_ALWAYS:
+            dwCreationDisposition = OPEN_ALWAYS;
+            break;
+        case FF_CREATE_NEWONE:
+            dwCreationDisposition = CREATE_NEW;
+            break;
+        case FF_CREATE_ALWAYS:
+            dwCreationDisposition = CREATE_ALWAYS;
+            break;
+        default:
+            return -EINVAL;
+    }
+
+    fd = CreateFileA(path, dwDesiredAccess, FILE_SHARE_READ, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
-        return RE_ERROR(GetLastError());
+        return (int)((int)GetLastError() * -1);
     }
     *((HANDLE *) descriptor) = fd;
     return 0;
 }
 
-int posix__file_open_always(const char *path, void *descriptor) {
-    if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+int posix__file_read(const void *descriptor, unsigned char *buffer, int size)
+{
+    HANDLE fd;
+    int offset, n;
+
+    if (!descriptor || !buffer) {
+        return -EINVAL;
     }
 
-    HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    fd = *((HANDLE *)descriptor);
     if (INVALID_HANDLE_VALUE == fd) {
-        return RE_ERROR(GetLastError());
+        return -EBADFD;
     }
-    *((HANDLE *) descriptor) = fd;
-    return 0;
+
+    n = ReadFile(fd, buffer, (DWORD)size, (LPDWORD)&offset, NULL);
+    if (!n) {
+        return (int)((int)GetLastError() * -1);
+    }
+
+    return offset;
 }
 
-int posix__file_create(const char *path, void *descriptor) {
-    if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+int posix__file_write(const void *descriptor, const unsigned char *buffer, int size)
+{
+    HANDLE fd;
+    int offset, n;
+
+    if (!descriptor || !buffer) {
+        return -EINVAL;
     }
 
-    HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, NULL);
+    fd = *((HANDLE *)descriptor);
     if (INVALID_HANDLE_VALUE == fd) {
-        return RE_ERROR(GetLastError());
+        return -EBADFD;
     }
-    *((HANDLE *) descriptor) = fd;
-    return 0;
+
+    n = WriteFile(fd, buffer, (DWORD)size, (LPDWORD)&offset, NULL);
+    if (!n) {
+        return (int)((int)GetLastError() * -1);
+    }
+
+    return offset;
 }
 
-int posix__file_create_always(const char *path, void *descriptor) {
-    if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+void posix__file_close(const void *descriptor) {
+    HANDLE fd;
+
+    if (descriptor) {
+        fd = *((HANDLE *)descriptor);
+        if (INVALID_HANDLE_VALUE != fd) {
+            CloseHandle(fd);
+        }
+    }
+}
+
+int posix__file_flush(const void *descriptor) {
+    HANDLE fd;
+
+    if (!descriptor) {
+        return -EINVAL;
     }
 
-    HANDLE fd;
-    fd = CreateFileA(path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    fd = *((HANDLE *)descriptor);
     if (INVALID_HANDLE_VALUE == fd) {
-        return RE_ERROR(GetLastError());
+        return -EBADFD;
     }
-    *((HANDLE *) descriptor) = fd;
+
+    if (!FlushFileBuffers((HANDLE) fd)) {
+        return (int)((int)GetLastError() * -1);
+    }
+
     return 0;
 }
 
@@ -905,19 +929,6 @@ int posix__rm(const char *const target) {
     } else {
         return remove(target);
     }
-}
-
-void posix__close(int fd) {
-    if (fd > 0) {
-        close(fd);
-    }
-}
-
-int posix__fflush(int fd) {
-    if (fd < 0) {
-        return EINVAL;
-    }
-    return fdatasync(fd);
 }
 
 const char *posix__fullpath_current() {
@@ -1238,48 +1249,6 @@ static int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to
     return -1;
 }
 
-int posix__write_file(int fd, const char *buffer, int size) {
-    int wcb;
-    int n;
-    int wtotal;
-
-    if (fd < 0 || size <= 0 || !buffer) {
-        return RE_ERROR(EINVAL);
-    }
-
-    wtotal = 0;
-    n = size;
-    while (n > 0) {
-        wcb = write(fd, (buffer + (size - n)), n);
-        if (wcb <= 0) {
-            break;
-        }
-        n -= wcb;
-        wtotal += wcb;
-    }
-    return wtotal;
-}
-
-int posix__read_file(int fd, char *buffer, int size) {
-
-    int rcb;
-    int rtotal;
-    int n;
-
-    rtotal = 0;
-    n = size;
-    while (n > 0) {
-        rcb = read(fd, (buffer + (size - n)), n);
-        if (rcb <= 0) {
-            break;
-        }
-        n -= rcb;
-        rtotal += rcb;
-    }
-
-    return rtotal;
-}
-
 /*  Generate random numbers in the half-closed interva
  *  [range_min, range_max). In other words,
  *  range_min <= random number < range_max
@@ -1310,20 +1279,40 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
-uint64_t posix__get_filesize(const char *path) {
+uint64_t posix__file_getsize(const void *descriptor) {
     uint64_t filesize = (uint64_t) (-1);
-    struct stat statbuff;
+    struct stat statbuf;
+    int fd;
 
-    if (stat(path, &statbuff) < 0) {
-        return filesize;
+    if (!descriptor) {
+        return -EINVAL;
+    }
+
+    fd = *((int *)descriptor);
+    if (fd <= 0) {
+        return -EBADFD;
+    }
+
+    if (fstat(fd, &statbuf) < 0) {
+        return errno * -1;
     } else {
-        filesize = statbuff.st_size;
+        filesize = statbuf.st_size;
     }
     return filesize;
 }
 
-int posix__seek_file_offset(int fd, uint64_t offset) {
+int posix__file_seek(const void *descriptor, uint64_t offset) {
     __off_t newoff;
+    int fd;
+
+    if (!descriptor) {
+        return -EINVAL;
+    }
+
+    fd = *((int *)descriptor);
+    if (fd <= 0) {
+        return -EBADFD;
+    }
 
     newoff = lseek(fd, (__off_t) offset, SEEK_SET);
     if (newoff != offset) {
@@ -1333,63 +1322,146 @@ int posix__seek_file_offset(int fd, uint64_t offset) {
     return 0;
 }
 
-int posix__file_open(const char *path, void *descriptor) {
+int posix__file_open(const char *path, int flag, int mode, void *descriptor)
+{
+    int fflags;
     int fd;
 
     if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
-    fd = open(path, O_RDWR);
+    fflags = 0;
+    if (flag & FF_WRACCESS) {
+        fflags |= O_RDWR;
+    } else {
+        fflags |= O_RDONLY;
+    }
+
+    switch(flag) {
+        case FF_OPEN_EXISTING:
+            break;
+        case FF_OPEN_ALWAYS:
+            fflags |= (O_CREAT);
+            break;
+        case FF_CREATE_NEWONE:
+            fflags |= (O_CREAT | O_EXCL);
+            break;
+        case FF_CREATE_ALWAYS:
+            fflags = (O_CREAT | O_TRUNC);
+            break;
+        default:
+            return -EINVAL;
+    }
+
+    fd = open(path, fflags, mode);
     if (fd < 0) {
-        return RE_ERROR(errno);
+        return errno * -1;
     }
     *((int *) descriptor) = fd;
     return 0;
 }
 
-int posix__file_open_always(const char *path, void *descriptor) {
+int posix__file_read(const void *descriptor, unsigned char *buffer, int size)
+{
     int fd;
+    int offset, n;
 
-    if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+    if (!descriptor || !buffer) {
+        return -EINVAL;
     }
 
-    fd = open(path, O_RDWR | O_CREAT, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (fd < 0) {
-        return RE_ERROR(errno);
+    fd = *((int *)descriptor);
+    if (fd <= 0) {
+        return -EBADFD;
     }
-    *((int *) descriptor) = fd;
-    return 0;
+
+    offset = 0;
+    while (offset < size) {
+        n = read(fd, buffer + offset, size - offset);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            } else {
+                return (errno * -1);
+            }
+        }
+
+        if (0 == n) {
+            break;
+        }
+
+        offset += n;
+    }
+
+    return offset;
 }
 
-int posix__file_create(const char *path, void *descriptor) {
+int posix__file_write(const void *descriptor, const unsigned char *buffer, int size)
+{
     int fd;
+    int offset, n;
 
-    if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+    if (!descriptor || !buffer || size <= 0) {
+        return -EINVAL;
     }
 
-    fd = open(path, O_RDWR | O_CREAT | O_EXCL, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (fd < 0) {
-        return RE_ERROR(errno);
+    fd = *((int *)descriptor);
+    if (fd <= 0) {
+        return -EBADFD;
     }
-    *((int *) descriptor) = fd;
-    return 0;
+
+    offset = 0;
+    while (offset < size) {
+        n = write(fd, buffer + offset, size - offset);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+
+            if (errno == ENOSPC) {
+                break;
+            }
+
+            return (errno * -1);
+        }
+
+        if (0 == n) {
+            break;
+        }
+
+        offset += n;
+    }
+
+    return offset;
 }
 
-int posix__file_create_always(const char *path, void *descriptor) {
+void posix__file_close(const void *descriptor) {
     int fd;
 
-    if (!path || !descriptor) {
-        return RE_ERROR(EINVAL);
+    if (descriptor) {
+        fd = *((int *)descriptor);
+        if (fd > 0) {
+            close(fd);
+        }
+    }
+}
+
+int posix__file_flush(const void *descriptor) {
+    int fd;
+
+    if (!descriptor) {
+        return -EINVAL;
     }
 
-    fd = open(path, O_RDWR | O_CREAT | O_TRUNC, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-    if (fd < 0) {
-        return RE_ERROR(errno);
+    fd = *((int *)descriptor);
+    if (fd <= 0) {
+        return -EBADFD;
     }
-    *((int *) descriptor) = fd;
+
+    if (fsync(fd) < 0) {
+        return errno * -1;
+    }
     return 0;
 }
 

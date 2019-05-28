@@ -39,10 +39,6 @@ int posix__pmkdir(const char *const dir);
 /* if @target is a directory, this method is the same as rm -fr */
 __extern__
 int posix__rm(const char *const target);
-__extern__
-void posix__close(int fd);
-__extern__
-int posix__fflush(int fd);
 
 /* 获取当前执行文件完整路径 */
 __extern__
@@ -123,7 +119,7 @@ uint32_t posix__getpagesize();
 __extern__
 void posix__syslog(const char *const logmsg );
 
-/* 编码格式转换 
+/* 编码格式转换
  * from_encode/to_encode 支持列表:
  * utf-8
  * gb2312
@@ -132,17 +128,6 @@ void posix__syslog(const char *const logmsg );
 __extern__
 int posix__iconv(const char *from_encode, const char *to_encode, char **from, size_t from_bytes, char **to, size_t *to_bytes);
 
-/* 简单同步读写文件， 并确保读写长度符合调用需求
- * @返回值: 最终完成读写的字节数，不会返回负数 */
-__extern__
-int posix__write_file(int fd, const char *buffer, int size);
-__extern__
-int posix__read_file(int fd, char *buffer, int size);
-__extern__
-uint64_t posix__get_filesize(const char *path);
-__extern__
-int posix__seek_file_offset(int fd, uint64_t offset);
-
 /*  Generate random numbers in the half-closed interval
  *  [range_min, range_max). In other words,
  *  range_min <= random number < range_max
@@ -150,18 +135,31 @@ int posix__seek_file_offset(int fd, uint64_t offset);
 __extern__
 int posix__random(const int range_min, const int range_max);
 
-/* CREAT/OPEN file with normal priority access, file descriptor output by @*descriptor when function return 0 */
-/* open existing */
+
+/* simple file operations */
+/* lowest 1 bit to describe open access mode, 0 means read only */
+#define FF_RDACCESS			(0)
+#define FF_WRACCESS			(1)
+/* next 3 bit to describe open method */
+#define FF_OPEN_EXISTING	(2)
+#define FF_OPEN_ALWAYS		(4)
+#define FF_CREATE_NEWONE	(6)
+#define FF_CREATE_ALWAYS	(8)
+/* windows application ignore @mode parameter
+   @descriptor return the file-descriptor/file-handle when all syscall successed */
 __extern__
-int posix__file_open(const char *path, void *descriptor);
-/* open always */
+int posix__file_open(const char *path, int flag, int mode, void *descriptor);
 __extern__
-int posix__file_open_always(const char *path, void *descriptor);
-/* create new */
+uint64_t posix__file_getsize(const void *descriptor);
 __extern__
-int posix__file_create(const char *path, void *descriptor);
-/* create always */
+int posix__file_seek(const void *descriptor, uint64_t offset);
 __extern__
-int posix__file_create_always(const char *path, void *descriptor);
+int posix__file_read(const void *descriptor, unsigned char *buffer, int size);
+__extern__
+int posix__file_write(const void *descriptor, const unsigned char *buffer, int size);
+__extern__
+void posix__file_close(const void *descriptor);
+__extern__
+int posix__file_flush(const void *descriptor);
 
 #endif /* POSIX_IFOS_H */
