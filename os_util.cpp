@@ -8,7 +8,7 @@
 #if _WIN32
 #include <Windows.h>
 #pragma comment(lib, "Advapi32.lib")
-#include <Shlobj.h>  
+#include <Shlobj.h>
 #pragma comment( lib, "shell32.lib")
 #endif
 
@@ -44,7 +44,7 @@ namespace nsp {
 
         template<>
         uint64_t get_filesize(const std::basic_string<char> &path){
-            return ::posix__get_filesize(path.c_str());
+            return ::posix__file_getsize(path.c_str());
         }
 #if _WIN32
 

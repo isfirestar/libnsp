@@ -570,7 +570,7 @@ int posix__file_open(const char *path, int flag, int mode, void *descriptor)
     }
 
     dwCreationDisposition = 0;
-    switch(flag) {
+    switch(flag & ~1) {
         case FF_OPEN_EXISTING:
             dwCreationDisposition = OPEN_EXISTING;
             break;
@@ -1337,7 +1337,7 @@ int posix__file_open(const char *path, int flag, int mode, void *descriptor)
         fflags |= O_RDONLY;
     }
 
-    switch(flag) {
+    switch(flag & ~1) {
         case FF_OPEN_EXISTING:
             break;
         case FF_OPEN_ALWAYS:
@@ -1347,7 +1347,7 @@ int posix__file_open(const char *path, int flag, int mode, void *descriptor)
             fflags |= (O_CREAT | O_EXCL);
             break;
         case FF_CREATE_ALWAYS:
-            fflags = (O_CREAT | O_TRUNC);
+            fflags |= (O_CREAT | O_TRUNC);
             break;
         default:
             return -EINVAL;
