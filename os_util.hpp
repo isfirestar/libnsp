@@ -21,7 +21,7 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include <dlfcn.h> 
+#include <dlfcn.h>
 #include <pthread.h>
 #include <syscall.h>
 #include <dirent.h>
@@ -88,11 +88,11 @@ namespace nsp {
 		std::basic_string<T> get_module_directory();
 		template<class T>
 		std::basic_string<T> get_module_filename();
-               
+
 #define INVAILD_FILESIZE        ((uint64_t)(~0))
         template<class T>
         uint64_t get_filesize(const std::basic_string<T> &path);
-
+        uint64_t fget_filesize(const file_descriptor_t fd);
 #if _WIN32
 		template<class T>
 		std::basic_string<T> get_sysdir();
@@ -133,11 +133,11 @@ namespace nsp {
 			 * 如果 tsc <= 0 则有:
 			 * 0: 事件触发
 			 * -1: 系统调用失败
-			 * 
+			 *
 			 * 如果 tsc > 0 则有：
 			 * 0: 事件触发
 			 * ETIMEOUT: 等待超时
-			 * -1: 系统调用失败 
+			 * -1: 系统调用失败
 			 */
 			int wait( uint32_t timeo = 0xFFFFFFFF );
 			void sig();
