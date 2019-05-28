@@ -540,6 +540,9 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
         case FF_CREATE_ALWAYS:
             dwCreationDisposition = CREATE_ALWAYS;
             break;
+        case FF_TRUNCTE_ALWAYS:
+            dwCreationDisposition = (CREATE_ALWAYS | TRUNCATE_EXISTING);
+            break;
         default:
             return -EINVAL;
     }
@@ -612,7 +615,7 @@ int posix__file_flush(file_descriptor_t fd)
     return 0;
 }
 
-uint64_t posix__file_getsize(file_descriptor_t fd)
+uint64_t posix__file_fgetsize(file_descriptor_t fd)
 {
     uint64_t filesize = (uint64_t) (-1);
     LARGE_INTEGER size;
@@ -629,6 +632,25 @@ uint64_t posix__file_getsize(file_descriptor_t fd)
         return (int)((int)GetLastError() * -1);
     }
     return filesize;
+}
+
+uint64_t posix__file_getsize(const char *path)
+{
+    WIN32_FIND_DATAA wfd;
+    HANDLE find;
+    uint64_t size;
+
+    find = FindFirstFileA(path, &wfd);
+    if (INVALID_HANDLE_VALUE == find) {
+        return (uint64_t)INVALID_FILE_SIZE;
+    }
+
+    size = nFileSizeHigh;
+    size <<= 32;
+    size |= nFileSizeLow;
+
+    FindClose(find);
+    return size;
 }
 
 int posix__file_seek(file_descriptor_t fd, uint64_t offset)
@@ -1275,12 +1297,15 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
         case FF_OPEN_EXISTING:
             break;
         case FF_OPEN_ALWAYS:
-            fflags |= (O_CREAT);
+            fflags |= O_CREAT;
             break;
         case FF_CREATE_NEWONE:
             fflags |= (O_CREAT | O_EXCL);
             break;
         case FF_CREATE_ALWAYS:
+            fflags |= (O_CREAT | O_APPEND);
+            break;
+        case FF_TRUNCTE_ALWAYS:
             fflags |= (O_CREAT | O_TRUNC);
             break;
         default:
@@ -1389,7 +1414,7 @@ int posix__file_flush(file_descriptor_t fd)
     return 0;
 }
 
-uint64_t posix__file_getsize(file_descriptor_t fd)
+uint64_t posix__file_fgetsize(file_descriptor_t fd)
 {
     uint64_t filesize = (uint64_t) (-1);
     struct stat statbuf;
@@ -1399,6 +1424,23 @@ uint64_t posix__file_getsize(file_descriptor_t fd)
     }
 
     if (fstat(fd, &statbuf) < 0) {
+        return errno * -1;
+    } else {
+        filesize = statbuf.st_size;
+    }
+    return filesize;
+}
+
+uint64_t posix__file_getsize(const char *path)
+{
+    uint64_t filesize = (uint64_t) (-1);
+    struct stat statbuf;
+
+    if (!path) {
+        return (uint64_t)(-EINVAL);
+    }
+
+    if (stat(path, &statbuf) < 0) {
         return errno * -1;
     } else {
         filesize = statbuf.st_size;

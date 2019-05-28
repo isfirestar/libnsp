@@ -6,7 +6,10 @@
 #include "compiler.h"
 
 #if _WIN32
-#include <Windows.h>
+	#include <Windows.h>
+#else
+	#include <unistd.h>
+	#include <fcntl.h>
 #endif
 
 /* ifos-ps */
@@ -141,10 +144,22 @@ int posix__random(const int range_min, const int range_max);
 
 #if _WIN32
 	typedef HANDLE file_descriptor_t;
-	#define INVALID_FILE_DESCRIPTOR		(INVALID_HANDLE_VALUE)
+	#define INVALID_FILE_DESCRIPTOR		((file_descriptor_t)INVALID_HANDLE_VALUE)
+
+	#if !defined STDIN_FILENO
+		#define STDIN_FILENO		(file_descriptor_t)GetStdHandle(STD_INPUT_HANDLE)
+	#endif
+
+	#if !defined STDOUT_FILENO
+		#define STDOUT_FILENO		(file_descriptor_t)GetStdHandle(STD_OUTPUT_HANDLE)
+	#endif
+
+	#if !defined STDERR_FILENO
+		#define STDERR_FILENO		(file_descriptor_t)GetStdHandle(STD_ERROR_HANDLE)
+	#endif
 #else
 	typedef int file_descriptor_t;
-	#define INVALID_FILE_DESCRIPTOR		((int)-1)
+	#define INVALID_FILE_DESCRIPTOR		((file_descriptor_t)-1)
 #endif
 
 /* simple file operations */
@@ -156,12 +171,15 @@ int posix__random(const int range_min, const int range_max);
 #define FF_OPEN_ALWAYS		(4)
 #define FF_CREATE_NEWONE	(6)
 #define FF_CREATE_ALWAYS	(8)
+#define FF_TRUNCTE_ALWAYS	(10)
 /* windows application ignore @mode parameter
    @descriptor return the file-descriptor/file-handle when all syscall successed */
 __extern__
 int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor);
 __extern__
-uint64_t posix__file_getsize(file_descriptor_t fd);
+uint64_t posix__file_fgetsize(file_descriptor_t fd);
+__extern__
+uint64_t posix__file_getsize(const char *path);
 __extern__
 int posix__file_seek(file_descriptor_t fd, uint64_t offset);
 __extern__

@@ -1,13 +1,6 @@
 ﻿#include <stdlib.h>
 #include <stdio.h>
 
-#if _WIN32
-#include <windows.h>
-#else
-#include <fcntl.h>
-#include <unistd.h>
-#endif
-
 #include <stdarg.h>
 #include <assert.h>
 
@@ -37,11 +30,7 @@ static const char *LOG__LEVEL_TXT[] = {
 
 typedef struct {
     struct list_head link_;
-#if _WIN32
-    HANDLE fd_;
-#else
-    int fd_;
-#endif
+    file_descriptor_t fd_;
     posix__systime_t filest_;
     int line_count_;
     char module_[LOG_MODULE_NAME_LEN];
@@ -76,75 +65,28 @@ static log__async_context_t __log_async;
 static
 int log__create_file(log__file_describe_t *file, const char *path) {
     if (!file || !path) {
-        return -1;
+        return -EINVAL;
     }
 
-#if _WIN32
-    file->fd_ = CreateFileA(path, GENERIC_WRITE | GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-    if (INVALID_HANDLE_VALUE == file->fd_) {
-        return -1;
-    }
-    SetFilePointer(file->fd_, 0, NULL, FILE_END);
-    return 0;
-#else
-    file->fd_ = open(path, O_RDWR | O_APPEND);
-    if (file->fd_ < 0) {
-        if (ENOENT == errno) {
-            file->fd_ = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-        }
-    }
-    return file->fd_;
-#endif
+    return posix__file_open(path, FF_RDACCESS | FF_WRACCESS | FF_CREATE_ALWAYS, 0644, &file->fd_);
 }
 
 static
 void log__close_file(log__file_describe_t *file) {
     if (file) {
-
-#if _WIN32
-        if (INVALID_HANDLE_VALUE != file->fd_) {
-            CloseHandle(file->fd_);
-            file->fd_ = INVALID_HANDLE_VALUE;
-#else
-        if (file->fd_ >= 0) {
-            close(file->fd_);
-            file->fd_ = -1;
-#endif
-        }
+        posix__file_close(file->fd_);
+        file->fd_ = INVALID_FILE_DESCRIPTOR;
     }
 }
 
 static
-int log__fwrite(log__file_describe_t *file, const void *buf, int count) {
-#if _WIN32
-    uint32_t out;
-    if (!WriteFile(file->fd_, buf, count, &out, NULL)) {
-        return -1;
-    }
-#else
-    int offset, written;
-    const unsigned char *p;
-
-    offset = 0;
-    p = (const unsigned char *)buf;
-    while (offset < count) {
-        written = write(file->fd_, p + offset, count - offset);
-        if (written < 0) {
-            if (errno != EINTR) {
-                return -1;
-            }
-        } else {
-            if (0 == written) {
-                break;
-            }
-            offset += written;
-        }
+int log__fwrite(log__file_describe_t *file, const void *buf, int count)
+{
+    if (posix__file_write(file->fd_, buf, count) > 0) {
+        /* posix__file_flush(file->fd_) */
+        file->line_count_++;
     }
 
-#endif
-
-    /* posix__fflush(file->fd_) */
-    file->line_count_++;
     return 0;
 }
 
@@ -176,11 +118,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
                 return NULL;
             }
             memset(file, 0, sizeof ( log__file_describe_t));
-#if _WIN32
-            file->fd_ = INVALID_HANDLE_VALUE;
-#else
-            file->fd_ = -1;
-#endif
+            file->fd_ = INVALID_FILE_DESCRIPTOR;
             list_add_tail(&file->link_, &__log__file_head);
             break;
         }
@@ -226,32 +164,6 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 }
 
 static
-int log__writestd(enum log__levels level, const char* logstr, int cb) {
-    int n;
-#if _WIN32
-    HANDLE std;
-    DWORD written;
-
-    if (level == kLogLevel_Error) {
-        std = GetStdHandle(STD_ERROR_HANDLE);
-    }else{
-        std = GetStdHandle(STD_OUTPUT_HANDLE);
-    }
-
-    if (INVALID_HANDLE_VALUE != std) {
-        n = WriteFile(std, logstr, cb, &written, NULL);
-    }
-#else
-    if (level == kLogLevel_Error) {
-        n = write(STDERR_FILENO, logstr, cb); /* 2 */
-    }else{
-        n = write(STDOUT_FILENO, logstr, cb); /* 1 */
-    }
-#endif
-    return n;
-}
-
-static
 void log__printf(const char *module, enum log__levels level, int target, const posix__systime_t *currst, const char* logstr, int cb) {
     log__file_describe_t *fileptr;
 
@@ -267,7 +179,7 @@ void log__printf(const char *module, enum log__levels level, int target, const p
     }
 
     if (target & kLogTarget_Stdout) {
-        log__writestd(level, logstr, cb);
+        posix__file_write(level == kLogLevel_Error ? STDERR_FILENO : STDOUT_FILENO, logstr, cb);
     }
 
     if (target & kLogTarget_Sysmesg) {
@@ -358,12 +270,7 @@ void log__create_log_directory(const char *rootdir)
     int pos, i;
 
     if (rootdir) {
-#if _WIN32
-		strcpy_s(__log_root_directory, cchof(__log_root_directory), rootdir);
-#else
-        strcpy(__log_root_directory, rootdir);
-#endif
-
+		posix__strcpy(__log_root_directory, cchof(__log_root_directory), rootdir);
         pos = strlen(__log_root_directory);
         for (i = pos - 1; i >= 0; i--) {
             if (__log_root_directory[i] == POSIX__DIR_SYMBOL) {
