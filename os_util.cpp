@@ -41,11 +41,6 @@ namespace nsp {
             p = ::posix__getpename2(pename, sizeof(pename));
             return std::basic_string<char>(p);
         }
-
-        template<>
-        uint64_t get_filesize(const std::basic_string<char> &path){
-            return ::posix__file_getsize(path.c_str());
-        }
 #if _WIN32
 
         template<>

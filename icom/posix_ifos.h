@@ -135,6 +135,13 @@ int posix__iconv(const char *from_encode, const char *to_encode, char **from, si
 __extern__
 int posix__random(const int range_min, const int range_max);
 
+#if _WIN32
+	typedef HANDLE file_descriptor_t;
+	#define INVALID_FILE_DESCRIPTOR		(INVALID_HANDLE)
+#else
+	typedef int file_descriptor_t;
+	#define INVALID_FILE_DESCRIPTOR		((int)-1)
+#endif
 
 /* simple file operations */
 /* lowest 1 bit to describe open access mode, 0 means read only */
@@ -148,19 +155,19 @@ int posix__random(const int range_min, const int range_max);
 /* windows application ignore @mode parameter
    @descriptor return the file-descriptor/file-handle when all syscall successed */
 __extern__
-int posix__file_open(const char *path, int flag, int mode, void *descriptor);
+int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor);
 __extern__
-uint64_t posix__file_getsize(const void *descriptor);
+uint64_t posix__file_getsize(file_descriptor_t fd);
 __extern__
-int posix__file_seek(const void *descriptor, uint64_t offset);
+int posix__file_seek(file_descriptor_t fd, uint64_t offset);
 __extern__
-int posix__file_read(const void *descriptor, unsigned char *buffer, int size);
+int posix__file_read(file_descriptor_t fd, void *buffer, int size);
 __extern__
-int posix__file_write(const void *descriptor, const unsigned char *buffer, int size);
+int posix__file_write(file_descriptor_t fd, const void *buffer, int size);
 __extern__
-void posix__file_close(const void *descriptor);
+void posix__file_close(file_descriptor_t fd);
 __extern__
-int posix__file_flush(const void *descriptor);
+int posix__file_flush(file_descriptor_t fd);
 
 #if !defined EBADFD
 #define EBADFD	77

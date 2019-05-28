@@ -509,51 +509,7 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
-uint64_t posix__file_getsize(const void *descriptor) {
-    uint64_t filesize = (uint64_t) (-1);
-    LARGE_INTEGER size;
-    HANDLE fd;
-
-    if (!descriptor) {
-        return -EINVAL;
-    }
-
-    fd = *((HANDLE *)descriptor);
-    if (INVALID_HANDLE_VALUE == fd) {
-        return -EBADFD;
-    }
-
-    if (GetFileSizeEx(fd, &size)) {
-        filesize = size.HighPart;
-        filesize <<= 32;
-        filesize |= size.LowPart;
-    } else {
-        return (int)((int)GetLastError() * -1);
-    }
-    return filesize;
-}
-
-int posix__file_seek(const void *descriptor, uint64_t offset) {
-    LARGE_INTEGER move, pointer;
-    HANDLE fd;
-
-    if (!descriptor) {
-        return -EINVAL;
-    }
-
-    fd = *((HANDLE *)descriptor);
-    if (INVALID_HANDLE_VALUE == fd) {
-        return -EBADFD;
-    }
-
-    move.QuadPart = offset;
-    if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)) {
-        return -1;
-    }
-    return 0;
-}
-
-int posix__file_open(const char *path, int flag, int mode, void *descriptor)
+int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor)
 {
     HANDLE fd;
     DWORD dwDesiredAccess;
@@ -591,20 +547,18 @@ int posix__file_open(const char *path, int flag, int mode, void *descriptor)
     if (INVALID_HANDLE_VALUE == fd) {
         return (int)((int)GetLastError() * -1);
     }
-    *((HANDLE *) descriptor) = fd;
+    *descriptor = fd;
     return 0;
 }
 
-int posix__file_read(const void *descriptor, unsigned char *buffer, int size)
+int posix__file_read(file_descriptor_t fd, unsigned char *buffer, int size)
 {
-    HANDLE fd;
     int offset, n;
 
-    if (!descriptor || !buffer) {
+    if (!buffer) {
         return -EINVAL;
     }
 
-    fd = *((HANDLE *)descriptor);
     if (INVALID_HANDLE_VALUE == fd) {
         return -EBADFD;
     }
@@ -617,16 +571,14 @@ int posix__file_read(const void *descriptor, unsigned char *buffer, int size)
     return offset;
 }
 
-int posix__file_write(const void *descriptor, const unsigned char *buffer, int size)
+int posix__file_write(file_descriptor_t fd, const unsigned char *buffer, int size)
 {
-    HANDLE fd;
     int offset, n;
 
     if (!descriptor || !buffer) {
         return -EINVAL;
     }
 
-    fd = *((HANDLE *)descriptor);
     if (INVALID_HANDLE_VALUE == fd) {
         return -EBADFD;
     }
@@ -639,25 +591,15 @@ int posix__file_write(const void *descriptor, const unsigned char *buffer, int s
     return offset;
 }
 
-void posix__file_close(const void *descriptor) {
-    HANDLE fd;
-
-    if (descriptor) {
-        fd = *((HANDLE *)descriptor);
-        if (INVALID_HANDLE_VALUE != fd) {
-            CloseHandle(fd);
-        }
+void posix__file_close(file_descriptor_t fd)
+{
+    if (INVALID_HANDLE_VALUE != fd) {
+        CloseHandle(fd);
     }
 }
 
-int posix__file_flush(const void *descriptor) {
-    HANDLE fd;
-
-    if (!descriptor) {
-        return -EINVAL;
-    }
-
-    fd = *((HANDLE *)descriptor);
+int posix__file_flush(file_descriptor_t fd)
+{
     if (INVALID_HANDLE_VALUE == fd) {
         return -EBADFD;
     }
@@ -666,6 +608,40 @@ int posix__file_flush(const void *descriptor) {
         return (int)((int)GetLastError() * -1);
     }
 
+    return 0;
+}
+
+uint64_t posix__file_getsize(file_descriptor_t fd)
+{
+    uint64_t filesize = (uint64_t) (-1);
+    LARGE_INTEGER size;
+
+    if (INVALID_HANDLE_VALUE == fd) {
+        return -EBADFD;
+    }
+
+    if (GetFileSizeEx(fd, &size)) {
+        filesize = size.HighPart;
+        filesize <<= 32;
+        filesize |= size.LowPart;
+    } else {
+        return (int)((int)GetLastError() * -1);
+    }
+    return filesize;
+}
+
+int posix__file_seek(file_descriptor_t fd, uint64_t offset)
+{
+    LARGE_INTEGER move, pointer;
+
+    if (INVALID_HANDLE_VALUE == fd) {
+        return -EBADFD;
+    }
+
+    move.QuadPart = offset;
+    if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)) {
+        return -1;
+    }
     return 0;
 }
 
@@ -1278,50 +1254,7 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
-uint64_t posix__file_getsize(const void *descriptor) {
-    uint64_t filesize = (uint64_t) (-1);
-    struct stat statbuf;
-    int fd;
-
-    if (!descriptor) {
-        return -EINVAL;
-    }
-
-    fd = *((int *)descriptor);
-    if (fd <= 0) {
-        return -EBADFD;
-    }
-
-    if (fstat(fd, &statbuf) < 0) {
-        return errno * -1;
-    } else {
-        filesize = statbuf.st_size;
-    }
-    return filesize;
-}
-
-int posix__file_seek(const void *descriptor, uint64_t offset) {
-    __off_t newoff;
-    int fd;
-
-    if (!descriptor) {
-        return -EINVAL;
-    }
-
-    fd = *((int *)descriptor);
-    if (fd <= 0) {
-        return -EBADFD;
-    }
-
-    newoff = lseek(fd, (__off_t) offset, SEEK_SET);
-    if (newoff != offset) {
-        return -1;
-    }
-
-    return 0;
-}
-
-int posix__file_open(const char *path, int flag, int mode, void *descriptor)
+int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor)
 {
     int fflags;
     int fd;
@@ -1353,31 +1286,32 @@ int posix__file_open(const char *path, int flag, int mode, void *descriptor)
             return -EINVAL;
     }
 
+
     fd = open(path, fflags, mode);
     if (fd < 0) {
         return errno * -1;
     }
-    *((int *) descriptor) = fd;
+    *descriptor = fd;
     return 0;
 }
 
-int posix__file_read(const void *descriptor, unsigned char *buffer, int size)
+int posix__file_read(file_descriptor_t fd, void *buffer, int size)
 {
-    int fd;
     int offset, n;
+    unsigned char *p;
 
-    if (!descriptor || !buffer) {
+    if (!buffer) {
         return -EINVAL;
     }
 
-    fd = *((int *)descriptor);
     if (fd <= 0) {
         return -EBADFD;
     }
 
     offset = 0;
+    p = (unsigned char *)buffer;
     while (offset < size) {
-        n = read(fd, buffer + offset, size - offset);
+        n = read(fd, p + offset, size - offset);
         if (n < 0) {
             if (errno == EINTR) {
                 continue;
@@ -1396,23 +1330,23 @@ int posix__file_read(const void *descriptor, unsigned char *buffer, int size)
     return offset;
 }
 
-int posix__file_write(const void *descriptor, const unsigned char *buffer, int size)
+int posix__file_write(file_descriptor_t fd, const void *buffer, int size)
 {
-    int fd;
     int offset, n;
+    const unsigned char *p;
 
-    if (!descriptor || !buffer || size <= 0) {
+    if (!buffer || size <= 0) {
         return -EINVAL;
     }
 
-    fd = *((int *)descriptor);
     if (fd <= 0) {
         return -EBADFD;
     }
 
     offset = 0;
+    p = (const unsigned char *)buffer;
     while (offset < size) {
-        n = write(fd, buffer + offset, size - offset);
+        n = write(fd, p + offset, size - offset);
         if (n < 0) {
             if (errno == EINTR) {
                 continue;
@@ -1435,25 +1369,15 @@ int posix__file_write(const void *descriptor, const unsigned char *buffer, int s
     return offset;
 }
 
-void posix__file_close(const void *descriptor) {
-    int fd;
-
-    if (descriptor) {
-        fd = *((int *)descriptor);
-        if (fd > 0) {
-            close(fd);
-        }
+void posix__file_close(file_descriptor_t fd)
+{
+    if (fd > 0) {
+        close(fd);
     }
 }
 
-int posix__file_flush(const void *descriptor) {
-    int fd;
-
-    if (!descriptor) {
-        return -EINVAL;
-    }
-
-    fd = *((int *)descriptor);
+int posix__file_flush(file_descriptor_t fd)
+{
     if (fd <= 0) {
         return -EBADFD;
     }
@@ -1461,6 +1385,39 @@ int posix__file_flush(const void *descriptor) {
     if (fsync(fd) < 0) {
         return errno * -1;
     }
+    return 0;
+}
+
+uint64_t posix__file_getsize(file_descriptor_t fd)
+{
+    uint64_t filesize = (uint64_t) (-1);
+    struct stat statbuf;
+
+    if (fd <= 0) {
+        return -EBADFD;
+    }
+
+    if (fstat(fd, &statbuf) < 0) {
+        return errno * -1;
+    } else {
+        filesize = statbuf.st_size;
+    }
+    return filesize;
+}
+
+int posix__file_seek(file_descriptor_t fd, uint64_t offset)
+{
+    __off_t newoff;
+
+    if (fd <= 0) {
+        return -EBADFD;
+    }
+
+    newoff = lseek(fd, (__off_t) offset, SEEK_SET);
+    if (newoff != offset) {
+        return -1;
+    }
+
     return 0;
 }
 
