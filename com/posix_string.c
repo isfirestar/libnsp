@@ -96,7 +96,10 @@ const char *posix__strerror2(char *estr) {
 char *posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt) {
 #if _WIN32
     errno_t e;
-    if (!target || !src) return NULL;
+    if (!target || !src) {
+        return NULL;
+    }
+
     e = strncpy_s(target, cch, src, cnt);
     return ( (0 == e) ? target : NULL);
 #else
@@ -411,7 +414,7 @@ int posix__wcscmp(const wchar_t *s1, const wchar_t *s2) {
 }
 
 /****************************************************************************
- STRCASECMP() - Case-insensitive strcmp.                                   
+ STRCASECMP() - Case-insensitive strcmp.
  *****************************************************************************/
 int posix__strcasecmp(const char* s1, const char* s2) {
     char c1, c2;
@@ -434,7 +437,7 @@ int posix__wcscasecmp(const wchar_t* s1, const wchar_t* s2) {
 }
 
 /****************************************************************************
- STRNCASECMP() - Case-insensitive strncmp.                                 
+ STRNCASECMP() - Case-insensitive strncmp.
  ****************************************************************************/
 int posix__strncasecmp(const char* s1, const char* s2, uint32_t n) {
     char c1, c2;

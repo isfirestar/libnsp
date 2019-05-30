@@ -608,7 +608,7 @@ int posix__file_flush(file_descriptor_t fd)
         return -EBADFD;
     }
 
-    if (!FlushFileBuffers((HANDLE) fd)) {
+    if (!FlushFileBuffers(fd)) {
         return (int)((int)GetLastError() * -1);
     }
 
@@ -662,7 +662,7 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
     }
 
     move.QuadPart = offset;
-    if (!SetFilePointerEx((HANDLE) fd, move, &pointer, FILE_BEGIN)) {
+    if (!SetFilePointerEx(fd, move, &pointer, FILE_BEGIN)) {
         return -1;
     }
     return 0;

@@ -162,6 +162,7 @@ int posix__random(const int range_min, const int range_max);
 	#define INVALID_FILE_DESCRIPTOR		((file_descriptor_t)-1)
 #endif
 
+/* newest file framework version > 9.8.0 */
 /* simple file operations */
 /* lowest 1 bit to describe open access mode, 0 means read only */
 #define FF_RDACCESS			(0)

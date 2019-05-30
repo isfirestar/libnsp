@@ -1,13 +1,13 @@
-﻿#include <stdlib.h>
-#include <stdio.h>
+﻿#include "logger.h"
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include <assert.h>
 
-#include "logger.h"
-#include "clist.h"
-
 #include "compiler.h"
+
+#include "clist.h"
 #include "posix_string.h"
 #include "posix_thread.h"
 #include "posix_time.h"
@@ -63,7 +63,8 @@ typedef struct {
 static log__async_context_t __log_async;
 
 static
-int log__create_file(log__file_describe_t *file, const char *path) {
+int log__create_file(log__file_describe_t *file, const char *path)
+{
     if (!file || !path) {
         return -EINVAL;
     }
@@ -72,7 +73,8 @@ int log__create_file(log__file_describe_t *file, const char *path) {
 }
 
 static
-void log__close_file(log__file_describe_t *file) {
+void log__close_file(log__file_describe_t *file)
+{
     if (file) {
         posix__file_close(file->fd_);
         file->fd_ = INVALID_FILE_DESCRIPTOR;
@@ -82,16 +84,19 @@ void log__close_file(log__file_describe_t *file) {
 static
 int log__fwrite(log__file_describe_t *file, const void *buf, int count)
 {
-    if (posix__file_write(file->fd_, buf, count) > 0) {
-        /* posix__file_flush(file->fd_) */
+    int retval;
+
+    retval = posix__file_write(file->fd_, buf, count);
+    if ( retval > 0) { /* need posix__file_flush(file->fd_) ? */
         file->line_count_++;
     }
 
-    return 0;
+    return retval;
 }
 
 static
-log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module) {
+log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module)
+{
     char name[128], path[512], pename[128];
     int retval;
     struct list_head *pos;
@@ -112,7 +117,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     }
 
     do {
-        /* 对象为空，说明该module模块新增 */
+        /* empty object, it means this module is a new one */
         if (!file) {
             if (NULL == (file = malloc(sizeof ( log__file_describe_t)))) {
                 return NULL;
@@ -164,7 +169,8 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 }
 
 static
-void log__printf(const char *module, enum log__levels level, int target, const posix__systime_t *currst, const char* logstr, int cb) {
+void log__printf(const char *module, enum log__levels level, int target, const posix__systime_t *currst, const char* logstr, int cb)
+{
     log__file_describe_t *fileptr;
 
     if (target & kLogTarget_Filesystem) {
@@ -188,7 +194,8 @@ void log__printf(const char *module, enum log__levels level, int target, const p
 }
 
 static
-char *log__format_string(enum log__levels level, int tid, const char* format, va_list ap, const posix__systime_t *currst, char *logstr, int cch) {
+char *log__format_string(enum log__levels level, int tid, const char* format, va_list ap, const posix__systime_t *currst, char *logstr, int cch)
+{
     int pos;
     char *p;
 
@@ -208,7 +215,8 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 }
 
 static
-void *log__asnyc_proc(void *argv) {
+void *log__asnyc_proc(void *argv)
+{
     log__async_node_t *node;
 
     while (posix__waitfor_waitable_handle(&__log_async.alert_, 10 * 1000) >= 0) {
@@ -235,7 +243,8 @@ void *log__asnyc_proc(void *argv) {
 }
 
 static
-int log__async_init() {
+int log__async_init()
+{
     int misc_memory_size;
 
     __log_async.pendding_ = 0;
@@ -288,7 +297,8 @@ void log__create_log_directory(const char *rootdir)
 	}
 }
 
-static int __log__init() {
+static int __log__init()
+{
     posix__atomic_initial_declare_variable(__inited__);
 
     if (posix__atomic_initial_try(&__inited__)) {
@@ -318,7 +328,8 @@ int log__init2(const char *rootdir)
 	return __log__init();
 }
 
-void log__write(const char *module, enum log__levels level, int target, const char *format, ...) {
+void log__write(const char *module, enum log__levels level, int target, const char *format, ...)
+{
     va_list ap;
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
     posix__systime_t currst;
@@ -348,7 +359,8 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     }
 }
 
-void log__save(const char *module, enum log__levels level, int target, const char *format, ...) {
+void log__save(const char *module, enum log__levels level, int target, const char *format, ...)
+{
     va_list ap;
     log__async_node_t *node;
     uint64_t index;
