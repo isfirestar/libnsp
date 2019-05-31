@@ -509,6 +509,37 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
+int posix__random_block(unsigned char *buffer, int size)
+{
+	HCRYPTPROV hCryptProv;
+	static LPCSTR UserName = "nshost";
+	BOOL retval;
+	DWORD err;
+
+	hCryptProv = (HCRYPTPROV)NULL;
+
+	do {
+		if (CryptAcquireContextA((HCRYPTPROV*)&hCryptProv, UserName, NULL, PROV_RSA_FULL, 0)) {
+			break;
+		}
+
+		err = GetLastError();
+		if (err == NTE_BAD_KEYSET) {
+			if (CryptAcquireContextA(&hCryptProv, UserName, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET)) {
+				break;
+			}
+		}
+
+		return (int)((int)GetLastError() * -1);
+	} while (0);
+
+	retval = CryptGenRandom(hCryptProv, (DWORD)size, buffer);
+
+	CryptReleaseContext(hCryptProv, 0);
+
+	return retval ? size : -1;
+}
+
 int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor)
 {
     HANDLE fd;
