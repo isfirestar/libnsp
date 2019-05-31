@@ -540,9 +540,6 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
         case FF_CREATE_ALWAYS:
             dwCreationDisposition = CREATE_ALWAYS;
             break;
-        case FF_TRUNCATE_ALWAYS:
-            dwCreationDisposition = (CREATE_ALWAYS | TRUNCATE_EXISTING);
-            break;
         default:
             return -EINVAL;
     }
@@ -1295,25 +1292,23 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
 
     switch(flag & ~1) {
         case FF_OPEN_EXISTING:
+            fd = open(path, fflags);
             break;
         case FF_OPEN_ALWAYS:
-            fflags |= O_CREAT;
+            fd = open(path, fflags | O_CREAT, mode);
             break;
         case FF_CREATE_NEWONE:
-            fflags |= (O_CREAT | O_EXCL);
+            fd = open(path, fflags | O_CREAT | O_EXCL, mode);
             break;
         case FF_CREATE_ALWAYS:
-            fflags |= (O_CREAT | O_APPEND);
-            break;
-        case FF_TRUNCATE_ALWAYS:
-            fflags |= (O_CREAT | O_TRUNC);
+            /* In order to maintain consistency with Windows API behavior, when a file exists, the file data is cleared directly.
+                    do NOT use O_APPEND here*/
+            fd = open(path, fflags | O_CREAT | O_TRUNC, mode);
             break;
         default:
             return -EINVAL;
     }
 
-
-    fd = open(path, fflags, mode);
     if (fd < 0) {
         return errno * -1;
     }
@@ -1330,7 +1325,7 @@ int posix__file_read(file_descriptor_t fd, void *buffer, int size)
         return -EINVAL;
     }
 
-    if (fd <= 0) {
+    if (fd < 0) {
         return -EBADFD;
     }
 
@@ -1365,7 +1360,7 @@ int posix__file_write(file_descriptor_t fd, const void *buffer, int size)
         return -EINVAL;
     }
 
-    if (fd <= 0) {
+    if (fd < 0) {
         return -EBADFD;
     }
 
@@ -1404,7 +1399,7 @@ void posix__file_close(file_descriptor_t fd)
 
 int posix__file_flush(file_descriptor_t fd)
 {
-    if (fd <= 0) {
+    if (fd < 0) {
         return -EBADFD;
     }
 
@@ -1419,7 +1414,7 @@ uint64_t posix__file_fgetsize(file_descriptor_t fd)
     uint64_t filesize = (uint64_t) (-1);
     struct stat statbuf;
 
-    if (fd <= 0) {
+    if (fd < 0) {
         return -EBADFD;
     }
 
@@ -1452,7 +1447,7 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
 {
     __off_t newoff;
 
-    if (fd <= 0) {
+    if (fd < 0) {
         return -EBADFD;
     }
 

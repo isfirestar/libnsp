@@ -171,8 +171,7 @@ int posix__random(const int range_min, const int range_max);
 #define FF_OPEN_EXISTING	(2)		/* failed on file NOT existed */
 #define FF_OPEN_ALWAYS		(4)		/* create a new file when file NOT existed, otherwise open existing */
 #define FF_CREATE_NEWONE	(6)		/* failed on file existed  */
-#define FF_CREATE_ALWAYS	(8)		/* append to file when it is existed, otherwise create new one with zero size */
-#define FF_TRUNCATE_ALWAYS	(10)	/* create new file when it does NOT existed, otherwise truncate existing one. */
+#define FF_CREATE_ALWAYS	(8)		/* truncate and open file when it is existed, otherwise create new one with zero size */
 /* windows application ignore @mode parameter
    @descriptor return the file-descriptor/file-handle when all syscall successed */
 __extern__
