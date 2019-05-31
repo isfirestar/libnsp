@@ -141,6 +141,8 @@ int posix__iconv(const char *from_encode, const char *to_encode, char **from, si
  */
 __extern__
 int posix__random(const int range_min, const int range_max);
+__extern__
+int posix__random_block(unsigned char *buffer, int size);
 
 #if _WIN32
 	typedef HANDLE file_descriptor_t;

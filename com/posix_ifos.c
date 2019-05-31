@@ -1274,6 +1274,39 @@ int posix__random(const int range_min, const int range_max) {
     return u;
 }
 
+int posix__random_block(unsigned char *buffer, int size)
+{
+    int fd;
+    int offset;
+    int n;
+
+    fd = open("/dev/random", O_RDONLY);
+    if (fd < 0) {
+        return errno * -1;
+    }
+
+    offset = 0;
+    while (offset < size) {
+        n = read(fd, buffer + offset, size - offset);
+        if (n < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+
+            return errno * -1;
+        }
+
+        if (0 == n) {
+            break;
+        }
+
+        offset += n;
+    }
+
+    close(fd);
+    return offset;
+}
+
 int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor)
 {
     int fflags;
