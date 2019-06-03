@@ -55,7 +55,7 @@ namespace nsp {
 
             virtual void on_connected();
             virtual void bind_object(const std::shared_ptr<obtcp> &object);
-            virtual void on_pre_close();
+            virtual void on_pre_close(void *context);
 
         protected:
             virtual void on_closed(HTCPLINK previous);
@@ -91,7 +91,7 @@ namespace nsp {
             void setlnk(const HUDPLINK lnk);
             void on_recvdata(const unsigned char *data, const int cb, const char *ipaddr, const port_t port);
             void on_closed();
-            virtual void on_pre_close();
+            virtual void on_pre_close(void *context);
 
         protected:
             std::atomic<HUDPLINK> lnk_{INVALID_HUDPLINK};
@@ -99,7 +99,7 @@ namespace nsp {
 
             virtual void on_recvdata(const std::basic_string<unsigned char> &data, const endpoint &r_ep);
             virtual void on_closed(HUDPLINK previous);
-            
+
         private:
             obudp(const obudp &) = delete;
             obudp(obudp &&) = delete;

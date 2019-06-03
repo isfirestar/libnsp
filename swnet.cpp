@@ -9,29 +9,30 @@ namespace nsp {
     namespace tcpip {
 
         void STD_CALL swnet::tcp_io(const nis_event_t *tcp_evt, const void *data) {
-            if (!tcp_evt || !data) return;
-
-            tcp_data_t *tcp_dat = (tcp_data_t *) data;
+            if (!tcp_evt) {
+                return;
+            }
 
             switch (tcp_evt->Event) {
                 case EVT_RECEIVEDATA:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
-                        object->on_recvdata(tcp_dat->e.Packet.Data, tcp_dat->e.Packet.Size);
+                        object->on_recvdata(((tcp_data_t *) data)->e.Packet.Data, ((tcp_data_t *) data)->e.Packet.Size);
                     });
                     break;
                 case EVT_TCP_ACCEPTED:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&] (const std::shared_ptr<obtcp> &object) {
-                        object->on_accepted(tcp_evt->Ln.Tcp.Link, tcp_dat->e.Accept.AcceptLink);
+                        object->on_accepted(tcp_evt->Ln.Tcp.Link, ((tcp_data_t *) data)->e.Accept.AcceptLink);
                     });
                     break;
-				case EVT_TCP_CONNECTED:
-					toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&](const std::shared_ptr<obtcp> &object) {
-						object->on_connected2();
-					});
-					break;
                 case EVT_PRE_CLOSE:
                     toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&](const std::shared_ptr<obtcp> &object) {
-                        object->on_pre_close();
+                        object->on_pre_close(((tcp_data_t *) data)->e.PreClose.Context);
+                    });
+                    break;
+
+                case EVT_TCP_CONNECTED:
+                    toolkit::singleton<swnet>::instance()->tcp_refobj(tcp_evt->Ln.Tcp.Link, [&](const std::shared_ptr<obtcp> &object) {
+                        object->on_connected2();
                     });
                     break;
                 case EVT_CLOSED:
@@ -45,21 +46,21 @@ namespace nsp {
         }
 
         void STD_CALL swnet::udp_io(const nis_event_t *udp_evt, const void *data) {
-            if (!udp_evt || !data) return;
-
-            udp_data_t *udp_dat = (udp_data_t *) data;
+            if (!udp_evt) {
+                return;
+            }
 
             switch (udp_evt->Event) {
                 case EVT_RECEIVEDATA:
                     toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&] (const std::shared_ptr<obudp> &object) {
-                        object->on_recvdata(udp_dat->e.Packet.Data, udp_dat->e.Packet.Size,
-                                udp_dat->e.Packet.RemoteAddress,
-                                udp_dat->e.Packet.RemotePort);
+                        object->on_recvdata(((udp_data_t *) data)->e.Packet.Data, ((udp_data_t *) data)->e.Packet.Size,
+                                ((udp_data_t *) data)->e.Packet.RemoteAddress,
+                                ((udp_data_t *) data)->e.Packet.RemotePort);
                     });
                     break;
                 case EVT_PRE_CLOSE:
                     toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&](const std::shared_ptr<obudp> &object) {
-                        object->on_pre_close();
+                        object->on_pre_close(((udp_data_t *) data)->e.PreClose.Context);
                     });
                     break;
                 case EVT_CLOSED:

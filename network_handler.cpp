@@ -218,7 +218,7 @@ namespace nsp {
             return remote_;
         }
 
-        void obtcp::on_pre_close() {
+        void obtcp::on_pre_close(void *context) {
             ;
         }
 
@@ -367,7 +367,7 @@ namespace nsp {
             }
         }
 
-        void obudp::on_pre_close() {
+        void obudp::on_pre_close(void *context) {
             ;
         }
 
@@ -382,7 +382,7 @@ namespace nsp {
                 on_closed(previous);
             }
         }
-        
+
         void obudp::setlnk(const HUDPLINK lnk) {
             lnk_ = lnk;
         }
