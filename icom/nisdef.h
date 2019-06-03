@@ -131,15 +131,19 @@ typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *orig
 
 struct nis_tcp_data {
     union {
+        /* only used in case of EVT_RECEIVEDATA, @Packet.Size of bytes of data storage in @Packet.Data has been received from kernel,  */
         struct {
             const unsigned char *Data;
             int Size;
         } Packet;
 
+        /* only used in case of EVT_TCP_ACCEPTED,
+            @Accept.AcceptLink specify the remote link which accepted by listener @nis_event.Ln.Tcp.Link */
         struct {
             HTCPLINK AcceptLink;
         } Accept;
 
+        /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
         struct {
             void *Context;
         } PreClose;
@@ -158,6 +162,8 @@ typedef struct nis_tcp_data tcp_data_t;
 
 struct nis_udp_data {
     union {
+        /* only used in case of EVT_RECEIVEDATA, @Packet.Size of bytes of data storage in @Packet.Data has been received from kernel,
+            the sender endpoint is @RemoteAddress:@RemotePort */
         struct {
             const unsigned char *Data;
             int Size;
@@ -165,6 +171,7 @@ struct nis_udp_data {
             uint16_t RemotePort;
         } Packet;
 
+        /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
         struct {
             void *Context;
         } PreClose;
@@ -172,10 +179,10 @@ struct nis_udp_data {
 } __POSIX_TYPE_ALIGNED__;
 
 typedef struct nis_udp_data udp_data_t;
+
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     GRP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
-
 struct __packet_grp_node {
     char *Data;
     int Length;
