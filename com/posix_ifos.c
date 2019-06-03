@@ -482,15 +482,16 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
  */
 int posix__random(const int range_min, const int range_max) {
     static int rand_begin = 0;
+    int u;
+    int r;
+
     if (1 == posix__atomic_inc(&rand_begin)) {
         srand((unsigned int) time(NULL));
     } else {
         posix__atomic_dec(&rand_begin);
     }
 
-    int u;
-    int r = rand();
-
+    r = rand();
     if (range_min == range_max) {
         u = ((0 == range_min) ? r : range_min);
     } else {
@@ -514,7 +515,6 @@ int posix__random_block(unsigned char *buffer, int size)
 	HCRYPTPROV hCryptProv;
 	static LPCSTR UserName = "nshost";
 	BOOL retval;
-	DWORD err;
 
 	hCryptProv = (HCRYPTPROV)NULL;
 
@@ -523,8 +523,7 @@ int posix__random_block(unsigned char *buffer, int size)
 			break;
 		}
 
-		err = GetLastError();
-		if (err == NTE_BAD_KEYSET) {
+		if (GetLastError() == NTE_BAD_KEYSET) {
 			if (CryptAcquireContextA(&hCryptProv, UserName, NULL, PROV_RSA_FULL, CRYPT_NEWKEYSET)) {
 				break;
 			}
