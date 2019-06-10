@@ -121,6 +121,7 @@ interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
  *		set the tcp stream template of specify object
  *	NI_GETTST(tst_t *)
  *		get the tcp stream template of specify object current set
+ *
  */
 interface_format(int) nis_cntl(objhld_t link, int cmd, ...);
 

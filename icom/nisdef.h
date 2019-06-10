@@ -78,6 +78,7 @@ typedef int nis_boolean_t;
 #define NI_GETCTX       (4)
 #define NI_SETTST       (5)
 #define NI_GETTST       (6)
+#define NI_DUPCTX       (7)
 
 struct nis_event {
     int Event;

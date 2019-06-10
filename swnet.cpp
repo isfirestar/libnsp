@@ -53,7 +53,9 @@ namespace nsp {
             switch (udp_evt->Event) {
                 case EVT_RECEIVEDATA:
                     toolkit::singleton<swnet>::instance()->udp_refobj(udp_evt->Ln.Udp.Link, [&] (const std::shared_ptr<obudp> &object) {
-                        object->on_recvdata(((udp_data_t *) data)->e.Packet.Data, ((udp_data_t *) data)->e.Packet.Size,
+                        object->on_recvdata(
+                                ((udp_data_t *) data)->e.Packet.Data,
+                                ((udp_data_t *) data)->e.Packet.Size,
                                 ((udp_data_t *) data)->e.Packet.RemoteAddress,
                                 ((udp_data_t *) data)->e.Packet.RemotePort);
                     });

@@ -194,7 +194,10 @@ int posix__rm(const char *const target) {
     if (posix__isdir(target)) {
         return __posix__rmdir(target);
     } else {
-        return DeleteFileA(target);
+        if (!DeleteFileA(target)) {
+            return -1;
+        }
+        return 0;
     }
 }
 
