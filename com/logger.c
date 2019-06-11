@@ -252,7 +252,7 @@ int log__async_init()
 
     __log_async.misc_memory = (log__async_node_t *)malloc(misc_memory_size);
     if (!__log_async.misc_memory) {
-        return RE_ERROR(ENOMEM);
+        return -ENOMEM;
     }
     memset(__log_async.misc_memory, 0, misc_memory_size);
 

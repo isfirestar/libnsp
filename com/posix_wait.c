@@ -6,7 +6,7 @@
 
 int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
     if (!waiter) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     waiter->sync_ = 1;
@@ -19,7 +19,7 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
 
 int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
     if (!waiter) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     waiter->sync_ = 0;
@@ -43,9 +43,9 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     DWORD waitRes;
 
     if (!waiter) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
-    
+
 	if (!waiter->cond_) {
         return -1;
     }
@@ -69,11 +69,11 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
 
 int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) {
     if (!waiter) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
 	if (!waiter->cond_) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
 	return SetEvent(waiter->cond_);
@@ -139,143 +139,182 @@ pointer address return by @malloc always aligned to 4 bytes
 */
 
 static
-int __posix_init_waitable_handle(posix__waitable_handle_t *waiter) {
-    if (waiter) {
-        posix__pthread_mutex_init(&waiter->mutex_);
-        pthread_condattr_init(&waiter->condattr_);
-        /* using CLOCK_MONOTONIC time check method */
-        pthread_condattr_setclock(&waiter->condattr_, CLOCK_MONOTONIC);
-        pthread_cond_init(&waiter->cond_, &waiter->condattr_);
-        /* initialize the pass condition */
-        waiter->pass_ = 0;
-        return 0;
+int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
+{
+    int retval;
+
+    if (!waiter) {
+        return -EINVAL;
     }
 
-    return -1;
+    /* waitable handle MUST locked by a internal mutex object */
+    retval = posix__pthread_mutex_init(&waiter->mutex_);
+    if (retval < 0) {
+        return retval;
+    }
+
+    retval = pthread_condattr_init(&waiter->condattr_);
+    if (0 != retval) {
+        posix__pthread_mutex_release(&waiter->mutex_);
+        return posix__makeerror(retval);
+    }
+
+    /* using CLOCK_MONOTONIC time check method */
+    retval = pthread_condattr_setclock(&waiter->condattr_, CLOCK_MONOTONIC);
+    if (0 != retval) {
+        pthread_condattr_destroy(&waiter->condattr_);
+        posix__pthread_mutex_release(&waiter->mutex_);
+        return posix__makeerror(retval);
+    }
+
+    /* OK, initial the condition variable now */
+    retval = pthread_cond_init(&waiter->cond_, &waiter->condattr_);
+    if (0 != retval) {
+        pthread_condattr_destroy(&waiter->condattr_);
+        posix__pthread_mutex_release(&waiter->mutex_);
+        return posix__makeerror(retval);
+    }
+
+    /* initialize the pass condition */
+    waiter->pass_ = 0;
+    return 0;
 }
 
-int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
+int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
+{
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(waiter);
 
     waiter->sync_ = 1;
     return __posix_init_waitable_handle(waiter);
 }
 
-int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
+int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
+{
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(waiter);
 
     waiter->sync_ = 0;
     return __posix_init_waitable_handle(waiter);
 }
 
-void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) {
+void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
+{
     __POSIX_EFFICIENT_ALIGNED_PTR_NR__(waiter);
     pthread_condattr_destroy(&waiter->condattr_);
     pthread_cond_destroy(&waiter->cond_);
     posix__pthread_mutex_release(&waiter->mutex_);
 }
 
-int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t tsc) {
+static
+int __posix__infinite_waitfor_waitable_handle(posix__waitable_handle_t *waiter)
+{
+    int retval;
+
+    assert(waiter);
+
+    posix__pthread_mutex_lock(&waiter->mutex_);
+    if (waiter->sync_) {
+        while (!waiter->pass_) {
+            if (0 != (retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_))) {
+                break;
+            }
+        }
+
+        /* reset @pass_ flag to zero immediately after wait syscall,
+            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
+        waiter->pass_ = 0;
+    } else {
+
+        /* for notification waitable handle,
+            all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
+            the object is always in a state of signal before method @posix__reset_waitable_handle called.
+            */
+        if (!waiter->pass_) {
+            retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
+        }
+    }
+
+    posix__pthread_mutex_unlock(&waiter->mutex_);
+    return posix__makeerror(retval);
+}
+
+int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval)
+{
     int retval;
     struct timespec abstime; /* -D_POSIX_C_SOURCE >= 199703L */
 
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(waiter);
-    
-    retval = 0;
-    if (0 == tsc || tsc >= 0x7FFFFFFF) {
-        posix__pthread_mutex_lock(&waiter->mutex_);
 
-        if (waiter->sync_) {
-            while (!waiter->pass_) {
-                retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
-                /* fail syscall */
-                if (0 != retval) {
-                    retval = -1;
-                    break;
-                }
-            }
-
-            /* reset @pass_ flag to zero immediately after wait syscall,
-                to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
-            waiter->pass_ = 0;
-        } else {
-
-            /* for notification waitable handle, 
-                all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
-                the object is always in a state of signal before method @posix__reset_waitable_handle called.
-                */
-            if (!waiter->pass_) {
-                retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
-            }
-        }
-
-        posix__pthread_mutex_unlock(&waiter->mutex_);
-        return retval;
+    /* the waiter using infinite wait model */
+    if (interval <= 0) {
+        return __posix__infinite_waitfor_waitable_handle(waiter);
     }
 
     /* wait with timeout */
-    retval = clock_gettime(CLOCK_MONOTONIC, &abstime);
-    if (0 == retval ) {
-        /* Calculation delay from current time，if tv_nsec >= 1000000000 will cause pthread_cond_timedwait EINVAL, 64 bit overflow */
-        uint64_t nsec = abstime.tv_nsec;
-        nsec += ((uint64_t) tsc * 1000000); /* convert milliseconds to nanoseconds */
-        abstime.tv_sec += (nsec / 1000000000);
-        abstime.tv_nsec = (nsec % 1000000000);
-
-        posix__pthread_mutex_lock(&waiter->mutex_);
-
-        if (waiter->sync_) {
-            while (!waiter->pass_) {
-                retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-                /* timedout, break the loop */
-                if (ETIMEDOUT == retval) {
-                    break;
-                }
-
-                /* fail syscall */
-                if (0 != retval) {
-                    retval = -1;
-                    break;
-                }
-            }
-        
-            /* reset @pass_ flag to zero immediately after wait syscall,
-                to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
-            waiter->pass_ = 0;
-        } else {
-            /* for notification waitable handle, 
-                all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
-                the object is always in a state of signal before method @posix__reset_waitable_handle called.
-                */
-            if (!waiter->pass_) {
-                retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-            }
-         }
-
-        posix__pthread_mutex_unlock(&waiter->mutex_);
-        return retval;
+    if (0 != clock_gettime(CLOCK_MONOTONIC, &abstime)) {
+         return posix__makeerror(errno);
     }
-    
-    return RE_ERROR(errno);
+
+    /* Calculation delay from current time，if tv_nsec >= 1000000000 will cause pthread_cond_timedwait EINVAL, 64 bit overflow */
+    uint64_t nsec = abstime.tv_nsec;
+    nsec += ((uint64_t) interval * 1000000); /* convert milliseconds to nanoseconds */
+    abstime.tv_sec += (nsec / 1000000000);
+    abstime.tv_nsec = (nsec % 1000000000);
+
+    posix__pthread_mutex_lock(&waiter->mutex_);
+
+    if (waiter->sync_) {
+        while (!waiter->pass_) {
+            retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+            if (0 != retval) { /* timedout or fatal syscall cause the loop break */
+                break;
+            }
+        }
+
+        /* reset @pass_ flag to zero immediately after wait syscall,
+            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
+        waiter->pass_ = 0;
+    } else {
+        /* for notification waitable handle,
+            all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
+            the object is always in a state of signal before method @posix__reset_waitable_handle called.
+            */
+        if (!waiter->pass_) {
+            retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+        }
+    }
+    posix__pthread_mutex_unlock(&waiter->mutex_);
+
+    if (0 != retval) {
+        if (ETIMEDOUT != retval) {
+            retval = posix__makeerror(retval);
+        }
+    }
+
+    return retval;
 }
 
-int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) {
+int posix__sig_waitable_handle(posix__waitable_handle_t *waiter)
+{
+    int retval;
+
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(waiter);
 
     posix__pthread_mutex_lock(&waiter->mutex_);
     waiter->pass_ = 1;
     if (waiter->sync_) {
-        pthread_cond_signal(&waiter->cond_);
+        retval = pthread_cond_signal(&waiter->cond_);
     } else {
-        pthread_cond_broadcast(&waiter->cond_);
+        retval = pthread_cond_broadcast(&waiter->cond_);
     }
     posix__pthread_mutex_unlock(&waiter->mutex_);
-    return 0;
+
+    return posix__makeerror(retval);
 }
 
-void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
+void posix__block_waitable_handle(posix__waitable_handle_t *waiter)
+{
     __POSIX_EFFICIENT_ALIGNED_PTR_NR__(waiter);
-    
+
      /* @reset operation effect only for notification wait object.  */
     if ( 0 == waiter->sync_) {
         posix__pthread_mutex_lock(&waiter->mutex_);
@@ -284,21 +323,32 @@ void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 }
 
-int posix__delay_execution( uint64_t us ) {
+int posix__delay_execution( uint64_t us )
+{
+    int fdset;
     struct timeval tv;
+
     tv.tv_sec = 0;
     tv.tv_usec = us;
-    return select(0, NULL, NULL, NULL, &tv);
+
+    fdset = select(0, NULL, NULL, NULL, &tv);
+    if (fdset < 0) {
+        return posix__makeerror(errno);
+    }
+
+    return 0;
 }
 
 #endif
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
-void posix__reset_waitable_handle(posix__waitable_handle_t *waiter) {
+void posix__reset_waitable_handle(posix__waitable_handle_t *waiter)
+{
     posix__block_waitable_handle(waiter);
 }
 
-void posix__hang() {
+void posix__hang()
+{
     DECLARE_SYNC_WAITER(waiter);
     posix__waitfor_waitable_handle(&waiter, -1);
 }

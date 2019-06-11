@@ -8,7 +8,7 @@
 #include <Windows.h>
 
 struct __posix_pthread {
-    posix__boolean_t detached_;
+    boolean_t detached_;
     HANDLE pid_;
 };
 
@@ -30,7 +30,7 @@ struct __posix__pthread_mutex {
 #include <pthread.h>
 
 struct __posix_pthread {
-    posix__boolean_t detached_;
+    boolean_t detached_;
     pthread_t pid_;
     pthread_attr_t attr_;
 } __POSIX_TYPE_ALIGNED__;
@@ -61,7 +61,7 @@ typedef struct __posix__pthread_mutex   posix__pthread_mutex_t;
 __extern__
 int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 __extern__
-int posix__pthread_self(posix__pthread_t *tidp); 
+int posix__pthread_self(posix__pthread_t *tidp);
 __extern__
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 __extern__
@@ -81,7 +81,7 @@ int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask);
 __extern__
 int posix__pthread_detach(posix__pthread_t * tidp);
 __extern__
-posix__boolean_t posix__pthread_joinable(posix__pthread_t * tidp);
+boolean_t posix__pthread_joinable(posix__pthread_t * tidp);
 __extern__
 int posix__pthread_join(posix__pthread_t * tidp, void **retval);
 

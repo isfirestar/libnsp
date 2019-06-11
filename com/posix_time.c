@@ -12,7 +12,7 @@ static const uint64_t ET_METHOD_NTKRNL = ((uint64_t) ((uint64_t) 1000 * 1000 * 1
 
 /* NT FILETIME 到 Epoch 时间的差距， 单位100ns(NT FILETIME采用1640年记时)
   使用ULL强制限制数据类型， 避免 warning: this decimal constant is unsigned only in ISO C90 警告 */
-static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111902ULL << 32) | 3577643008ULL); 
+static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111902ULL << 32) | 3577643008ULL);
 /* { .dwLowDateTime = 3577643008, .dwHighDateTime = 27111902 }; */
 
 int posix__clock_localtime(posix__systime_t *systime) {
@@ -98,13 +98,14 @@ uint64_t posix__clock_gettime() {
     return 0;
 }
 
-#else
+#else /* POSIX */
 
 #include <sys/time.h>
 
-int posix__clock_localtime(posix__systime_t *systime) {
+int posix__clock_localtime(posix__systime_t *systime)
+{
     struct timeval tv_now;
-    struct tm tm_now;
+    struct tm tm_now, *tm_retval;
 
     if(!systime) {
         return -EINVAL;
@@ -112,7 +113,10 @@ int posix__clock_localtime(posix__systime_t *systime) {
 
     tv_now.tv_sec = systime->epoch / ET_METHOD_NTKRNL;/* 10000000*/
 
-    localtime_r(&tv_now.tv_sec, &tm_now);
+    tm_retval = localtime_r(&tv_now.tv_sec, &tm_now);
+    if (!tm_retval) {
+        return -1;
+    }
 
     systime->year = tm_now.tm_year + 1900;
     systime->month = tm_now.tm_mon + 1;
@@ -124,7 +128,8 @@ int posix__clock_localtime(posix__systime_t *systime) {
     return 0;
 }
 
-int posix__localtime_clock(posix__systime_t *systime) {
+int posix__localtime_clock(posix__systime_t *systime)
+{
     struct tm timem;
     uint64_t epoch;
 
@@ -150,14 +155,18 @@ int posix__localtime_clock(posix__systime_t *systime) {
     return 0;
 }
 
-uint64_t posix__gettick() {
+uint64_t posix__gettick()
+{
     struct timespec ts;
 
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return ((uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    if (0 == clock_gettime(CLOCK_MONOTONIC, &ts)) {
+        return ((uint64_t) ts.tv_sec * 1000 + ts.tv_nsec / 1000000);
+    }
+    return 0;
 }
 
-uint64_t posix__clock_epoch() {
+uint64_t posix__clock_epoch()
+{
     struct timespec ts;
 
     if (0 == clock_gettime(CLOCK_REALTIME, &ts)) {
@@ -167,7 +176,8 @@ uint64_t posix__clock_epoch() {
     return 0;
 }
 
-uint64_t posix__clock_gettime() {
+uint64_t posix__clock_gettime()
+{
     /* gcc -lrt */
     struct timespec tsc;
     uint64_t tick;
@@ -178,7 +188,7 @@ uint64_t posix__clock_gettime() {
         tick = (uint64_t) tsc.tv_sec * ET_METHOD_NTKRNL + tsc.tv_nsec / 100;
         return  tick;
     }
-    
+
     return 0;
 }
 
@@ -187,9 +197,13 @@ uint64_t posix__clock_gettime() {
 
 int posix__localtime(posix__systime_t *systime) {
     if (!systime) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     systime->epoch = posix__clock_epoch();
-    return posix__clock_localtime(systime);
+    if (0 != systime->epoch) {
+        return posix__clock_localtime(systime);
+    }
+
+    return -1;
 }

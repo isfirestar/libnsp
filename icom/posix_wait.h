@@ -32,25 +32,25 @@ __extern__
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter);
 
 /*
- * 让一个等待对象执行等待操作 
- * @waiter  等待对象
- * @tsc     等待超时的毫秒级设置
- * 
+ * 让一个等待对象执行等待操作
+ * @waiter      等待对象
+ * @interval    间隔，等待超时的毫秒级设置
+ *
  * 返回定义:
- * 如果 tsc <= 0 则有:
+ * 如果 interval <= 0 则有:
  * 0: 事件触发
  * -1: 系统调用失败
- * 
- * 如果 tsc > 0 则有：
+ *
+ * 如果 interval > 0 则有：
  * 0: 事件触发
  * ETIMEOUT: 等待超时
- * -1: 系统调用失败 
+ * -1: 系统调用失败
  */
 #if !defined INFINITE
 #define INFINITE (0xFFFFFFFF)
 #endif
 __extern__
-int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t tsc/*ms*/);
+int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval/*ms*/);
 
 /*
  * 唤醒 @waiter 对象

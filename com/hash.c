@@ -135,7 +135,7 @@ int base64__encode(const char *input, int incb, char *output, int *outcb) {
     int k;
 
     if (!input || incb <= 0 || (!output && !outcb)) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     /* 补‘=’个数 */

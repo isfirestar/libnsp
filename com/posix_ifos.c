@@ -135,7 +135,7 @@ int posix__pmkdir(const char *const dir) {
     }
 
     if ( 0 == strlen(dir)) {
-        return RE_ERROR(ENOENT);
+        return -ENOENT;
     }
 
     retval = 0;
@@ -330,21 +330,20 @@ int posix__isdir(const char *const file) {
     if (!file) return -1;
 
     attr = GetFileAttributesA(file);
-    if (INVALID_FILE_ATTRIBUTES == attr) {
-        return -1;
+    if (INVALID_FILE_ATTRIBUTES != attr) {
+        if (attr & FILE_ATTRIBUTE_DIRECTORY) {
+            return 0;
+        }
     }
 
-    if (attr & FILE_ATTRIBUTE_DIRECTORY) {
-        return 1;
-    }
-    return 0;
+    return -1;
 }
 
 int posix__getpriority(int *priority) {
     DWORD retval;
 
     if (!priority) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     retval = GetPriorityClass(GetCurrentProcess());
@@ -448,7 +447,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
     int need;
 
     if (!output_bytes) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     min = MultiByteToWideChar(CP_ACP, 0, *from, -1, NULL, 0);
@@ -456,7 +455,7 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
 
     if (!to || *output_bytes < (size_t) need) {
         *output_bytes = need;
-        return RE_ERROR(EAGAIN);
+        return -EAGAIN;
     }
 
     return MultiByteToWideChar(CP_ACP, 0, *from, -1, (LPWSTR) * to, (int) *output_bytes);
@@ -467,13 +466,13 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
     int min;
 
     if (!output_bytes) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     min = WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, NULL, 0, NULL, FALSE);
     if (!to || *output_bytes < (size_t) min) {
         *output_bytes = min;
-        return RE_ERROR(EAGAIN);
+        return -EAGAIN;
     }
 
     return WideCharToMultiByte(CP_OEMCP, 0, (LPCWCH) * from, -1, *to, (int) *output_bytes, NULL, FALSE);
@@ -728,19 +727,20 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
 #include <crypt.h>
 
 static
-int __posix__rmdir(const char *dir) {
+int __posix__rmdir(const char *dir)
+{
     /* > rm -rf dir */
     struct dirent *ent;
     DIR *dirp;
     char filename[MAXPATH];
 
     if (!dir) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     dirp = opendir(dir);
     if (!dirp) {
-        return RE_ERROR(errno);
+        return posix__makeerror(errno);
     }
 
     while (NULL != (ent = readdir(dirp))) {
@@ -764,15 +764,18 @@ int __posix__rmdir(const char *dir) {
     return 0;
 }
 
-long posix__gettid() {
+long posix__gettid()
+{
     return syscall(SYS_gettid);
 }
 
-long posix__getpid() {
+long posix__getpid()
+{
     return syscall(SYS_getpid);
 }
 
-int posix__syslogin(const char *user, const char *key) {
+int posix__syslogin(const char *user, const char *key)
+{
     char salt[13], *encrypt, buf[1024];
     int i, j, retval;
     struct crypt_data crd;
@@ -831,33 +834,39 @@ int posix__syslogin(const char *user, const char *key) {
     return -EACCES;
 }
 
-void posix__sleep(uint64_t ms) {
+void posix__sleep(uint64_t ms)
+{
     usleep(ms * 1000);
 }
 
-void *posix__dlopen(const char *file) {
+void *posix__dlopen(const char *file)
+{
     return dlopen(file, /*RTLD_LAZY*/RTLD_NOW);
 }
 
-void* posix__dlsym(void* handle, const char* symbol) {
+void* posix__dlsym(void* handle, const char* symbol)
+{
     if (!handle || !symbol) {
         return NULL;
     }
     return dlsym(handle, symbol);
 }
 
-int posix__dlclose(void *handle) {
+int posix__dlclose(void *handle)
+{
     if (!handle) {
         return -1;
     }
     return dlclose(handle);
 }
 
-const char *posix__dlerror() {
+const char *posix__dlerror()
+{
     return dlerror();
 }
 
-const char *posix__dlerror2(char *estr) {
+const char *posix__dlerror2(char *estr)
+{
     if (estr) {
         const char *p = posix__dlerror();
         if (p) {
@@ -868,23 +877,25 @@ const char *posix__dlerror2(char *estr) {
     return NULL;
 }
 
-int posix__mkdir(const char *const dir) {
+int posix__mkdir(const char *const dir)
+{
     if (dir) {
         if (0 == mkdir(dir, 0755)) {
             return 0;
         }
 
-        int e = errno;
-        if (EEXIST == e) {
+        if (EEXIST == errno) {
             return 0;
         }
 
-        return RE_ERROR(e);
+        return posix__makeerror(errno);
     }
-    return -1;
+
+    return -EINVAL;
 }
 
-int posix__pmkdir(const char *const dir) {
+int posix__pmkdir(const char *const dir)
+{
     struct list_head stack;
     struct dir_stack_node *node; /* 不允许使用栈对象 */
     struct dir_stack_node *pos;
@@ -892,11 +903,11 @@ int posix__pmkdir(const char *const dir) {
     int retval;
 
     if (!dir) {
-        return -1;
+        return -EINVAL;
     }
 
     if ( 0 == strlen(dir)) {
-        return RE_ERROR(ENOENT);
+        return -ENOENT;
     }
 
     retval = 0;
@@ -904,8 +915,9 @@ int posix__pmkdir(const char *const dir) {
 
     node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
     if (!node) {
-        return -1;
+        return -ENOMEM;
     }
+
     posix__strcpy(node->dir, cchof(node->dir), dir);
     list_add(&node->link, &stack);
     while (!list_empty(&stack)) {
@@ -944,22 +956,27 @@ int posix__pmkdir(const char *const dir) {
             free(pos);
         }
     }
-    return RE_ERROR(retval);
+    return posix__makeerror(retval);
 }
 
-int posix__rm(const char *const target) {
+int posix__rm(const char *const target)
+{
     if (!target) {
-        return -1;
+        return -EINVAL;
     }
 
     if (posix__isdir(target)) {
         return __posix__rmdir(target);
     } else {
-        return remove(target);
+        if (0 == remove(target)) {
+            return 0;
+        }
+        return posix__makeerror(errno);
     }
 }
 
-const char *posix__fullpath_current() {
+const char *posix__fullpath_current()
+{
     static char fullpath[MAXPATH];
     long pid;
     char link[64];
@@ -977,7 +994,8 @@ const char *posix__fullpath_current() {
     return fullpath;
 }
 
-char *posix__fullpath_current2(char *holder, int cb) {
+char *posix__fullpath_current2(char *holder, int cb)
+{
     if (!holder || cb <= 0) {
         return NULL;
     }
@@ -998,7 +1016,8 @@ char *posix__fullpath_current2(char *holder, int cb) {
     return holder;
 }
 
-const char *posix__getpedir() {
+const char *posix__getpedir()
+{
     char *p;
     static char dir[MAXPATH];
     const char *fullpath = posix__fullpath_current();
@@ -1014,7 +1033,8 @@ const char *posix__getpedir() {
     return dir;
 }
 
-char *posix__getpedir2(char *holder, int cb) {
+char *posix__getpedir2(char *holder, int cb)
+{
     char *p;
     char fullpath[MAXPATH];
 
@@ -1034,7 +1054,8 @@ char *posix__getpedir2(char *holder, int cb) {
     return holder;
 }
 
-const char *posix__getpename() {
+const char *posix__getpename()
+{
     const char *p;
     static char name[MAXPATH];
     const char *fullpath = posix__fullpath_current();
@@ -1051,7 +1072,8 @@ const char *posix__getpename() {
     return &name[0];
 }
 
-char *posix__getpename2(char *holder, int cb) {
+char *posix__getpename2(char *holder, int cb)
+{
     char *p;
     char fullpath[MAXPATH];
 
@@ -1073,14 +1095,16 @@ char *posix__getpename2(char *holder, int cb) {
     return holder;
 }
 
-const char *posix__gettmpdir() {
+const char *posix__gettmpdir()
+{
     static char buffer[MAXPATH];
 
     posix__strcpy(buffer, cchof(buffer), "/tmp");
     return buffer;
 }
 
-char *posix__gettmpdir2(char *holder, int cb) {
+char *posix__gettmpdir2(char *holder, int cb)
+{
     if (!holder || cb <= 0) {
         return NULL;
     }
@@ -1089,7 +1113,8 @@ char *posix__gettmpdir2(char *holder, int cb) {
     return holder;
 }
 
-int posix__isdir(const char *const file) {
+int posix__isdir(const char *const file)
+{
     struct stat st;
 
     if (!file) {
@@ -1097,7 +1122,7 @@ int posix__isdir(const char *const file) {
     }
 
     if (stat(file, &st) < 0) {
-        return -1;
+        return posix__makeerror(errno);
     }
 
     /* 如果符号链接目标是一个目录， 同样会解释为一个目录， 而不是 __S_IFLNK
@@ -1119,12 +1144,13 @@ int posix__isdir(const char *const file) {
     return 0;
 }
 
-int posix__getpriority(int *priority) {
+int posix__getpriority(int *priority)
+{
     int who;
     int retval;
 
     if (!priority) {
-        return RE_ERROR(EINVAL);
+        return -EINVAL;
     }
 
     who = 0;
@@ -1136,27 +1162,33 @@ int posix__getpriority(int *priority) {
     return -1;
 }
 
-int posix__setpriority_below() {
+int posix__setpriority_below()
+{
     return nice(5);
 }
 
-int posix__setpriority_normal() {
+int posix__setpriority_normal()
+{
     return nice(0);
 }
 
-int posix__setpriority_critical() {
+int posix__setpriority_critical()
+{
     return nice(-5);
 }
 
-int posix__setpriority_realtime() {
+int posix__setpriority_realtime()
+{
     return nice(-10);
 }
 
-int posix__getnprocs() {
+int posix__getnprocs()
+{
     return sysconf(_SC_NPROCESSORS_CONF);
 }
 
-int posix__setaffinity_process(int mask) {
+int posix__setaffinity_process(int mask)
+{
     int i;
     cpu_set_t cpus;
 
@@ -1172,10 +1204,15 @@ int posix__setaffinity_process(int mask) {
         }
     }
 
-    return sched_setaffinity(0, sizeof(cpu_set_t), &cpus);
+    if (0 == sched_setaffinity(0, sizeof(cpu_set_t), &cpus)) {
+        return 0;
+    }
+
+    return posix__makeerror(errno);
 }
 
-int posix__getaffinity_process(int *mask) {
+int posix__getaffinity_process(int *mask)
+{
     int i;
     cpu_set_t cpus;
     int n;
@@ -1183,7 +1220,7 @@ int posix__getaffinity_process(int *mask) {
     n = 0;
     CPU_ZERO(&cpus);
     if (sched_getaffinity(0, sizeof(cpu_set_t), &cpus) < 0) {
-        return -1;
+        return posix__makeerror(errno);
     }
 
     for (i = 0; i < 32; i++) {
@@ -1199,7 +1236,8 @@ int posix__getaffinity_process(int *mask) {
     return 0;
 }
 
-int posix__getsysmem(sys_memory_t *sysmem) {
+int posix__getsysmem(sys_memory_t *sysmem)
+{
     struct sysinfo s_info;
 
     if (!sysmem) {
@@ -1207,7 +1245,7 @@ int posix__getsysmem(sys_memory_t *sysmem) {
     }
 
     if (sysinfo(&s_info) < 0) {
-        return -1;
+        return posix__makeerror(errno);
     }
 
     memset(sysmem, 0, sizeof ( sys_memory_t));
@@ -1239,13 +1277,15 @@ int posix__getsysmem(sys_memory_t *sysmem) {
     return 0;
 }
 
-uint32_t posix__getpagesize() {
-    uint32_t ps = 0;
-    ps = sysconf(_SC_PAGE_SIZE);
-    return ps;
+uint32_t posix__getpagesize()
+{
+    uint32_t pagesize = 0;
+    pagesize = sysconf(_SC_PAGE_SIZE);
+    return pagesize;
 }
 
-void posix__syslog(const char *const logmsg) {
+void posix__syslog(const char *const logmsg)
+{
     /*
      * cat /var/log/messages | tail -n1
      */
@@ -1315,7 +1355,7 @@ int posix__random_block(unsigned char *buffer, int size)
 
     fd = open("/dev/random", O_RDONLY);
     if (fd < 0) {
-        return errno * -1;
+        return posix__makeerror(errno);
     }
 
     offset = 0;
@@ -1326,7 +1366,7 @@ int posix__random_block(unsigned char *buffer, int size)
                 continue;
             }
 
-            return errno * -1;
+            return posix__makeerror(errno);
         }
 
         if (0 == n) {
@@ -1376,10 +1416,12 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
     }
 
     if (fd < 0) {
-        return errno * -1;
+        *descriptor = INVALID_FILE_DESCRIPTOR;
+        return posix__makeerror(errno);
+    } else {
+        *descriptor = fd;
+        return 0;
     }
-    *descriptor = fd;
-    return 0;
 }
 
 int posix__file_read(file_descriptor_t fd, void *buffer, int size)
@@ -1387,7 +1429,7 @@ int posix__file_read(file_descriptor_t fd, void *buffer, int size)
     int offset, n;
     unsigned char *p;
 
-    if (!buffer) {
+    if (!buffer || size <= 0) {
         return -EINVAL;
     }
 
@@ -1403,7 +1445,7 @@ int posix__file_read(file_descriptor_t fd, void *buffer, int size)
             if (errno == EINTR) {
                 continue;
             } else {
-                return (errno * -1);
+                return posix__makeerror(errno);
             }
         }
 
@@ -1439,11 +1481,13 @@ int posix__file_write(file_descriptor_t fd, const void *buffer, int size)
                 continue;
             }
 
+            /* no space for write more data into hard disk,
+                this NOT means a error, but MUST break now */
             if (errno == ENOSPC) {
                 break;
             }
 
-            return (errno * -1);
+            return posix__makeerror(errno);
         }
 
         if (0 == n) {
@@ -1470,8 +1514,9 @@ int posix__file_flush(file_descriptor_t fd)
     }
 
     if (fsync(fd) < 0) {
-        return errno * -1;
+        return posix__makeerror(errno);
     }
+
     return 0;
 }
 
@@ -1485,7 +1530,7 @@ uint64_t posix__file_fgetsize(file_descriptor_t fd)
     }
 
     if (fstat(fd, &statbuf) < 0) {
-        return errno * -1;
+        return posix__makeerror(errno);
     } else {
         filesize = statbuf.st_size;
     }
@@ -1502,7 +1547,7 @@ uint64_t posix__file_getsize(const char *path)
     }
 
     if (stat(path, &statbuf) < 0) {
-        return errno * -1;
+        return posix__makeerror(errno);
     } else {
         filesize = statbuf.st_size;
     }
@@ -1518,11 +1563,11 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
     }
 
     newoff = lseek(fd, (__off_t) offset, SEEK_SET);
-    if (newoff != offset) {
-        return -1;
+    if (newoff != (__off_t)-1) {
+        return posix__makeerror(errno);
     }
 
-    return 0;
+    return offset;
 }
 
 #endif

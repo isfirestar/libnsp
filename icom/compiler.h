@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stddef.h>
+#include <assert.h>
 
 #if !defined STDCALL
 #if _WIN32
@@ -80,14 +81,14 @@
 #endif
 #endif
 
-typedef int posix__boolean_t;
-
-#if !defined posix__true
-#define posix__true ((posix__boolean_t)1)
+typedef int boolean_t;
+#if !defined __true__
+#define __true__ (1)
+#define YES     ((boolean_t)__true__)
 #endif
-
-#if !defined posix__false
-#define posix__false ((posix__boolean_t)0)
+#if !defined __false__
+#define __false__ (0)
+#define NO    ((boolean_t)__false__)
 #endif
 
 #if !defined posix__ipv4_length
@@ -383,15 +384,7 @@ enum byte_order_t {
 #define BYTES_PER_SECTOR		(512)
 #endif
 
-#if !defined RE_ERROR
-#define RE_ERROR(eval)   ((((int)eval) > 0 ) ? (int)((~(int)(eval)) + 1) : eval)
-#endif
-
-#if !defined RE_ERRNO
-#define RE_ERRNO    RE_ERROR(errno)
-#endif
-
-#define posix__mkerror(e)   ((int)(~((int)(e)) + 1))
+#define posix__makeerror(e)   (((int)e) <= 0 ? e : (int)(~((int)(e)) + 1))
 
 /* the maximum of integer */
 #define NSP_MAX_UINT8       (0xFF)
