@@ -187,11 +187,6 @@ typedef int boolean_t;
 #define container_of(__address, __type, __field) containing_record(__address, __type, __field)
 #endif
 
-#if !defined convert_boolean_condition_to_retval
-#define convert_boolean_condition_to_retval(condition) \
-        ((condition) ? (0) : (-1))
-#endif
-
 #if _WIN32
 
 #if !defined smp_mb

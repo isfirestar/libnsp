@@ -4,7 +4,8 @@
 /*--------------------------------------------------------------------------------------------------------------------------*/
 #if _WIN32
 
-int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
+int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) 
+{
     if (!waiter) {
         return -EINVAL;
     }
@@ -12,12 +13,13 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) {
     waiter->sync_ = 1;
 	waiter->cond_ = CreateEvent(NULL, FALSE, FALSE, NULL);
 	if (!waiter->cond_) {
-        return -1;
+        return posix__makeerror(GetLastError());
     }
     return 0;
 }
 
-int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
+int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) 
+{
     if (!waiter) {
         return -EINVAL;
     }
@@ -25,12 +27,13 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) {
     waiter->sync_ = 0;
 	waiter->cond_ = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (!waiter->cond_) {
-        return -1;
+		return posix__makeerror(GetLastError());
     }
     return 0;
 }
 
-void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) {
+void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) 
+{
     if (waiter) {
 		if (waiter->cond_) {
 			CloseHandle(waiter->cond_);
@@ -39,7 +42,8 @@ void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 }
 
-int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t tsc) {
+int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval)
+{
     DWORD waitRes;
 
     if (!waiter) {
@@ -47,19 +51,19 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     }
 
 	if (!waiter->cond_) {
-        return -1;
+        return -EBADF;
     }
 
     /* if t state of the specified object is signaled before wait function called, the return value willbe @WAIT_OBJECT_0
         either synchronous event or notification event.*/
-    if (0 == tsc || tsc < 0x7FFFFFFF) {
-		waitRes = WaitForSingleObject(waiter->cond_, tsc);
+    if (interval >= 0) {
+		waitRes = WaitForSingleObject(waiter->cond_, (DWORD)interval);
     } else {
 		waitRes = WaitForSingleObject(waiter->cond_, INFINITE);
     }
 
     if (WAIT_FAILED == waitRes) {
-        return -1;
+		return posix__makeerror(GetLastError());
     } else if (WAIT_TIMEOUT == waitRes) {
         return ETIMEDOUT;
     } else {
@@ -67,19 +71,21 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, uint32_t ts
     }
 }
 
-int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) {
+int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) 
+{
     if (!waiter) {
         return -EINVAL;
     }
 
 	if (!waiter->cond_) {
-        return -EINVAL;
+        return -EBADF;
     }
 
 	return SetEvent(waiter->cond_);
 }
 
-void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
+void posix__block_waitable_handle(posix__waitable_handle_t *waiter) 
+{
     if (waiter) {
 		if (waiter->cond_ && waiter->sync_ == 0) {
 			ResetEvent(waiter->cond_);
@@ -87,7 +93,8 @@ void posix__block_waitable_handle(posix__waitable_handle_t *waiter) {
     }
 }
 
-int posix__delay_execution( uint64_t us ) {
+int posix__delay_execution( uint64_t us ) 
+{
     typedef NTSTATUS( WINAPI * DelayExecution )( BOOL bAlertable, PLARGE_INTEGER pTimeOut );
     static DelayExecution ZwDelayExecution = NULL;
     static HINSTANCE inst = NULL;
@@ -101,6 +108,7 @@ int posix__delay_execution( uint64_t us ) {
         }
         ZwDelayExecution = ( DelayExecution )GetProcAddress( inst, "NtDelayExecution" );
     }
+
     if ( ZwDelayExecution ) {
         LARGE_INTEGER TimeOut;
         TimeOut.QuadPart = -1 * us * 10;

@@ -27,7 +27,7 @@ char *posix__trim(char *src) {
     }
 
     if (target != p) {
-        posix__strncpy(target, cb, p, (cb - (p - src)));
+        posix__strncpy(target, cb, p, (cb - (uint32_t)(p - src)));
     }
 
     cb = (int) strlen(target);

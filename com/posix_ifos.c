@@ -21,13 +21,19 @@ struct dir_stack_node {
 #pragma comment(lib, "Advapi32.lib")
 
 static
-int __posix__rmdir(const char *dir) {
+int __posix__rmdir(const char *dir) 
+{
     char all_file[MAXPATH];
     HANDLE find;
     WIN32_FIND_DATAA wfd;
 
-    if (!dir) return -1;
-    if (posix__isdir(dir) <= 0) return -1;
+	if (!dir) {
+		return -EINVAL;
+	}
+	
+	if (posix__isdir(dir) <= 0) {
+		return -1;
+	}
 
     posix__sprintf(all_file, cchof(all_file), "%s\\*.*", dir);
 
@@ -55,36 +61,43 @@ int __posix__rmdir(const char *dir) {
     return ( (RemoveDirectoryA(dir) > 0) ? (0) : (-1));
 }
 
-long posix__gettid() {
+long posix__gettid() 
+{
     return (int) GetCurrentThreadId();
 }
 
-long posix__getpid() {
+long posix__getpid() 
+{
     return (int) GetCurrentProcessId();
 }
 
-int posix__syslogin(const char *user, const char *key) {
+int posix__syslogin(const char *user, const char *key) 
+{
     return -1;
 }
 
-void posix__sleep(uint64_t ms) {
+void posix__sleep(uint64_t ms) 
+{
     Sleep(MAXDWORD & ms);
 }
 
-void *posix__dlopen(const char *file) {
+void *posix__dlopen(const char *file) 
+{
     HMODULE mod;
     mod = LoadLibraryA(file);
     return (void *) mod;
 }
 
-void* posix__dlsym(void* handle, const char* symbol) {
+void* posix__dlsym(void* handle, const char* symbol) 
+{
     if (!handle || !symbol) {
         return NULL;
     }
     return (void *) GetProcAddress(handle, symbol);
 }
 
-int posix__dlclose(void *handle) {
+int posix__dlclose(void *handle) 
+{
     if (!handle){
         return -1;
     }
@@ -96,18 +109,21 @@ int posix__dlclose(void *handle) {
     return -1;
 }
 
-const char *posix__dlerror() {
+const char *posix__dlerror() 
+{
     return posix__strerror();
 }
 
-const char *posix__dlerror2(char *estr) {
+const char *posix__dlerror2(char *estr) 
+{
     if (estr) {
         return posix__strerror2(estr);
     }
     return NULL;
 }
 
-int posix__mkdir(const char *const dir) {
+int posix__mkdir(const char *const dir) 
+{
     if (!dir) {
         return -1;
     }
@@ -123,7 +139,8 @@ int posix__mkdir(const char *const dir) {
     return -1;
 }
 
-int posix__pmkdir(const char *const dir) {
+int posix__pmkdir(const char *const dir) 
+{
     struct list_head stack;
     struct dir_stack_node *node; /* 不允许使用栈对象 */
     struct dir_stack_node *pos;
@@ -143,7 +160,7 @@ int posix__pmkdir(const char *const dir) {
 
     node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
     if (!node) {
-        return -1;
+        return -ENOMEM;
     }
     posix__strcpy(node->dir, cchof(node->dir), dir);
     list_add(&node->link, &stack);
@@ -186,7 +203,8 @@ int posix__pmkdir(const char *const dir) {
     return retval;
 }
 
-int posix__rm(const char *const target) {
+int posix__rm(const char *const target) 
+{
     if (!target) {
         return -1;
     }
@@ -201,7 +219,8 @@ int posix__rm(const char *const target) {
     }
 }
 
-const char *posix__fullpath_current() {
+const char *posix__fullpath_current()
+{
     static char fullpath[MAXPATH];
     uint32_t length;
 
@@ -215,7 +234,8 @@ const char *posix__fullpath_current() {
     }
 }
 
-char *posix__fullpath_current2(char *holder, int cb) {
+char *posix__fullpath_current2(char *holder, int cb) 
+{
     if (!holder || cb <= 0) {
         return NULL;
     }
@@ -231,10 +251,12 @@ char *posix__fullpath_current2(char *holder, int cb) {
     return holder;
 }
 
-const char *posix__getpedir() {
+const char *posix__getpedir() 
+{
     char *p;
     static char dir[MAXPATH];
     const char *fullpath = posix__fullpath_current();
+
     if (!fullpath) {
         return NULL;
     }
@@ -246,7 +268,8 @@ const char *posix__getpedir() {
     return dir;
 }
 
-char *posix__getpedir2(char *holder, int cb) {
+char *posix__getpedir2(char *holder, int cb) 
+{
     char *p;
     char fullpath[MAXPATH];
 
@@ -266,7 +289,8 @@ char *posix__getpedir2(char *holder, int cb) {
     return holder;
 }
 
-const char *posix__getpename() {
+const char *posix__getpename() 
+{
     const char *p;
     static char name[MAXPATH];
     const char *fullpath = posix__fullpath_current();
@@ -283,7 +307,8 @@ const char *posix__getpename() {
     return &name[0];
 }
 
-char *posix__getpename2(char *holder, int cb) {
+char *posix__getpename2(char *holder, int cb) 
+{
     char *p;
     char fullpath[MAXPATH];
 
@@ -305,7 +330,8 @@ char *posix__getpename2(char *holder, int cb) {
     return holder;
 }
 
-const char *posix__gettmpdir() {
+const char *posix__gettmpdir() 
+{
     static char buffer[MAXPATH];
     if (0 == GetTempPathA(_countof(buffer), buffer)) {
         return buffer;
@@ -313,7 +339,8 @@ const char *posix__gettmpdir() {
     return NULL;
 }
 
-char *posix__gettmpdir2(char *holder, int cb) {
+char *posix__gettmpdir2(char *holder, int cb) 
+{
     if (!holder || cb <= 0) {
         return NULL;
     }
@@ -324,7 +351,8 @@ char *posix__gettmpdir2(char *holder, int cb) {
     return NULL;
 }
 
-int posix__isdir(const char *const file) {
+int posix__isdir(const char *const file) 
+{
     unsigned long attr;
 
     if (!file) return -1;
@@ -339,7 +367,8 @@ int posix__isdir(const char *const file) {
     return -1;
 }
 
-int posix__getpriority(int *priority) {
+int posix__getpriority(int *priority) 
+{
     DWORD retval;
 
     if (!priority) {
@@ -355,39 +384,58 @@ int posix__getpriority(int *priority) {
     return 0;
 }
 
-int posix__setpriority_below() {
-    return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS));
+int posix__setpriority_below() 
+{
+	if (!SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS)) {
+		return posix__makeerror(GetLastError());
+	}
+	return 0;
 }
 
-int posix__setpriority_normal() {
-    return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS));
+int posix__setpriority_normal() 
+{
+	if (!SetPriorityClass(GetCurrentProcess(), NORMAL_PRIORITY_CLASS)) {
+		return posix__makeerror(GetLastError());
+	}
+	return 0;
 }
 
-int posix__setpriority_critical() {
-    return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS));
+int posix__setpriority_critical() 
+{
+	if (!SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS)) {
+		return posix__makeerror(GetLastError());
+	}
+	return 0;
 }
 
-int posix__setpriority_realtime() {
-	return convert_boolean_condition_to_retval(SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS));
+int posix__setpriority_realtime() 
+{
+	if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
+		return posix__makeerror(GetLastError());
+	}
+	return 0;
 }
 
-int posix__getnprocs() {
+int posix__getnprocs() 
+{
     SYSTEM_INFO sysinfo;
     GetSystemInfo(&sysinfo);
     return (int) sysinfo.dwNumberOfProcessors;
 }
 
-int posix__setaffinity_process(int mask) {
+int posix__setaffinity_process(int mask) 
+{
     if (0 == mask) {
         return -1;
     }
     if (SetProcessAffinityMask(GetCurrentProcess(), mask)) {
         return 0;
     }
-    return -1;
+	return posix__makeerror(GetLastError());
 }
 
-int posix__getaffinity_process(int *mask) {
+int posix__getaffinity_process(int *mask) 
+{
     DWORD_PTR ProcessAffinityMask, SystemAffinityMask;
     if (GetProcessAffinityMask(GetCurrentProcess(), &ProcessAffinityMask, &SystemAffinityMask)) {
         if (mask) {
@@ -395,14 +443,15 @@ int posix__getaffinity_process(int *mask) {
         }
         return 0;
     }
-    return -1;
+	return posix__makeerror(GetLastError());
 }
 
-int posix__getsysmem(sys_memory_t *sysmem) {
+int posix__getsysmem(sys_memory_t *sysmem) 
+{
     MEMORYSTATUSEX s_info;
     s_info.dwLength = sizeof(s_info);
     if (!GlobalMemoryStatusEx(&s_info)) {
-        return -1;
+		return posix__makeerror(GetLastError());
     }
 
     memset(sysmem, 0, sizeof ( sys_memory_t));
@@ -413,7 +462,8 @@ int posix__getsysmem(sys_memory_t *sysmem) {
     return 0;
 }
 
-uint32_t posix__getpagesize() {
+uint32_t posix__getpagesize() 
+{
     uint32_t ps = 0;
     SYSTEM_INFO sys_info;
     GetSystemInfo(&sys_info);
@@ -421,7 +471,8 @@ uint32_t posix__getpagesize() {
     return ps;
 }
 
-void posix__syslog(const char *const logmsg) {
+void posix__syslog(const char *const logmsg) 
+{
     HANDLE shlog;
     const char *strerrs[1];
 
@@ -442,7 +493,8 @@ void posix__syslog(const char *const logmsg) {
 }
 
 static
-int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_t *output_bytes) {
+int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_t *output_bytes) 
+{
     int min;
     int need;
 
@@ -462,7 +514,8 @@ int __posix__gb2312_to_uniocde(char **from, size_t input_bytes, char **to, size_
 }
 
 static
-int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_t *output_bytes) {
+int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_t *output_bytes) 
+{
     int min;
 
     if (!output_bytes) {
@@ -482,7 +535,8 @@ int __posix__unicode_to_gb2312(char **from, size_t input_bytes, char **to, size_
  *  [range_min, range_max). In other words,
  *  range_min <= random number < range_max
  */
-int posix__random(const int range_min, const int range_max) {
+int posix__random(const int range_min, const int range_max) 
+{
     static int rand_begin = 0;
     int u;
     int r;
@@ -531,7 +585,7 @@ int posix__random_block(unsigned char *buffer, int size)
 			}
 		}
 
-		return (int)((int)GetLastError() * -1);
+		return posix__makeerror(GetLastError());
 	} while (0);
 
 	retval = CryptGenRandom(hCryptProv, (DWORD)size, buffer);
@@ -578,7 +632,7 @@ int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *de
 
     fd = CreateFileA(path, dwDesiredAccess, FILE_SHARE_READ, NULL, dwCreationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
     if (INVALID_HANDLE_VALUE == fd) {
-        return (int)((int)GetLastError() * -1);
+		return posix__makeerror(GetLastError());
     }
     *descriptor = fd;
     return 0;
@@ -598,7 +652,7 @@ int posix__file_read(file_descriptor_t fd, unsigned char *buffer, int size)
 
     n = ReadFile(fd, buffer, (DWORD)size, (LPDWORD)&offset, NULL);
     if (!n) {
-        return (int)((int)GetLastError() * -1);
+		return posix__makeerror(GetLastError());
     }
 
     return offset;
@@ -618,7 +672,7 @@ int posix__file_write(file_descriptor_t fd, const unsigned char *buffer, int siz
 
     n = WriteFile(fd, buffer, (DWORD)size, (LPDWORD)&offset, NULL);
     if (!n) {
-        return (int)((int)GetLastError() * -1);
+		return posix__makeerror(GetLastError());
     }
 
     return offset;
@@ -692,9 +746,9 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
 
     move.QuadPart = offset;
     if (!SetFilePointerEx(fd, move, &pointer, FILE_BEGIN)) {
-        return -1;
+        return posix__makeerror(GetLastError());
     }
-    return 0;
+	return 0;
 }
 
 #else
@@ -1567,7 +1621,7 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
         return posix__makeerror(errno);
     }
 
-    return offset;
+    return 0;
 }
 
 #endif

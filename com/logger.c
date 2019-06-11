@@ -276,7 +276,7 @@ int log__async_init()
 static
 void log__create_log_directory(const char *rootdir)
 {
-    int pos, i;
+	size_t pos, i;
 
     if (rootdir) {
 		posix__strcpy(__log_root_directory, cchof(__log_root_directory), rootdir);
