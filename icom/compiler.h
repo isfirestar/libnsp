@@ -91,8 +91,12 @@ typedef int boolean_t;
 #define NO    ((boolean_t)__false__)
 #endif
 
-#if !defined posix__ipv4_length
-#define posix__ipv4_length          (16)
+#if !defined INET_ADDRSTRLEN
+#define INET_ADDRSTRLEN 16
+#endif
+
+#if !defined INET6_ADDRSTRLEN
+#define INET6_ADDRSTRLEN 46
 #endif
 
 #if !_WIN32
@@ -352,10 +356,6 @@ __static_inline_function(void) __write_once_size(volatile void *p, void *res, in
 #endif
 #endif
 
-#if !defined UNREFERENCED_PARAMETER
-#define UNREFERENCED_PARAMETER(p)       (p)
-#endif
-
 #if defined BITS_P_BYTE
 #undef BITS_P_BYTE
 #endif
@@ -379,7 +379,7 @@ enum byte_order_t {
 #define BYTES_PER_SECTOR		(512)
 #endif
 
-#define posix__makeerror(e)   (((int)e) <= 0 ? e : (int)(~((int)(e)) + 1))
+#define posix__makeerror(e)   (((int)(e)) <= 0 ? (e) : (int)(~((int)(e)) + 1))
 
 /* the maximum of integer */
 #define NSP_MAX_UINT8       (0xFF)

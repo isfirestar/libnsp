@@ -48,9 +48,6 @@ interface_format(void) udp_uninit();
  */
 interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* ipstr, uint16_t port, int flag);
 interface_format(void) udp_destroy(HUDPLINK link);
-
-/* @udp_write interface using direct IO mode
- * @udp_sendto interface like @tcp_write, push memory block into wpoll cache first */
 interface_format(int) udp_write(HUDPLINK link, const void *origin, int cb, const char* ipstr, uint16_t port, const nis_serializer_t serializer);
 interface_format(int) udp_getaddr(HUDPLINK link, uint32_t *ipv4, uint16_t *port);
 interface_format(int) udp_setopt(HUDPLINK link, int level, int opt, const char *val, int len);

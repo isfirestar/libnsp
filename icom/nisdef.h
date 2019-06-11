@@ -80,6 +80,15 @@ typedef int nis_boolean_t;
 #define NI_GETTST       (6)
 #define NI_DUPCTX       (7)
 
+/* the dotted decimal notation for IPv4 or IPv6 */
+struct nis_inet_addr {
+    char i_addr[INET_ADDRSTRLEN];
+};
+
+struct nis_inet6_addr {
+    char i6_addr[INET6_ADDRSTRLEN];
+};
+
 struct nis_event {
     int Event;
 
@@ -128,6 +137,12 @@ struct __tcp_stream_template {
 
 typedef struct __tcp_stream_template tst_t;
 
+/*  @nis_serializer_t target object use for @tcp_write or @udp_write procedure
+ *  when parameter @origin of these write function is a pointer to a C style strcuture object without 1 byte aligned,
+ *  or, @origin it's a pointer to a simple C++ object.
+ *  the @serializer parameter should specify a method how to serialization @origin into byte-string @packet
+ *  @packet will be the data buffer that is actually delivered to the kernel after @serializer call.
+ */
 typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *origin, int cb);
 
 struct nis_tcp_data {

@@ -4,7 +4,7 @@
 /*--------------------------------------------------------------------------------------------------------------------------*/
 #if _WIN32
 
-int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter) 
+int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
         return -EINVAL;
@@ -18,7 +18,7 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
     return 0;
 }
 
-int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter) 
+int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
         return -EINVAL;
@@ -32,7 +32,7 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
     return 0;
 }
 
-void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter) 
+void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (waiter) {
 		if (waiter->cond_) {
@@ -71,7 +71,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
     }
 }
 
-int posix__sig_waitable_handle(posix__waitable_handle_t *waiter) 
+int posix__sig_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
         return -EINVAL;
@@ -84,7 +84,7 @@ int posix__sig_waitable_handle(posix__waitable_handle_t *waiter)
 	return SetEvent(waiter->cond_);
 }
 
-void posix__block_waitable_handle(posix__waitable_handle_t *waiter) 
+void posix__block_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (waiter) {
 		if (waiter->cond_ && waiter->sync_ == 0) {
@@ -93,7 +93,7 @@ void posix__block_waitable_handle(posix__waitable_handle_t *waiter)
     }
 }
 
-int posix__delay_execution( uint64_t us ) 
+int posix__delay_execution( uint64_t us )
 {
     typedef NTSTATUS( WINAPI * DelayExecution )( BOOL bAlertable, PLARGE_INTEGER pTimeOut );
     static DelayExecution ZwDelayExecution = NULL;
@@ -268,6 +268,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
     abstime.tv_sec += (nsec / 1000000000);
     abstime.tv_nsec = (nsec % 1000000000);
 
+    retval = 0;
     posix__pthread_mutex_lock(&waiter->mutex_);
 
     if (waiter->sync_) {
