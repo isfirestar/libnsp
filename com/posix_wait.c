@@ -219,6 +219,8 @@ int __posix__infinite_waitfor_waitable_handle(posix__waitable_handle_t *waiter)
 
     assert(waiter);
 
+    retval = 0;
+
     posix__pthread_mutex_lock(&waiter->mutex_);
     if (waiter->sync_) {
         while (!waiter->pass_) {
