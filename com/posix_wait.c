@@ -4,6 +4,21 @@
 /*--------------------------------------------------------------------------------------------------------------------------*/
 #if _WIN32
 
+static
+int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
+{
+	if (!waiter) {
+		return -EINVAL;
+	}
+
+	waiter->cond_ = CreateEvent(NULL, waiter->sync_ ? FALSE : TRUE, FALSE, NULL);
+	if (!waiter->cond_) {
+		return posix__makeerror(GetLastError());
+	}
+
+	return 0;
+}
+
 int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
