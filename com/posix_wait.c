@@ -26,11 +26,7 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
     }
 
     waiter->sync_ = 1;
-	waiter->cond_ = CreateEvent(NULL, FALSE, FALSE, NULL);
-	if (!waiter->cond_) {
-        return posix__makeerror(GetLastError());
-    }
-    return 0;
+    return __posix_init_waitable_handle(waiter);
 }
 
 int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
@@ -40,11 +36,7 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
     }
 
     waiter->sync_ = 0;
-	waiter->cond_ = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (!waiter->cond_) {
-		return posix__makeerror(GetLastError());
-    }
-    return 0;
+	return __posix_init_waitable_handle(waiter);
 }
 
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
