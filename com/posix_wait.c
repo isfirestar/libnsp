@@ -207,6 +207,7 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
 {
     __POSIX_EFFICIENT_ALIGNED_PTR_NR__(waiter);
+
     pthread_condattr_destroy(&waiter->condattr_);
     pthread_cond_destroy(&waiter->cond_);
     posix__pthread_mutex_release(&waiter->mutex_);
@@ -251,6 +252,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
 {
     int retval;
     struct timespec abstime; /* -D_POSIX_C_SOURCE >= 199703L */
+    uint64_t nsec;
 
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(waiter);
 
@@ -265,12 +267,13 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
     }
 
     /* Calculation delay from current time，if tv_nsec >= 1000000000 will cause pthread_cond_timedwait EINVAL, 64 bit overflow */
-    uint64_t nsec = abstime.tv_nsec;
+    nsec = abstime.tv_nsec;
     nsec += ((uint64_t) interval * 1000000); /* convert milliseconds to nanoseconds */
     abstime.tv_sec += (nsec / 1000000000);
     abstime.tv_nsec = (nsec % 1000000000);
 
     retval = 0;
+
     posix__pthread_mutex_lock(&waiter->mutex_);
 
     if (waiter->sync_) {
@@ -293,6 +296,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
             retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
         }
     }
+
     posix__pthread_mutex_unlock(&waiter->mutex_);
 
     if (0 != retval) {
@@ -353,6 +357,60 @@ int posix__delay_execution( uint64_t us )
 #endif
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
+int posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waiter)
+{
+    posix__waitable_handle_t *inner;
+    int retval;
+
+    inner = (posix__waitable_handle_t *)malloc(sizeof(posix__waitable_handle_t));
+    if (!inner) {
+        return -ENOMEM;
+    }
+    inner->sync_ = 1;
+
+    retval = __posix_init_waitable_handle(inner);
+    if ( retval < 0) {
+        free(inner);
+        return retval;
+    }
+
+    if (waiter) {
+        *waiter = inner;
+    }
+    return 0;
+}
+
+int posix__allocate_notification_waitable_handle(posix__waitable_handle_t **waiter)
+{
+    posix__waitable_handle_t *inner;
+    int retval;
+
+    inner = (posix__waitable_handle_t *)malloc(sizeof(posix__waitable_handle_t));
+    if (!inner) {
+        return -ENOMEM;
+    }
+    inner->sync_ = 0;
+
+    retval = __posix_init_waitable_handle(inner);
+    if ( retval < 0) {
+        free(inner);
+        return retval;
+    }
+
+    if (waiter) {
+        *waiter = inner;
+    }
+    return 0;
+}
+
+void posix__release_waitable_handle(posix__waitable_handle_t *waiter)
+{
+    if (waiter) {
+        posix__uninit_waitable_handle(waiter);
+        free(waiter);
+    }
+}
+
 void posix__reset_waitable_handle(posix__waitable_handle_t *waiter)
 {
     posix__block_waitable_handle(waiter);

@@ -22,10 +22,6 @@ struct __posix__pthread_mutex {
 
 #else /* POSIX */
 
-#if !defined __USE_GNU
-#define __USE_GNU
-#endif
-
 /* -lpthread */
 #include <pthread.h>
 

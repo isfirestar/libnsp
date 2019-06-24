@@ -29,7 +29,13 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter);
 __extern__
 int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter);
 __extern__
+int posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waiter);
+__extern__
+int posix__allocate_notification_waitable_handle(posix__waitable_handle_t **waiter);
+__extern__
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter);
+__extern__
+void posix__release_waitable_handle(posix__waitable_handle_t *waiter);
 
 /*
  * 让一个等待对象执行等待操作
