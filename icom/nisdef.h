@@ -186,7 +186,7 @@ struct nis_udp_data {
             const unsigned char *Data;
             int Size;
             char RemoteAddress[16];
-            uint16_t RemotePort;
+            unsigned short RemotePort;
         } Packet;
 
         /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
@@ -206,15 +206,15 @@ typedef struct nis_udp_data udp_data_t;
 struct nis_arp_data {
     union {
         struct {
-            uint16_t    Arp_Hardware_Type;
-            uint16_t    Arp_Protocol_Type;
-            uint8_t     Arp_Hardware_Size;
-            uint8_t     Arp_Protocol_Size;
-            uint16_t    Arp_Op_Code;
-            uint8_t     Arp_Sender_Mac[6];
-            uint32_t    Arp_Sender_Ip;
-            uint8_t     Arp_Target_Mac[6];
-            uint32_t    Arp_Target_Ip;
+            unsigned short    Arp_Hardware_Type;
+            unsigned short    Arp_Protocol_Type;
+            unsigned char     Arp_Hardware_Size;
+            unsigned char     Arp_Protocol_Size;
+            unsigned short    Arp_Op_Code;
+            unsigned char     Arp_Sender_Mac[6];
+            unsigned int      Arp_Sender_Ip;
+            unsigned char     Arp_Target_Mac[6];
+            unsigned int      Arp_Target_Ip;
         } Packet;
 
         /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
@@ -257,9 +257,9 @@ typedef void( STD_CALL *nis_event_callback_t)(const char *host_event, const char
 
 struct __ifmisc {
     char interface_[64];
-    uint32_t addr_;
-    uint32_t netmask_;
-    uint32_t boardcast_;
+    unsigned int addr_;
+    unsigned int netmask_;
+    unsigned int boardcast_;
 }__POSIX_TYPE_ALIGNED__;
 typedef struct __ifmisc ifmisc_t;
 
