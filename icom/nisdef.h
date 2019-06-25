@@ -201,6 +201,8 @@ typedef struct nis_udp_data udp_data_t;
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     ARP implement
 ---------------------------------------------------------------------------------------------------------------------------------------------------------*/
+#pragma pack(push, 1)
+
 struct nis_arp_data {
     union {
         struct {
@@ -221,6 +223,7 @@ struct nis_arp_data {
         } PreClose;
     } e;
 } __POSIX_TYPE_ALIGNED__;
+#pragma pack(pop)
 
 typedef struct nis_arp_data arp_data_t;
 
