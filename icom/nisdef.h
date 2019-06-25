@@ -26,6 +26,7 @@
 typedef objhld_t HLNK;
 typedef HLNK HTCPLINK;
 typedef HLNK HUDPLINK;
+typedef HLNK HARPLINK;
 
 #if !defined STD_CALL
 #if _WIN32
@@ -109,6 +110,7 @@ typedef struct nis_event nis_event_t;
 typedef void( STD_CALL *nis_callback_t)(const struct nis_event *event, const void *data);
 typedef nis_callback_t tcp_io_callback_t;
 typedef nis_callback_t udp_io_callback_t;
+typedef nis_callback_t arp_io_callback_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     TCP implement
@@ -195,6 +197,32 @@ struct nis_udp_data {
 } __POSIX_TYPE_ALIGNED__;
 
 typedef struct nis_udp_data udp_data_t;
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------------
+    ARP implement
+---------------------------------------------------------------------------------------------------------------------------------------------------------*/
+struct nis_arp_data {
+    union {
+        struct {
+            uint16_t    Arp_Hardware_Type;
+            uint16_t    Arp_Protocol_Type;
+            uint8_t     Arp_Hardware_Size;
+            uint8_t     Arp_Protocol_Size;
+            uint16_t    Arp_Op_Code;
+            uint8_t     Arp_Sender_Mac[6];
+            uint32_t    Arp_Sender_Ip;
+            uint8_t     Arp_Target_Mac[6];
+            uint32_t    Arp_Target_Ip;
+        } Packet;
+
+        /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
+        struct {
+            void *Context;
+        } PreClose;
+    } e;
+} __POSIX_TYPE_ALIGNED__;
+
+typedef struct nis_arp_data arp_data_t;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------
     GRP implement

@@ -63,6 +63,14 @@ interface_format(void) udp_detach_grp(HUDPLINK link);
 interface_format(int) udp_write_grp(HUDPLINK link, packet_grp_t *grp);
 #endif
 
+/* NOTE: Before using ARP low level network protocol, application MUST call @udp_init method
+ *			any ARP io/file-descriptor willbe bind on UDP threads.
+ *			ensure that calling thread HAVE root/administrator access right/equal or or higher execution priority
+ */
+interface_format(HARPLINK) arp_create(arp_io_callback_t user_callback);
+interface_format(int) arp_request(HARPLINK link, const char *source, const char *target);
+interface_format(void) arp_destroy(HARPLINK link);
+
 interface_format(int) nis_getver(swnet_version_t *version);
 /* parse the domain name, get the first parse result of obtained, convert it to Little-Endian*/
 interface_format(int) nis_gethost(const char *name, uint32_t *ipv4);
