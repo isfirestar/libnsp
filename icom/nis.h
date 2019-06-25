@@ -67,8 +67,9 @@ interface_format(int) udp_write_grp(HUDPLINK link, packet_grp_t *grp);
  *			any ARP io/file-descriptor willbe bind on UDP threads.
  *			ensure that calling thread HAVE root/administrator access right/equal or or higher execution priority
  */
-interface_format(HARPLINK) arp_create(arp_io_callback_t user_callback);
-interface_format(int) arp_request(HARPLINK link, const char *source, const char *target);
+interface_format(HARPLINK) arp_create(arp_io_callback_t user_callback, const char *ipstr);
+interface_format(int) arp_nrequest(HARPLINK link, uint32_t target);
+interface_format(int) arp_request(HARPLINK link, const char *target);
 interface_format(void) arp_destroy(HARPLINK link);
 
 interface_format(int) nis_getver(swnet_version_t *version);
