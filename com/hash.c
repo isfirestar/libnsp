@@ -7,10 +7,10 @@
 #include <stdlib.h>
 
 /*--------------------------------------------VFN1/VFN1a--------------------------------------------*/
-#define VFN_PRIME32 ((uint32_t)16777619L)
+#define VFN_PRIME32 ((uint32_t)16777619UL)
 #define VFN_PRIME64	((uint64_t)1099511628211ULL)
 
-#define VFN_OFFSET_BASIS32		((uint32_t)2166136261L)
+#define VFN_OFFSET_BASIS32		((uint32_t)2166136261UL)
 #define VFN_OFFSET_BASIS64		((uint64_t)14695981039346656037ULL)
 
 uint32_t vfn1_h32(const unsigned char *key, int length) {
