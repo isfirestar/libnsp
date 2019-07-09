@@ -158,12 +158,12 @@ typedef int boolean_t;
 
 /* 浮点为0的对比目标 */
 #if !defined EPSINON
-#define EPSINON  (0.000001)
+#define EPSINON  0.000001
 #endif
 
 /* 判断浮点数 @x 是否为 0 */
 #if !defined is_float_zero
-#define is_float_zero(x) (((x) > EPSINON) && ((x) < -EPSINON))
+#define is_float_zero(x) (((x) < EPSINON) && ((x) > -EPSINON))
 #endif
 
 /* 判断浮点数 @n @m 是否相等 */
