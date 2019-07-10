@@ -209,11 +209,11 @@ int posix__rm(const char *const target)
         return -1;
     }
 
-    if (posix__isdir(target)) {
+    if (1 == posix__isdir(target)) {
         return __posix__rmdir(target);
     } else {
         if (!DeleteFileA(target)) {
-            return -1;
+            return -1 * GetLastError();
         }
         return 0;
     }
@@ -355,16 +355,18 @@ int posix__isdir(const char *const file)
 {
     unsigned long attr;
 
-    if (!file) return -1;
+	if (!file) {
+		return -1;
+	}
 
     attr = GetFileAttributesA(file);
     if (INVALID_FILE_ATTRIBUTES != attr) {
         if (attr & FILE_ATTRIBUTE_DIRECTORY) {
-            return 0;
+            return 1;
         }
     }
 
-    return -1;
+    return 0;
 }
 
 int posix__getpriority(int *priority)
