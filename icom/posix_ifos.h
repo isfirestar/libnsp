@@ -179,9 +179,9 @@ int posix__random_block(unsigned char *buffer, int size);
 __extern__
 int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor);
 __extern__
-uint64_t posix__file_fgetsize(file_descriptor_t fd);
+int64_t posix__file_fgetsize(file_descriptor_t fd);
 __extern__
-uint64_t posix__file_getsize(const char *path);
+int64_t posix__file_getsize(const char *path);
 __extern__
 int posix__file_seek(file_descriptor_t fd, uint64_t offset);
 __extern__

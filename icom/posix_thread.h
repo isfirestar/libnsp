@@ -32,10 +32,10 @@ struct __posix_pthread {
 } __POSIX_TYPE_ALIGNED__;
 
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
-            posix__pthread_t name ={ .detached_ = posix__false, .pid_ = 0 }
+            posix__pthread_t name ={ .detached_ = NO, .pid_ = 0 }
 
 #define POSIX_PTHREAD_TYPE_INIT \
-            {.detached_ = posix__false, .pid_ = 0 }
+            {.detached_ = NO, .pid_ = 0 }
 
 struct __posix__pthread_mutex {
     pthread_mutex_t handle_;

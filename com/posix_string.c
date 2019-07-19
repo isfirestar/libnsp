@@ -10,35 +10,6 @@
 #include <wchar.h>
 #endif
 
-char *posix__trim(char *src) {
-    char *p, *target;
-    int cb;
-
-    if (!src) {
-        return NULL;
-    }
-
-    cb = (int) strlen(src);
-    p = src;
-    target = src;
-
-    while ((*p == '\r' || *p == '\n' || *p == ' ') && (p < (src + cb))) {
-        p++;
-    }
-
-    if (target != p) {
-        posix__strncpy(target, cb, p, (cb - (uint32_t)(p - src)));
-    }
-
-    cb = (int) strlen(target);
-    p = &target[cb - 1];
-    while ((*p == '\r' || *p == '\n' || *p == ' ') && (p >= target)) p--;
-
-    *p = 0;
-
-    return target;
-}
-
 int posix__strisdigit(const char *str, int len) {
     int i;
     if (len <= 0 || !str) {
@@ -63,7 +34,6 @@ const char *posix__strerror() {
         posix__strcpy(errout, cchof(errout), "syscall fatal.");
     } else {
         posix__strcpy(errout, cchof(errout), errmsg);
-        posix__trim(errout);
     }
     return errout;
 #else
@@ -85,7 +55,6 @@ const char *posix__strerror2(char *estr) {
         posix__strcpy(estr, 128, "syscall fatal.");
     } else {
         posix__strcpy(estr, 128, errmsg);
-        posix__trim(estr);
     }
     return estr;
 #else
@@ -465,40 +434,58 @@ int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n) {
     return tolower(c1) - tolower(c2);
 }
 
-const char *posix__strtrim(const char *s) {
-    const char *p;
-    char *r;
+char *posix__strtrim(char *str)
+{
+    char *cursor;
+    int i;
 
-    if (!s) {
+    cursor = str;
+    if (!cursor) {
         return NULL;
     }
 
-    p = s;
-    while (*p) {
-        if (*p == 0x20) {
-            p++;
+    /* automatic removal of invisible characters at the beginning of a string */
+    while (*cursor && ( !isprint(*cursor) || (0x20 == *cursor) ) ) {
+        ++cursor;
+    }
+
+    if (0 == *cursor) {
+        return NULL;
+    }
+
+    for (i = strlen(cursor) - 1; i >= 0 ; i--) {
+        /* when an invisible character or space is found,
+            the following character of string is automatically ignored  */
+        if (!isprint(cursor[i]) || 0x20 == cursor[i]) {
+            cursor[i] = 0;
         } else {
             break;
         }
     }
 
-    r = (char *) &s[strlen(s) - 1];
-    while (r > p) {
-        if (*r == 0x20) {
-            *r = 0;
-            --r;
-        } else {
-            break;
-        }
-    }
-
-    return p;
+    return cursor
 }
 
-char *posix__strtrimcpy(char *target, uint32_t cch, const char *src) {
-    if (!target || !src) {
+char *posix__strtrimdup(const char *origin) {
+    char *dup, *trimmed;
+
+    if (!origin) {
         return NULL;
     }
 
-    return posix__strcpy(target, cch, posix__strtrim(src));
+    dup = strdup(origin);
+    if (!dup) {
+        return NULL;
+    }
+
+    trimmed = posix__strtrim(dup);
+    if (!trimmed) {
+        free(dup);
+        return NULL;
+    }
+
+    if (dup != trimmed) {
+        strcpy(dup, trimmed);
+    }
+    return dup;
 }

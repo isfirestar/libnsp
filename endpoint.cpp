@@ -13,11 +13,11 @@ namespace nsp {
 	namespace tcpip {
 
 		//////////////////////////////////////////////// IP check ////////////////////////////////////////////////
-		posix__boolean_t endpoint::is_effective_ipv4( const std::string &ipstr ) {
+		boolean_t endpoint::is_effective_ipv4( const std::string &ipstr ) {
 			static const std::string delim = ".";
 
 			if ( 0 == ipstr.length() ) {
-				return posix__false;
+				return NO;
 			}
 
 			std::string value[4];
@@ -27,7 +27,7 @@ namespace nsp {
 			// 切割IP串， 不满足刚好 -- 3个'.'4个节 -- 的串均为非法IPv4
 			while ( ( loc = ipstr.find_first_of( delim, offset ) ) != std::string::npos ) {
 				if ( i == 3 ) {
-					return posix__false;
+					return NO;
 				}
 
 				value[i] = ipstr.substr( offset, loc - offset );
@@ -37,45 +37,45 @@ namespace nsp {
 			if ( 3 == i ) {
 				value[3] = ipstr.substr( offset );
 			} else {
-				return posix__false;
+				return NO;
 			}
 
 			//对4个value进行判断
 			for ( int i = 0; i < 4; i++ ) {
 				//全数字校验
 				if ( !toolkit::is_digit_str( value[i] ) ) {
-					return posix__false;
+					return NO;
 				}
 
 				// 每个节的越界判断
 				char* endptr;
 				auto n_value = strtol( value[i].c_str(), &endptr, 10 );
 				if ( n_value > 255 ) {
-					return posix__false;
+					return NO;
 				}
 			}
-			return posix__true;
+			return YES;
 		}
 
-		posix__boolean_t endpoint::is_effective_port( const std::string &portstr, uint16_t &port ) {
+		boolean_t endpoint::is_effective_port( const std::string &portstr, uint16_t &port ) {
 			// 全数字校验
 			if ( !toolkit::is_digit_str( portstr ) ) {
-				return posix__false;
+				return NO;
 			}
 
 			// 如果不是指定端口为0(使用随机端口), 第0个字节必须是1-9, 不能是0
 			if ( 0x30 == portstr[0] && portstr.size() > 1 ) {
-				return posix__false;
+				return NO;
 			}
 
 			// 越界判断
 			char* endptr;
 			auto n_port = strtol( portstr.c_str(), &endptr, 10 );
 			if ( n_port >= MAXIMU_TCPIP_PORT_NUMBER ) {
-				return posix__false;
+				return NO;
 			}
 			port = ( uint16_t ) n_port;
-			return posix__true;
+			return YES;
 		}
 
 		int endpoint::parse_domain( const std::string &domain, std::string &ipv4 ) {

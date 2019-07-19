@@ -65,8 +65,8 @@ namespace nsp {
         public:
             static int parse_ep(const std::string & epstr, std::string &ipv4, port_t &port);
             static int parse_domain(const std::string &domain, std::string &ipv4);
-            static posix__boolean_t is_effective_ipv4(const std::string &ipstr);
-            static posix__boolean_t is_effective_port(const std::string &portstr, uint16_t &port);
+            static boolean_t is_effective_ipv4(const std::string &ipstr);
+            static boolean_t is_effective_port(const std::string &portstr, uint16_t &port);
         private:
             char ipstr_[MAXIMUM_IPV4_STRLEN];
             port_t port_;

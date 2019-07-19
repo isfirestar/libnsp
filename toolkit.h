@@ -48,7 +48,7 @@ namespace nsp {
         template<class T>
         T *posix_strtok(T *s, const T *, T **save);
 
-        posix__boolean_t is_digit_str(const std::string &str);
+        boolean_t is_digit_str(const std::string &str);
         uint32_t ipv4_touint(const char *ipv4str, int method);
         char *ipv4_tostring(uint32_t ipv4Integer, char * ipv4TextString, uint32_t lengthOfTextCch);
 
@@ -181,7 +181,7 @@ namespace nsp {
         int base64_encode(const char *input, int cb, std::string &output);
         int base64_encode(const std::string &input, std::string &output);
         int base64_decode(const std::string &input, std::string &output);
-		
+
 		// VFN1/VFN1a
 		template<class T>
 		T vfn1_hash(const unsigned char *hash, int length);

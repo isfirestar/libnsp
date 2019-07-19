@@ -700,9 +700,9 @@ int posix__file_flush(file_descriptor_t fd)
     return 0;
 }
 
-uint64_t posix__file_fgetsize(file_descriptor_t fd)
+int64_t posix__file_fgetsize(file_descriptor_t fd)
 {
-    uint64_t filesize = (uint64_t) (-1);
+    int64_t filesize = 1;
     LARGE_INTEGER size;
 
     if (INVALID_HANDLE_VALUE == fd) {
@@ -714,20 +714,24 @@ uint64_t posix__file_fgetsize(file_descriptor_t fd)
         filesize <<= 32;
         filesize |= size.LowPart;
     } else {
-        return (int)((int)GetLastError() * -1);
+        return posix__makeerror(GetLastError());
     }
     return filesize;
 }
 
-uint64_t posix__file_getsize(const char *path)
+int64_t posix__file_getsize(const char *path)
 {
     WIN32_FIND_DATAA wfd;
     HANDLE find;
-    uint64_t size;
+    int64_t size;
+
+    if (!path) {
+        return -EINVAL;
+    }
 
     find = FindFirstFileA(path, &wfd);
     if (INVALID_HANDLE_VALUE == find) {
-        return (uint64_t)INVALID_FILE_SIZE;
+        return (int64_t)INVALID_FILE_SIZE;
     }
 
 	size = wfd.nFileSizeHigh;
@@ -1575,9 +1579,9 @@ int posix__file_flush(file_descriptor_t fd)
     return 0;
 }
 
-uint64_t posix__file_fgetsize(file_descriptor_t fd)
+int64_t posix__file_fgetsize(file_descriptor_t fd)
 {
-    uint64_t filesize = (uint64_t) (-1);
+    int64_t filesize = -1;
     struct stat statbuf;
 
     if (fd < 0) {
@@ -1587,24 +1591,24 @@ uint64_t posix__file_fgetsize(file_descriptor_t fd)
     if (fstat(fd, &statbuf) < 0) {
         return posix__makeerror(errno);
     } else {
-        filesize = statbuf.st_size;
+        filesize = (int64_t)statbuf.st_size;
     }
     return filesize;
 }
 
-uint64_t posix__file_getsize(const char *path)
+int64_t posix__file_getsize(const char *path)
 {
-    uint64_t filesize = (uint64_t) (-1);
+    int64_t filesize = -1;
     struct stat statbuf;
 
     if (!path) {
-        return (uint64_t)(-EINVAL);
+        return -EINVAL;
     }
 
     if (stat(path, &statbuf) < 0) {
         return posix__makeerror(errno);
     } else {
-        filesize = statbuf.st_size;
+        filesize = (int64_t)statbuf.st_size;
     }
     return filesize;
 }

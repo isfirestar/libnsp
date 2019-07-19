@@ -61,15 +61,9 @@ __extern__
 int posix__strncasecmp(const char* s1, const char* s2, uint32_t n);
 __extern__
 int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n);
-
-/* 处理字符串 @s, 去除前后空格，返回处理后的字符串起始指针
- * 副作用:
- * 虽然 @s 保留了原始指针，但是字符串尾部的空格，会被无条件清除
- * 如果需要完整保留原始串，应该考虑使用 posix__strtrimcpy
-*/
 __extern__
-const char *posix__strtrim(const char *s); 
+char *posix__strtrim(char *str);
 __extern__
-char *posix__strtrimcpy(char *target, uint32_t cch, const char *src); /* trim处理字符串 @src 后存入拷贝 @target  */
+char *posix__strtrimdup(const char *origin); /* the caller is always responsible to free the return pointer when not NULL */
 
 #endif

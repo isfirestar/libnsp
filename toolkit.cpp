@@ -165,17 +165,17 @@ namespace nsp {
             return output;
         }
 
-        posix__boolean_t is_digit_str(const std::string &str) {
+        boolean_t is_digit_str(const std::string &str) {
             std::size_t len = str.length();
             if (0 == len) {
-                return posix__false;
+                return NO;
             }
             for (std::size_t i = 0; i < len; i++) {
                 if (!isdigit(str[i])) {
-                    return posix__false;
+                    return NO;
                 }
             }
-            return posix__true;
+            return YES;
         }
 
         uint32_t ipv4_touint(const char *ipv4str, int method) {
@@ -696,7 +696,7 @@ namespace nsp {
 
             try {
                 temp_output = new char[outcb];
-                retval = ::base64__encode(input, input_cb, temp_output, &outcb); 
+                retval = ::base64__encode(input, input_cb, temp_output, &outcb);
                 if ( retval >= 0 ) {
                     output.assign(temp_output, outcb);
                 }
@@ -735,7 +735,7 @@ namespace nsp {
             if (temp_output) {
                 delete[]temp_output;
             }
-            
+
             return retval;
         }
 
@@ -743,17 +743,17 @@ namespace nsp {
 		uint32_t vfn1_hash<uint32_t>(const unsigned char *hash, int length) {
 			return vfn1_h32(hash,length);
 		}
-		
+
 		template<>
 		uint64_t vfn1_hash<uint64_t>(const unsigned char *hash, int length) {
 			return vfn1_h64(hash,length);
 		}
-		
+
 		template<>
 		uint32_t vfn1a_hash<uint32_t>(const unsigned char *hash, int length) {
 			return vfn1a_h32(hash,length);
 		}
-		
+
 		template<>
 		uint64_t vfn1a_hash<uint64_t>(const unsigned char *hash, int length) {
 			return vfn1a_h64(hash,length);
