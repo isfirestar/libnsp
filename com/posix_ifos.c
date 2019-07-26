@@ -362,7 +362,7 @@ int posix__getpriority(int *priority)
 int posix__setpriority_below()
 {
 	if (!SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS)) {
-		return posix__makeerror(GetLastError()GetLastError());
+		return posix__makeerror(GetLastError());
 	}
 	return 0;
 }
