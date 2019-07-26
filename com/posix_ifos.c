@@ -136,70 +136,43 @@ int posix__mkdir(const char *const dir)
         return 0;
     }
 
-    return -1;
+    return posix__makeerror(GetLastError());
 }
 
 int posix__pmkdir(const char *const dir)
 {
-    struct list_head stack;
-    struct dir_stack_node *node; /* 不允许使用栈对象 */
-    struct dir_stack_node *pos;
-    char *p_next_dir_symb;
+    char *dup, *rchr;
     int retval;
 
-    if (!dir) {
-        return -1;
-    }
+    dup = strdup(dir);
 
-    if ( 0 == strlen(dir)) {
-        return -ENOENT;
-    }
+    retval = posix__mkdir(dup);
 
-    retval = 0;
-    INIT_LIST_HEAD(&stack);
-
-    node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
-    if (!node) {
-        return -ENOMEM;
-    }
-    posix__strcpy(node->dir, cchof(node->dir), dir);
-    list_add(&node->link, &stack);
-    while (!list_empty(&stack)) {
-        pos = list_first_entry(&stack, struct dir_stack_node, link);
-        if (posix__mkdir(pos->dir) >= 0) {
-            list_del(&pos->link);
-            free(pos);
-        } else {
-            /* 不是目录结构性错误, 一律认定为失败 */
-            if (ERROR_PATH_NOT_FOUND != GetLastError()) {
-                retval = -1;
-                break;
-            }
-            p_next_dir_symb = strrchr(pos->dir, POSIX__DIR_SYMBOL);
-            if (!p_next_dir_symb) {
-                retval = -1;
-                break;
-            }
-            *p_next_dir_symb = 0;
-            node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
-            if (!node) {
-                retval = -1;
-                break;
-            }
-            posix__strncpy(node->dir, (uint32_t) (cchof(node->dir)), dir, (uint32_t) (p_next_dir_symb - pos->dir));
-            list_add(&node->link, &stack);
+    do {
+        if (retval >= 0) {
+            break;
         }
-    }
 
-    /* 返回前， 必须保证所有的内存被清理
-            无论前置操作是否成功 */
-    while (!list_empty(&stack)) {
-        pos = list_first_entry(&stack, struct dir_stack_node, link);
-        if (posix__mkdir(pos->dir)) {
-            list_del(&pos->link);
-            free(pos);
+        if ((-1 * ERROR_ALREADY_EXISTS) != retval) {
+            break;
         }
-    }
+
+        rchr = strrchr(dup, '\\');
+        if (!rchr) {
+            retval = -1;
+            break;
+        }
+
+        *rchr = 0;
+        retval = posix__pmkdir(dup);
+        if (retval < 0 ) {
+            break;
+        }
+
+        retval = posix__mkdir(dir);
+    } while(0);
+
+    free(dup);
     return retval;
 }
 
@@ -389,7 +362,7 @@ int posix__getpriority(int *priority)
 int posix__setpriority_below()
 {
 	if (!SetPriorityClass(GetCurrentProcess(), IDLE_PRIORITY_CLASS)) {
-		return posix__makeerror(GetLastError());
+		return posix__makeerror(GetLastError()GetLastError());
 	}
 	return 0;
 }
@@ -955,67 +928,39 @@ int posix__mkdir(const char *const dir)
 
 int posix__pmkdir(const char *const dir)
 {
-    struct list_head stack;
-    struct dir_stack_node *node; /* 不允许使用栈对象 */
-    struct dir_stack_node *pos;
-    char *p_next_dir_symb;
+    char *dup, *rchr;
     int retval;
 
-    if (!dir) {
-        return -EINVAL;
-    }
+    dup = strdup(dir);
 
-    if ( 0 == strlen(dir)) {
-        return -ENOENT;
-    }
+    retval = posix__mkdir(dup);
 
-    retval = 0;
-    INIT_LIST_HEAD(&stack);
-
-    node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
-    if (!node) {
-        return -ENOMEM;
-    }
-
-    posix__strcpy(node->dir, cchof(node->dir), dir);
-    list_add(&node->link, &stack);
-    while (!list_empty(&stack)) {
-        pos = list_first_entry(&stack, struct dir_stack_node, link);
-        retval = posix__mkdir(pos->dir);
-        if ( retval >= 0) {
-            list_del(&pos->link);
-            free(pos);
-        } else {
-            /* 不是目录结构性错误, 一律认定为失败 */
-            if (-ENOENT != retval) {
-                break;
-            }
-            p_next_dir_symb = strrchr(pos->dir, POSIX__DIR_SYMBOL);
-            if (!p_next_dir_symb) {
-                retval = -ENOMEM;
-                break;
-            }
-            *p_next_dir_symb = 0;
-            node = (struct dir_stack_node *) malloc(sizeof ( struct dir_stack_node));
-            if (!node) {
-                retval = -ENOMEM;
-                break;
-            }
-            posix__strncpy(node->dir, (uint32_t) (cchof(node->dir)), dir, (uint32_t) (p_next_dir_symb - pos->dir));
-            list_add(&node->link, &stack);
+    do {
+        if (retval >= 0) {
+            break;
         }
-    }
 
-    /* 返回前， 必须保证所有的内存被清理
-            无论前置操作是否成功 */
-    while (!list_empty(&stack)) {
-        pos = list_first_entry(&stack, struct dir_stack_node, link);
-        if (posix__mkdir(pos->dir)) {
-            list_del(&pos->link);
-            free(pos);
+        if (-ENOENT != retval) {
+            break;
         }
-    }
-    return posix__makeerror(retval);
+
+        rchr = strrchr(dup, '/');
+        if (!rchr) {
+            retval = -1;
+            break;
+        }
+
+        *rchr = 0;
+        retval = posix__pmkdir(dup);
+        if (retval < 0 ) {
+            break;
+        }
+
+        retval = posix__mkdir(dir);
+    } while(0);
+
+    free(dup);
+    return retval;
 }
 
 int posix__rm(const char *const target)
