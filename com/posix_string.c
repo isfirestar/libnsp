@@ -463,7 +463,7 @@ char *posix__strtrim(char *str)
         }
     }
 
-    return cursor
+    return cursor;
 }
 
 char *posix__strtrimdup(const char *origin) {
