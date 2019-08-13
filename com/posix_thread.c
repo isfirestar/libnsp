@@ -366,17 +366,20 @@ int posix__pthread_detach(posix__pthread_t * tidp)
 int posix__pthread_join(posix__pthread_t *tidp, void **retval)
 {
     int fr;
+    pthread_t pid;
 
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
 
     if (YES == posix__pthread_joinable(tidp)) {
-        fr = pthread_join(tidp->pid_, retval);
+        pid = tidp->pid_;
+        tidp->pid_ = 0;
+        tidp->detached_ = YES;
+
+        fr = pthread_join(pid, retval);
         if (0 != fr) {
             return posix__makeerror(fr);
         }
 
-        tidp->pid_ = 0;
-        tidp->detached_ = YES;
         pthread_attr_destroy(&tidp->attr_);
     }
 
