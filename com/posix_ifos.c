@@ -153,9 +153,9 @@ int posix__pmkdir(const char *const dir)
             break;
         }
 
-        if ((-1 * ERROR_ALREADY_EXISTS) != retval) {
-            break;
-        }
+		if ((-1 * ERROR_PATH_NOT_FOUND) != retval) {
+			break;
+		}
 
         rchr = strrchr(dup, '\\');
         if (!rchr) {
