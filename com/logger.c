@@ -19,10 +19,10 @@
 #define  MAXIMUM_LOGFILE_LINE    (5000)
 
 /* maximum asynchronous cache */
-#define MAXIMUM_LOGSAVE_COUNT       (3000)
+#define MAXIMUM_LOGSAVE_COUNT       (500)
 
 /* maximum number of concurrent threads for log_safe */
-#define MAXIMUM_NUMBEROF_CONCURRENT_THREADS   (2000)
+#define MAXIMUM_NUMBEROF_CONCURRENT_THREADS   (400)
 
 static const char *LOG__LEVEL_TXT[] = {
     "info", "warning", "error", "fatal", "trace"

@@ -1567,7 +1567,7 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
     }
 
     newoff = lseek(fd, (__off_t) offset, SEEK_SET);
-    if (newoff != (__off_t)-1) {
+    if (newoff == (__off_t)-1) {
         return posix__makeerror(errno);
     }
 
