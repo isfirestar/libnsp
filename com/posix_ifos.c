@@ -144,7 +144,11 @@ int posix__pmkdir(const char *const dir)
     char *dup, *rchr;
     int retval;
 
-    dup = strdup(dir);
+#if _WIN32
+	dup = _strdup(dir);
+#else
+	dup = strdup(dir);
+#endif
 
     retval = posix__mkdir(dup);
 

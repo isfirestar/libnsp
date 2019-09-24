@@ -147,6 +147,7 @@ int posix__pthread_detach(posix__pthread_t * tidp) {
 
 int posix__pthread_join(posix__pthread_t *tidp, void **exitCode)
 {
+	DWORD LocalExitCode;
 	if (!tidp) {
 		return -EINVAL;
 	}
@@ -154,7 +155,8 @@ int posix__pthread_join(posix__pthread_t *tidp, void **exitCode)
     if (YES == posix__pthread_joinable(tidp)) {
         WaitForSingleObject(tidp->pid_, INFINITE);
 		if (exitCode) {
-			GetExitCodeThread(tidp->pid_, (LPDWORD)*exitCode);
+			GetExitCodeThread(tidp->pid_, (LPDWORD)&LocalExitCode);
+			*exitCode = (void *)LocalExitCode;
 		}
 		CloseHandle(tidp->pid_);
 		tidp->pid_ = INVALID_HANDLE_VALUE;

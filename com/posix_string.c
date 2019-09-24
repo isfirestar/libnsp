@@ -473,7 +473,11 @@ char *posix__strtrimdup(const char *origin) {
         return NULL;
     }
 
+#if _WIN32
+	dup = _strdup(origin);
+#else
     dup = strdup(origin);
+#endif
     if (!dup) {
         return NULL;
     }
