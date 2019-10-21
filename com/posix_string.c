@@ -437,7 +437,7 @@ int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n) {
 char *posix__strtrim(char *str)
 {
     char *cursor;
-    int i;
+    size_t i;
 
     cursor = str;
     if (!cursor) {
