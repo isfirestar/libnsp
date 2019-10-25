@@ -43,8 +43,8 @@ interface_format(int) udp_init();
 interface_format(void) udp_uninit();
 
 /* NOTE: New applications should NOT set the @flag when calling @udp_create  (available since version 9.8.1),
- *			every udp link can change the attributes(flag) any time when calling interface @nis_cntl with @NI_SETATTR,
- *			more useful is that broadcast attributes can now be cancelled.
+ *			every udp link can change the attributes(flag) any time by interface @nis_cntl call with parameter @NI_SETATTR,
+ *			more useful: that broadcast attributes can now be cancelled.
  */
 interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* ipstr, uint16_t port, int flag);
 interface_format(void) udp_destroy(HUDPLINK link);
@@ -113,17 +113,16 @@ interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
  *	NI_SETATTR(int)
  *		set the attributes of specify object, return the operation result
  *	NI_GETATTR(void)
- *		get the attributes of speicfy object, return the object attributes in current on successful, otherwise, -1 willbe return
- *	NI_SETCTX(void *)
+ *		get the attributes of speicfy object, return the object attributes in current on successful, otherwise, -1 will be return
+ *	NI_SETCTX(const void *)
  *		set the user define context pointer and binding with target object
  *		NOTE: 	that @NI_SETCTX with @nis_cntl call failure during neither EVT_PRE_CLOSE nor EVT_CLOSED
  *	NI_GETCTX(void **)
  *		get the user define context pointer which is binding with target object
- *		NOTE: 	that @NI_GETCTX with @nis_cntl call failure during neither EVT_PRE_CLOSE nor EVT_CLOSED,
- *				calling thread should use PreClose::Context to use or save or free the context pointer when event EVT_PRE_CLOSE arrived,
- *					and EVT_PRE_CLOSE is the last chance to safely handle user context pointers
- *				in EVT_CLOSED, PreClose::Context it's SURE be NULL.
- *	NI_SETTST(tst_t *)
+ *		NOTE: 	that @NI_GETCTX with @nis_cntl call always failure on EVT_CLOSED,in this procedure, PreClose::Context it's SURE be NULL.
+ *				calling thread should use or save or free the context pointer through PreClose::Context in event handler EVT_PRE_CLOSE,
+ *					and EVT_PRE_CLOSE is the last chance to safely visit user context pointer
+ *	NI_SETTST(const tst_t *)
  *		set the tcp stream template of specify object
  *	NI_GETTST(tst_t *)
  *		get the tcp stream template of specify object current set

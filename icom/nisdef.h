@@ -14,6 +14,8 @@
 
 /* bytes size of network protocol layer */
 #define MTU       			               (1500)
+
+/* common application layer protocol size(include IP layer) */
 #define UDP_PROTOCOL_LAYER_SIZE             (28)
 #define TCP_PROTOCOL_LAYER_SIZE             (40)
 
@@ -34,12 +36,6 @@ typedef HLNK HARPLINK;
 #else
 #define STD_CALL
 #endif
-#endif
-
-#if defined __cplusplus
-typedef bool nis_boolean_t;
-#else
-typedef int nis_boolean_t;
 #endif
 
 /* macro of export format */
@@ -65,10 +61,12 @@ typedef int nis_boolean_t;
 #define LINK_ADDR_LOCAL   (1)   /* get local using endpoint pair */
 #define LINK_ADDR_REMOTE  (2)   /* get remote using endpoint pair */
 
-/* optional  attributes of tcp link */
+/* optional  attributes of TCP link */
 #define LINKATTR_TCP_FULLY_RECEIVE                      (1) /* receive fully packet include low-level head */
 #define LINKATTR_TCP_NO_BUILD                           (2) /* not use @tst::builder when calling @tcp_write */
 #define LINKATTR_TCP_UPDATE_ACCEPT_CONTEXT              (4) /* copy tst and attr to accepted link when syn */
+
+/* optional  attributes of UDP link */
 #define LINKATTR_UDP_BAORDCAST                          (1)
 #define LINKATTR_UDP_MULTICAST                          (2)
 
@@ -79,7 +77,7 @@ typedef int nis_boolean_t;
 #define NI_GETCTX       (4)
 #define NI_SETTST       (5)
 #define NI_GETTST       (6)
-#define NI_DUPCTX       (7)
+#define NI_DUPCTX       (7)	/* not used */
 
 /* the dotted decimal notation for IPv4 or IPv6 */
 struct nis_inet_addr {
@@ -149,19 +147,19 @@ typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *orig
 
 struct nis_tcp_data {
     union {
-        /* only used in case of EVT_RECEIVEDATA, @Packet.Size of bytes of data storage in @Packet.Data has been received from kernel,  */
+        /* only used in case of EVT_RECEIVEDATA, @Size of bytes of data storage in @Data has been received from kernel,  */
         struct {
             const unsigned char *Data;
             int Size;
         } Packet;
 
         /* only used in case of EVT_TCP_ACCEPTED,
-            @Accept.AcceptLink specify the remote link which accepted by listener @nis_event.Ln.Tcp.Link */
+            @AcceptLink specify the remote link which accepted by listener @nis_event.Ln.Tcp.Link */
         struct {
             HTCPLINK AcceptLink;
         } Accept;
 
-        /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
+        /* only used in case of EVT_PRE_CLOSE, @Context pointer to user defined context of each link object */
         struct {
             void *Context;
         } PreClose;
@@ -180,7 +178,7 @@ typedef struct nis_tcp_data tcp_data_t;
 
 struct nis_udp_data {
     union {
-        /* only used in case of EVT_RECEIVEDATA, @Packet.Size of bytes of data storage in @Packet.Data has been received from kernel,
+        /* only used in case of EVT_RECEIVEDATA, @Size of bytes of data storage in @Data has been received from kernel,
             the sender endpoint is @RemoteAddress:@RemotePort */
         struct {
             const unsigned char *Data;
@@ -189,7 +187,7 @@ struct nis_udp_data {
             unsigned short RemotePort;
         } Packet;
 
-        /* only used in case of EVT_PRE_CLOSE, @PreClose.Context  pointer to user defined context of each link object */
+        /* only used in case of EVT_PRE_CLOSE, @Context  pointer to user defined context of each link object */
         struct {
             void *Context;
         } PreClose;
@@ -242,7 +240,7 @@ struct __packet_grp {
 } __POSIX_TYPE_ALIGNED__;
 typedef struct __packet_grp packet_grp_t;
 
-/* 支持库版本协议	*/
+/* the local version of nshost shared library */
 struct __swnet_version {
     short major_;
     short minor_;

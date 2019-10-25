@@ -406,3 +406,25 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     posix__pthread_mutex_unlock(&__log_async.lock_);
     posix__sig_waitable_handle(&__log_async.alert_);
 }
+
+void log__flush()
+{
+    log__async_node_t *node;
+
+    do {
+        node = NULL;
+
+        posix__pthread_mutex_lock(&__log_async.lock_);
+        if (!list_empty(&__log_async.items_)) {
+            posix__atomic_dec(&__log_async.pendding_);
+            node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
+            assert(node);
+            list_del_init(&node->link_);
+        }
+        posix__pthread_mutex_unlock(&__log_async.lock_);
+
+        if (node) {
+            log__printf(node->module_, node->level_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
+        }
+    } while (node);
+}
