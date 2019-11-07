@@ -12,7 +12,7 @@
 #include "object.h"
 #include "clist.h"
 
-#define OBJ_HASHTABLE_SIZE   (399)
+#define OBJ_HASHTABLE_SIZE   (397)  /* use a prime number as the hash key */
 
 #define OBJSTAT_NORMAL    (0)
 #define OBJSTAT_CLOSEWAIT   (1)
@@ -90,8 +90,8 @@ static struct _object_manager g_objmgr = {
 };
 #endif
 
-static 
-struct list_head *__hld2root(objhld_t hld) 
+static
+struct list_head *__hld2root(objhld_t hld)
 {
     struct list_head *root;
     objhld_t idx;
@@ -114,8 +114,8 @@ struct list_head *__hld2root(objhld_t hld)
     return root;
 }
 
-static 
-objhld_t __objtabinst(object_t *obj) 
+static
+objhld_t __objtabinst(object_t *obj)
 {
     objhld_t hld;
     struct list_head *root;
@@ -150,7 +150,7 @@ objhld_t __objtabinst(object_t *obj)
     return obj->hld_;
 }
 
-static 
+static
 int __objtabrmve(objhld_t hld, object_t **removed)
 {
 	object_t *target, *cursor;
@@ -183,8 +183,8 @@ int __objtabrmve(objhld_t hld, object_t **removed)
     return ((NULL == target) ? (-1) : (0));
 }
 
-static 
-object_t *__objtabsrch(const objhld_t hld) 
+static
+object_t *__objtabsrch(const objhld_t hld)
 {
     object_t *target, *cursor;
     struct list_head *root, *pos, *n;
@@ -210,8 +210,8 @@ object_t *__objtabsrch(const objhld_t hld)
     return target;
 }
 
-static 
-void __objtagfree(object_t *target) 
+static
+void __objtagfree(object_t *target)
 {
     /* release the object context and free target memory when object removed from table
         call the unload routine if not null */
@@ -223,7 +223,7 @@ void __objtagfree(object_t *target)
     }
 }
 
-void objinit() 
+void objinit()
 {
     static long inited = 0;
     if ( 1 == INCREASEMENT(&inited)) {
@@ -233,12 +233,12 @@ void objinit()
     }
 }
 
-void objuninit() 
+void objuninit()
 {
     mutex_uninit(&g_objmgr.object_locker_);
 }
 
-objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx) 
+objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx)
 {
     object_t *obj;
 
@@ -280,12 +280,12 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     return obj->hld_;
 }
 
-objhld_t objallo2(int user_size) 
+objhld_t objallo2(int user_size)
 {
     return objallo(user_size, NULL, NULL, NULL, 0);
 }
 
-void *objrefr(objhld_t hld) 
+void *objrefr(objhld_t hld)
 {
     object_t *obj;
     unsigned char *user_data;
@@ -307,7 +307,7 @@ void *objrefr(objhld_t hld)
     return (void *)user_data;
 }
 
-void *objreff(objhld_t hld) 
+void *objreff(objhld_t hld)
 {
     object_t *obj;
     unsigned char *user_data;
@@ -333,7 +333,7 @@ void *objreff(objhld_t hld)
     return (void *)user_data;
 }
 
-void objdefr(objhld_t hld) 
+void objdefr(objhld_t hld)
 {
     object_t *obj, *removed;
 
@@ -364,10 +364,10 @@ void objdefr(objhld_t hld)
     }
 }
 
-void objclos(objhld_t hld) 
+void objclos(objhld_t hld)
 {
     object_t *removed, *obj;
-	
+
 	removed = NULL;
 
     LOCK(&g_objmgr.object_locker_);
@@ -394,7 +394,7 @@ void objregs()
 	int i;
 	struct list_head *root, *pos, *n;
 	object_t *cursor;
-	
+
 	LOCK(&g_objmgr.object_locker_);
 	for (i = 0; i < OBJ_HASHTABLE_SIZE; i++) {
 		root = &g_objmgr.object_table_[i];
