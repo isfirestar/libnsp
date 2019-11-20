@@ -350,8 +350,8 @@ int posix__delay_execution( uint64_t us )
     int fdset;
     struct timeval tv;
 
-    tv.tv_sec = 0;
-    tv.tv_usec = us;
+    tv.tv_sec = us / 1000000;
+    tv.tv_usec = us % 1000000;
 
     fdset = select(0, NULL, NULL, NULL, &tv);
     if (fdset < 0) {
