@@ -224,22 +224,14 @@ namespace nsp {
         template<>
         std::string to_string(const uint64_t d) {
             char tmp[64];
-#if _WIN32
-            ::posix__sprintf(tmp, cchof(tmp), "%I64u", d);
-#else
-            ::posix__sprintf(tmp, cchof(tmp), "%llu", d);
-#endif
+            ::posix__sprintf(tmp, cchof(tmp), UINT64_STRFMT, d);
             return std::string().assign(tmp);
         }
 
         template<>
         std::string to_string(const int64_t d) {
             char tmp[64];
-#if _WIN32
-            ::posix__sprintf(tmp, cchof(tmp), "%I64d", d);
-#else
-            ::posix__sprintf(tmp, cchof(tmp), "%lld", d);
-#endif
+            ::posix__sprintf(tmp, cchof(tmp), INT64_STRFMT, d);
             return std::string().assign(tmp);
         }
 

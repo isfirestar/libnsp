@@ -54,19 +54,27 @@
 #define __POSIX_EFFICIENT_ALIGNED_PTR_NR__(ptr) do { if (!__POSIX_EFFICIENT_ALIGNED_PTR__(ptr)) return; } while (0)
 
 #if !defined UINT64_STRFMT
-#if _WIN32
-#define UINT64_STRFMT "%I64u"
-#else
-#define UINT64_STRFMT "%llu"
-#endif
+    #if _WIN32
+        #define UINT64_STRFMT "%I64u"
+    #else
+        #if __WORDSIZE == 64
+            #define UINT64_STRFMT "%lu"
+        #else
+            #define UINT64_STRFMT "%llu"
+        #endif
+    #endif
 #endif
 
 #if !defined INT64_STRFMT
-#if _WIN32
-#define INT64_STRFMT "%I64d"
-#else
-#define INT64_STRFMT "%lld"
-#endif
+    #if _WIN32
+        #define INT64_STRFMT "%I64d"
+    #else
+        #if __WORDSIZE == 64
+            #define INT64_STRFMT "%ld"
+        #else
+            #define INT64_STRFMT "%lld"
+        #endif
+    #endif
 #endif
 
 #if !defined POSIX__EOL

@@ -76,20 +76,12 @@ namespace nsp {
             }
 
             loex &loex::operator<<(int64_t n) {
-#if _WIN32
-                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%I64d", n);
-#else
-                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%lld", n);
-#endif
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), INT64_STRFMT, n);
                 return *this;
             }
 
             loex &loex::operator<<(uint64_t n) {
-#if _WIN32
-                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%I64u", n);
-#else
-                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%llu", n);
-#endif
+                ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), UINT64_STRFMT, n);
                 return *this;
             }
 
