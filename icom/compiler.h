@@ -11,39 +11,39 @@
 #include <assert.h>
 
 #if !defined STDCALL
-#if _WIN32
-#define STDCALL __stdcall
-#else
-#define STDCALL
-#endif
+    #if _WIN32
+        #define STDCALL __stdcall
+    #else
+        #define STDCALL
+    #endif
 #endif
 
 #if !defined __extern__
-#if defined __cplusplus
-#define __extern__  extern "C"
-#else
-#define __extern__  extern
-#endif /*__cplusplus */
+    #if defined __cplusplus
+        #define __extern__  extern "C"
+    #else
+        #define __extern__  extern
+    #endif /*__cplusplus */
 #endif
 
 #if !defined __ALIGNED_SIZE__
-#define __ALIGNED_SIZE__        4/*(sizeof(void *))*/
+    #define __ALIGNED_SIZE__        4/*(sizeof(void *))*/
 #endif /* !__ALIGNED_SIZE__ */
 
 #if !_WIN32
-#if !defined __POSIX_TYPE_ALIGNED__
-#define __POSIX_TYPE_ALIGNED__ /*__attribute__((aligned(__ALIGNED_SIZE__))) */
-#endif
+    #if !defined __POSIX_TYPE_ALIGNED__
+        #define __POSIX_TYPE_ALIGNED__ /*__attribute__((aligned(__ALIGNED_SIZE__))) */
+    #endif
 #else
-#define __POSIX_TYPE_ALIGNED__
+    #define __POSIX_TYPE_ALIGNED__
 #endif
 
 #if !defined __POSIX_POINTER_ALIGNED__
-#define __POSIX_POINTER_ALIGNED__(ptr)   ((0 == ((long)ptr) % __ALIGNED_SIZE__))
+    #define __POSIX_POINTER_ALIGNED__(ptr)   ((0 == ((long)ptr) % __ALIGNED_SIZE__))
 #endif /* !__POSIX_POINTER_ALIGNED__ */
 
 #if !defined __POSIX_EFFICIENT_ALIGNED_PTR__
-#define __POSIX_EFFICIENT_ALIGNED_PTR__(ptr)    ((NULL != ptr) && __POSIX_POINTER_ALIGNED__(ptr))
+    #define __POSIX_EFFICIENT_ALIGNED_PTR__(ptr)    ((NULL != ptr) && __POSIX_POINTER_ALIGNED__(ptr))
 #endif /* !__POSIX_EFFICIENT_ALIGNED_PTR__ */
 
 #define __POSIX_EFFICIENT_PTR__(ptr) ((NULL != ptr))
@@ -78,169 +78,169 @@
 #endif
 
 #if !defined POSIX__EOL
-#if _WIN32
-#define POSIX__EOL              "\r\n"
-#define POSIX__DIR_SYMBOL       '\\'
-#define POSIX__DIR_SYMBOL_STR   "\\"
-#else
-#define POSIX__EOL              "\n"
-#define POSIX__DIR_SYMBOL       '/'
-#define POSIX__DIR_SYMBOL_STR   "/"
-#endif
+    #if _WIN32
+        #define POSIX__EOL              "\r\n"
+        #define POSIX__DIR_SYMBOL       '\\'
+        #define POSIX__DIR_SYMBOL_STR   "\\"
+    #else
+        #define POSIX__EOL              "\n"
+        #define POSIX__DIR_SYMBOL       '/'
+        #define POSIX__DIR_SYMBOL_STR   "/"
+    #endif
 #endif
 
 typedef int boolean_t;
 #if !defined __true__
-#define __true__ (1)
-#define YES     ((boolean_t)__true__)
+    #define __true__ (1)
+    #define YES     ((boolean_t)__true__)
 #endif
 #if !defined __false__
-#define __false__ (0)
-#define NO    ((boolean_t)__false__)
+    #define __false__ (0)
+    #define NO    ((boolean_t)__false__)
 #endif
 
 #if !defined INET_ADDRSTRLEN
-#define INET_ADDRSTRLEN 16
+    #define INET_ADDRSTRLEN 16
 #endif
 
 #if !defined INET6_ADDRSTRLEN
-#define INET6_ADDRSTRLEN 46
+    #define INET6_ADDRSTRLEN 46
 #endif
 
 #if !_WIN32
-#if defined __USE_MISC
-#if !__USE_MISC
-#undef __USE_MISC
-#define __USE_MISC 1 /* syscall nice in <unistd.h> */
-#endif /* !__USE_MISC */
-#else
-#define __USE_MISC 1
-#endif /* defined __USE_MISC */
+    #if defined __USE_MISC
+        #if !__USE_MISC
+            #undef __USE_MISC
+            #define __USE_MISC 1 /* syscall nice in <unistd.h> */
+        #endif /* !__USE_MISC */
+    #else
+        #define __USE_MISC 1
+    #endif /* defined __USE_MISC */
 #endif /* !_WIN32 */
 
 #if _WIN32
-#if !defined NT_SUCCESS
-#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
-#endif
+    #if !defined NT_SUCCESS
+        #define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
+    #endif
 #endif /* _WIN32 */
 
 #if !defined __always_inline
-#if _WIN32
-#define __always_inline __forceinline
-#else
-#define __always_inline inline
-#endif
+    #if _WIN32
+        #define __always_inline __forceinline
+    #else
+        #define __always_inline inline
+    #endif
 #endif
 
 #if defined __static_inline_function
-#undef __static_inline_function
+    #undef __static_inline_function
 #endif
 
 #if _WIN32
-#define __static_inline_function(type) __always_inline static type
+    #define __static_inline_function(type) __always_inline static type
 #else
-#define __static_inline_function(type) static __always_inline type
+    #define __static_inline_function(type) static __always_inline type
 #endif
 
 #if !defined NULL
-#define NULL ((void *)0)
+    #define NULL ((void *)0)
 #endif
 
 #if !defined MAXPATH
-#define MAXPATH (260)
+    #define MAXPATH (260)
 #endif
 
 #ifndef __cplusplus
-#if !defined max
-#define max(a,b)    (((a) > (b)) ? (a) : (b))
-#endif
-#if !defined min
-#define min(a,b)    (((a) < (b)) ? (a) : (b))
-#endif
+    #if !defined max
+        #define max(a,b)    (((a) > (b)) ? (a) : (b))
+    #endif
+    #if !defined min
+        #define min(a,b)    (((a) < (b)) ? (a) : (b))
+    #endif
 #endif
 
 /* 判断 @x 是否为 2 的正整次幂 */
 #if !defined is_powerof_2
-#define is_powerof_2(x) ((x) != 0 && (((x) & ((x) - 1)) == 0))
+    #define is_powerof_2(x) ((x) != 0 && (((x) & ((x) - 1)) == 0))
 #endif
 
 /* 浮点为0的对比目标 */
 #if !defined EPSINON
-#define EPSINON  0.000001
+    #define EPSINON  0.000001
 #endif
 
 /* 判断浮点数 @x 是否为 0 */
 #if !defined is_float_zero
-#define is_float_zero(x) (((x) < EPSINON) && ((x) > -EPSINON))
+    #define is_float_zero(x) (((x) < EPSINON) && ((x) > -EPSINON))
 #endif
 
 /* 判断浮点数 @n @m 是否相等 */
 #if !defined is_float_equal
-#define is_float_equal(n, m) ((fabs((n)-(m))) <= EPSINON )
+    #define is_float_equal(n, m) ((fabs((n)-(m))) <= EPSINON )
 #endif
 
 #if !defined containing_record
-#define containing_record(__address, __type, __field) ((__type *)( (char *)(__address) -  (char *)(&((__type *)0)->__field)))
+    #define containing_record(__address, __type, __field) ((__type *)( (char *)(__address) -  (char *)(&((__type *)0)->__field)))
 #endif
 
 #if !defined cchof
-#define cchof(__array)   (int)(sizeof(__array) / sizeof(__array[0]))
+    #define cchof(__array)   (int)(sizeof(__array) / sizeof(__array[0]))
 #endif
 
 #if !defined offsetof
-#define offsetof(__type, __field)      (( unsigned long )(&((__type*)0)->__field))
+    #define offsetof(__type, __field)      (( unsigned long )(&((__type*)0)->__field))
 #endif
 
 #if !defined msizeof
-#define msizeof(__type, __field)      (sizeof(((__type*)0)->__field))
+    #define msizeof(__type, __field)      (sizeof(((__type*)0)->__field))
 #endif
 
 #if !defined container_of
-#define container_of(__address, __type, __field) containing_record(__address, __type, __field)
+    #define container_of(__address, __type, __field) containing_record(__address, __type, __field)
 #endif
 
 #if _WIN32
 
 #if !defined smp_mb
-#define smp_mb() do {__asm { mfence } } while( 0 )
+    #define smp_mb() do {__asm { mfence } } while( 0 )
 #endif
 
 #if !defined smp_rmb
-#define smp_rmb() do {__asm { lfence } } while( 0 )
+    #define smp_rmb() do {__asm { lfence } } while( 0 )
 #endif
 
 #if !defined smp_wmb
-#define smp_wmb() do {__asm { sfence } } while( 0 )
+    #define smp_wmb() do {__asm { sfence } } while( 0 )
 #endif
 
 #else /* _GNU_ */
 
 #if !defined smp_mb
-#define smp_mb() /* asm volatile("mfence" ::: "memory") */
+    #define smp_mb() /* asm volatile("mfence" ::: "memory") */
 #endif
 
 #if !defined smp_rmb
-#define smp_rmb() /* asm volatile("lfence" ::: "memory") */
+    #define smp_rmb() /* asm volatile("lfence" ::: "memory") */
 #endif
 
 #if !defined smp_wmb
-#define smp_wmb() /* asm volatile("sfence" ::: "memory")  */
+    #define smp_wmb() /* asm volatile("sfence" ::: "memory")  */
 #endif
 
 #endif /* !_WIN32 */
 
 /* Optimization barrier */
 #ifndef barrier
-#define barrier() __memory_barrier()
+    #define barrier() __memory_barrier()
 #endif
 
 #ifndef barrier_data
-#define barrier_data(ptr) barrier()
+    #define barrier_data(ptr) barrier()
 #endif
 
 /* Unreachable code */
 #ifndef unreachable
-#define unreachable() do { } while (1)
+    #define unreachable() do { } while (1)
 #endif
 
 /**
@@ -335,42 +335,42 @@ __static_inline_function(void) __write_once_size(volatile void *p, void *res, in
 }
 
 #if !defined write_once
-#if _WIN32
-#define write_once(xtype, x, val) \
-        { union { xtype __val; char __c[1]; } __u = { .__val = (val) }; __write_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
-#else
-#define write_once(xtype, x, val) \
-        { union { xtype __val; char __c[1]; } __u = { .__val = (val) }; __write_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
-/*({ union { typeof(x) __val; char __c[1]; } __u = { .__val = (val) }; __write_once_size(&(x), __u.__c, sizeof(x)); __u.__val; })*/
-#endif
+    #if _WIN32
+        #define write_once(xtype, x, val) \
+                { union { xtype __val; char __c[1]; } __u = { .__val = (val) }; __write_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
+    #else
+        #define write_once(xtype, x, val) \
+                { union { xtype __val; char __c[1]; } __u = { .__val = (val) }; __write_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
+        /*({ union { typeof(x) __val; char __c[1]; } __u = { .__val = (val) }; __write_once_size(&(x), __u.__c, sizeof(x)); __u.__val; })*/
+    #endif
 #endif
 
 #if !defined read_once
-#if _WIN32
-#define read_once(xtype, x) \
-        { union { xtype __val; char __c[1]; } __u; __read_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
-#else
-#define read_once(xtype, x) \
-        { union { xtype __val; char __c[1]; } __u; __read_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
-/* ({ union { typeof(x) __val; char __c[1]; } __u; __read_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }) */
-#endif
+    #if _WIN32
+        #define read_once(xtype, x) \
+                { union { xtype __val; char __c[1]; } __u; __read_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
+    #else
+        #define read_once(xtype, x) \
+                { union { xtype __val; char __c[1]; } __u; __read_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }
+        /* ({ union { typeof(x) __val; char __c[1]; } __u; __read_once_size(&(x), __u.__c, sizeof(x)); __u.__val; }) */
+    #endif
 #endif
 
 #if !defined access_once
-#if _WIN32
-#define access_once(__type, __x) (*(volatile __type *)&(x))
-#else
-#define access_once(__type, __x) (*(volatile typeof(x) *)&(x))
-#endif
+    #if _WIN32
+        #define access_once(__type, __x) (*(volatile __type *)&(x))
+    #else
+        #define access_once(__type, __x) (*(volatile typeof(x) *)&(x))
+    #endif
 #endif
 
 #if defined BITS_P_BYTE
-#undef BITS_P_BYTE
+    #undef BITS_P_BYTE
 #endif
 #define BITS_P_BYTE     (8)
 
 #if defined PI
-#undef PI
+    #undef PI
 #endif
 #define PI ((double)3.14159265359)
 
@@ -380,11 +380,11 @@ enum byte_order_t {
 };
 
 #if !defined PAGE_SIZE
-#define PAGE_SIZE (4096)
+    #define PAGE_SIZE (4096)
 #endif
 
 #if !defined BYTES_PER_SECTOR
-#define BYTES_PER_SECTOR		(512)
+    #define BYTES_PER_SECTOR		(512)
 #endif
 
 #define posix__makeerror(e)   (((int)(e)) <= 0 ? (e) : (int)(~((int)(e)) + 1))
