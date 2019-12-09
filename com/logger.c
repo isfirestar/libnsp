@@ -302,7 +302,7 @@ static int __log__init()
     posix__atomic_initial_declare_variable(__inited__);
 
     if (posix__atomic_initial_try(&__inited__)) {
-       /* initial global context */
+        /* initial global context */
         posix__pthread_mutex_init(&__log_file_lock);
 
         /* allocate the async node pool */
