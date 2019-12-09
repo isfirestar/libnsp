@@ -324,7 +324,9 @@ wchar_t *posix__wcsrev(wchar_t *src) {
 }
 
 int posix__vsnprintf(char *const target, uint32_t cch, const char *format, va_list ap) {
-    if (!target || !format) return -1;
+	if (!target || !format) {
+		return -1;
+	}
 #if _WIN32
     return vsnprintf_s(target, cch, _TRUNCATE, format, ap);
 #else
@@ -341,7 +343,9 @@ int posix__vsnwprintf(wchar_t * const target, uint32_t cch, const wchar_t *forma
 }
 
 int posix__vsprintf(char *const target, uint32_t cch, const char *format, va_list ap) {
-    if (!target) return -1;
+	if (!target) {
+		return -1;
+	}
 #if _WIN32
     return vsprintf_s(target, cch, format, ap);
 #else
@@ -359,7 +363,9 @@ int posix__vswprintf(wchar_t * const target, uint32_t cch, const wchar_t *format
 
 int posix__sprintf(char *const target, uint32_t cch, const char *fmt, ...) {
     va_list ap;
-    if (!target || !fmt) return -1;
+	if (!target || !fmt) {
+		return -1;
+	}
     va_start(ap, fmt);
     int retval = posix__vsprintf(target, cch, fmt, ap);
     va_end(ap);
