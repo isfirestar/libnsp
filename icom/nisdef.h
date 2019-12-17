@@ -137,29 +137,36 @@ struct __tcp_stream_template {
 
 typedef struct __tcp_stream_template tst_t;
 
-/*  @nis_serializer_t target object use for @tcp_write or @udp_write procedure
- *  when parameter @origin of these write function is a pointer to a C style strcuture object without 1 byte aligned,
- *  or, @origin it's a pointer to a simple C++ object.
- *  the @serializer parameter should specify a method how to serialization @origin into byte-string @packet
+/*  @nis_serializer_t target object use for @tcp_write or @udp_write procedure call,
+ *  when:
+ *  @origin is a pointer to a C-style strcuture object without 1 byte aligned,
+ *  or,
+ *  @origin is a pointer to a simple C++ object.
+ *
+ *  the @serializer parameter should specify a method how to serialize @origin into byte-stream @packet,
  *  @packet will be the data buffer that is actually delivered to the kernel after @serializer call.
+ *
+ *  when @origin pointer to a standard C byte-stream, @serializer is ignore and can be set to null
  */
 typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *origin, int cb);
 
 struct nis_tcp_data {
     union {
-        /* only used in case of EVT_RECEIVEDATA, @Size of bytes of data storage in @Data has been received from kernel,  */
+        /* only used in case of EVT_RECEIVEDATA,
+            @Size of bytes of data storage in @Data has been received from kernel,  */
         struct {
             const unsigned char *Data;
             int Size;
         } Packet;
 
         /* only used in case of EVT_TCP_ACCEPTED,
-            @AcceptLink specify the remote link which accepted by listener @nis_event.Ln.Tcp.Link */
+            @AcceptLink is the remote link which accepted by listener @nis_event.Ln.Tcp.Link */
         struct {
             HTCPLINK AcceptLink;
         } Accept;
 
-        /* only used in case of EVT_PRE_CLOSE, @Context pointer to user defined context of each link object */
+        /* only used in case of EVT_PRE_CLOSE,
+            @Context pointer to user define context of each link object */
         struct {
             void *Context;
         } PreClose;
@@ -178,7 +185,8 @@ typedef struct nis_tcp_data tcp_data_t;
 
 struct nis_udp_data {
     union {
-        /* only used in case of EVT_RECEIVEDATA, @Size of bytes of data storage in @Data has been received from kernel,
+        /* only used in case of EVT_RECEIVEDATA,
+            @Size of bytes of data storage in @Data has been received from kernel,
             the sender endpoint is @RemoteAddress:@RemotePort */
         struct {
             const unsigned char *Data;
@@ -187,7 +195,8 @@ struct nis_udp_data {
             unsigned short RemotePort;
         } Packet;
 
-        /* only used in case of EVT_PRE_CLOSE, @Context  pointer to user defined context of each link object */
+        /* only used in case of EVT_PRE_CLOSE,
+            @Context  pointer to user defined context of each link object */
         struct {
             void *Context;
         } PreClose;
