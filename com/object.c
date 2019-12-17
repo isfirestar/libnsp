@@ -11,6 +11,7 @@
 
 #include "object.h"
 #include "clist.h"
+#include "avltree.h"
 
 #define OBJ_HASHTABLE_SIZE   (397)  /* use a prime number as the hash key */
 
@@ -65,35 +66,55 @@ static void mutex_uninit(MUTEX_T *mutex) {
 #endif
 
 typedef struct _object_t {
+    struct avltree_node_t hash_clash_;
     objhld_t hld_;
     int stat_;
     int refcnt_;
     int objsizecb_;
     int user_size_;
-    struct list_head hash_clash_;
     objinitfn_t initializer_;
     objuninitfn_t unloader_;
     unsigned char user_data_[0];
 } object_t;
 
 struct _object_manager {
-    struct list_head object_table_[OBJ_HASHTABLE_SIZE];
+    struct avltree_node_t *object_table_[OBJ_HASHTABLE_SIZE];
     objhld_t automatic_id_;
     MUTEX_T object_locker_;
 };
+
+static int avl_compare_routine(const void *left, const void *right)
+{
+    const object_t *lobj, *robj;
+
+    assert(left && right);
+
+    lobj = (const object_t *)left;
+    robj = (const object_t *)right;
+
+    if (lobj->hld_ > robj->hld_) {
+        return 1;
+    }
+
+    if (lobj->hld_ < robj->hld_) {
+        return -1;
+    }
+
+    return 0;
+}
 
 #if _WIN32 /* WIN32 */
 static struct _object_manager g_objmgr;
 #else
 static struct _object_manager g_objmgr = {
-    .object_table_ = { { NULL } }, 0, PTHREAD_MUTEX_INITIALIZER,
+    .object_table_ = { NULL }, 0, PTHREAD_MUTEX_INITIALIZER,
 };
 #endif
 
 static
-struct list_head *__hld2root(objhld_t hld)
+struct avltree_node_t **__hld2root(objhld_t hld)
 {
-    struct list_head *root;
+    struct avltree_node_t **root;
     objhld_t idx;
 
     if (hld <= 0) {
@@ -107,10 +128,6 @@ struct list_head *__hld2root(objhld_t hld)
     }
 
     root = &g_objmgr.object_table_[idx];
-    if (!root->next || !root->prev) {
-        INIT_LIST_HEAD(root);
-    }
-
     return root;
 }
 
@@ -118,7 +135,7 @@ static
 objhld_t __objtabinst(object_t *obj)
 {
     objhld_t hld;
-    struct list_head *root;
+    struct avltree_node_t **root;
 
     if (!obj) {
         return INVALID_OBJHLD;
@@ -136,14 +153,13 @@ objhld_t __objtabinst(object_t *obj)
         /* map root pointer from table */
         root = __hld2root(hld);
         if (!root) {
+            --g_objmgr.automatic_id_;
             break;
         }
 
-        /* insert into hash list */
-        list_add_tail(&obj->hash_clash_, root);
-
-        /* give the handle to object ptr */
+        /* insert into hash list and using avl-binary-tree to handle the clash */
         obj->hld_ = hld;
+        *root = avlinsert(*root, &obj->hash_clash_, &avl_compare_routine);
     } while (0);
 
     UNLOCK(&g_objmgr.object_locker_);
@@ -153,61 +169,42 @@ objhld_t __objtabinst(object_t *obj)
 static
 int __objtabrmve(objhld_t hld, object_t **removed)
 {
-	object_t *target, *cursor;
-    struct list_head *root, *pos, *n;
+	object_t node;
+    struct avltree_node_t **root, *rmnode;
 
-    target = NULL;
-
-    do {
-        root = __hld2root(hld);
-        if (!root) {
-            return -1;
-        }
-
-        list_for_each_safe(pos, n, root) {
-            cursor = containing_record(pos, object_t, hash_clash_);
-            assert(cursor);
-            if (cursor->hld_ == hld) {
-                target = cursor;
-                list_del(pos);
-                INIT_LIST_HEAD(pos);
-                break;
-            }
-        }
-    } while ( 0 );
-
-    if (removed) {
-        *removed = target;
+    root = __hld2root(hld);
+    if (!root) {
+        return -1;
     }
 
-    return ((NULL == target) ? (-1) : (0));
+    rmnode = NULL;
+
+    node.hld_ = hld;
+    *root = avlremove(*root, &node.hash_clash_, &rmnode, &avl_compare_routine);
+    if (rmnode && removed) {
+        *removed = containing_record(rmnode, object_t, hash_clash_);
+    }
+
+    return ((NULL == rmnode) ? (-1) : (0));
 }
 
 static
 object_t *__objtabsrch(const objhld_t hld)
 {
-    object_t *target, *cursor;
-    struct list_head *root, *pos, *n;
+    object_t node;
+    struct avltree_node_t **root, *target;
 
-    target = NULL;
+    root = __hld2root(hld);
+    if (!root) {
+        return NULL;
+    }
 
-    do {
-        root = __hld2root(hld);
-        if (!root) {
-            return NULL;
-        }
-
-        list_for_each_safe(pos, n, root) {
-            cursor = containing_record(pos, object_t, hash_clash_);
-            assert(cursor);
-            if (cursor->hld_ == hld) {
-                target = cursor;
-                break;
-            }
-        }
-    }while(0);
-
-    return target;
+    node.hld_ = hld;
+    target = avlsearch(*root, &node.hash_clash_, &avl_compare_routine);
+    if (!target) {
+        return NULL;
+    }
+    return containing_record(target, object_t, hash_clash_);
 }
 
 static
@@ -259,7 +256,7 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     obj->refcnt_ = 0;
     obj->objsizecb_ = user_size + sizeof ( object_t);
     obj->user_size_ = user_size;
-    INIT_LIST_HEAD(&obj->hash_clash_);
+    memset(&obj->hash_clash_, 0, sizeof(obj->hash_clash_));
     obj->initializer_ = initializer;
     obj->unloader_ = unloader;
     memset(obj->user_data_, 0, obj->user_size_);
@@ -391,25 +388,6 @@ void objclos(objhld_t hld)
 
 void objregs()
 {
-	int i;
-	struct list_head *root, *pos, *n;
-	object_t *cursor;
-
-	LOCK(&g_objmgr.object_locker_);
-	for (i = 0; i < OBJ_HASHTABLE_SIZE; i++) {
-		root = &g_objmgr.object_table_[i];
-		list_for_each_safe(pos, n, root) {
-			cursor = containing_record(pos, object_t, hash_clash_);
-			assert(cursor);
-			if ((0 == cursor->refcnt_) && (OBJSTAT_NORMAL == cursor->stat_)) {
-				list_del(pos);
-                INIT_LIST_HEAD(pos);
-				__objtagfree(cursor);
-			} else {
-				cursor->stat_ = OBJSTAT_CLOSEWAIT;
-			}
-		}
-	}
-	UNLOCK(&g_objmgr.object_locker_);
+    ;
 }
 
