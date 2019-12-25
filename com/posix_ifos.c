@@ -1144,7 +1144,7 @@ int posix__isdir(const char *const file)
      * find . -type l | xargs rm
     */
     if (st.st_mode & __S_IFDIR) {
-        return 1;
+        return S_IFDIR;
     }
 
     return 0;

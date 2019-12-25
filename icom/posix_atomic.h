@@ -18,7 +18,7 @@
 #define posix__atomic_ptr_xchange(ptr, val)     InterlockedExchangePointer((PVOID volatile* )tar, (PVOID)src)
 #define posix__atomic_compare_ptr_xchange(ptr, oldptr, newptr) InterlockedCompareExchangePointer((PVOID volatile*)ptr, (PVOID)newptr, (PVOID)oldptr)
 
-#else /* end WIN32 */
+#else /* POSIX */
 
 #define posix__atomic_inc(ptr)                  __sync_add_and_fetch(ptr, 1)
 #define posix__atomic_inc64(ptr)                  __sync_add_and_fetch(ptr, 1)

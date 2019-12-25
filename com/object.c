@@ -89,8 +89,8 @@ static int avl_compare_routine(const void *left, const void *right)
 
     assert(left && right);
 
-    lobj = (const object_t *)left;
-    robj = (const object_t *)right;
+    lobj = containing_record(left, object_t, hash_clash_);
+    robj = containing_record(right, object_t, hash_clash_);
 
     if (lobj->hld_ > robj->hld_) {
         return 1;

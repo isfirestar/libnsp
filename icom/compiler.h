@@ -159,25 +159,21 @@ typedef int boolean_t;
     #endif
 #endif
 
-/* 判断 @x 是否为 2 的正整次幂 */
+/* determine whether x is a positive integral power of 2 */
 #if !defined is_powerof_2
     #define is_powerof_2(x) ((x) != 0 && (((x) & ((x) - 1)) == 0))
 #endif
 
-/* 浮点为0的对比目标 */
-#if !defined EPSINON
-    #define EPSINON  0.000001
+/* zero float accuracy */
+#if defined EPSINON
+    #undef EPSINON
 #endif
 
-/* 判断浮点数 @x 是否为 0 */
-#if !defined is_float_zero
-    #define is_float_zero(x) (((x) < EPSINON) && ((x) > -EPSINON))
-#endif
-
-/* 判断浮点数 @n @m 是否相等 */
-#if !defined is_float_equal
-    #define is_float_equal(n, m) ((fabs((n)-(m))) <= EPSINON )
-#endif
+#define EPSINON  0.000001
+#define is_float_zero(x) (((x) < EPSINON) && ((x) > -EPSINON))
+#define is_float_equal(n, m) ((fabs((n)-(m))) <= EPSINON )
+#define is_float_larger_than(n, m)  (((n) - (m)) > EPSINON)
+#define is_float_less_than(n, m)  is_float_larger_than(m, n)
 
 #if !defined containing_record
     #define containing_record(__address, __type, __field) ((__type *)( (char *)(__address) -  (char *)(&((__type *)0)->__field)))
