@@ -338,12 +338,10 @@ int posix__isdir(const char *const file)
 
     attr = GetFileAttributesA(file);
     if (INVALID_FILE_ATTRIBUTES != attr) {
-        if (attr & FILE_ATTRIBUTE_DIRECTORY) {
-            return 1;
-        }
+		return attr & FILE_ATTRIBUTE_DIRECTORY;
     }
 
-    return 0;
+    return -1;
 }
 
 int posix__getpriority(int *priority)
