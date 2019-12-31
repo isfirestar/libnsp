@@ -11,11 +11,11 @@ struct ckfifo {
     void 		   *spin_lock;
 };
 
-struct ckfifo* ring_buffer_init(void *buffer, uint32_t size);
-void ring_buffer_free(struct ckfifo *ckfifo_ring_buffer);
-uint32_t ring_buffer_len(const struct ckfifo *ckfifo_ring_buffer);
-uint32_t ring_buffer_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size);
-uint32_t ring_buffer_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size);
+struct ckfifo* ckfifo_init(void *buffer, uint32_t size);
+void ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer);
+uint32_t ckfifo_len(const struct ckfifo *ckfifo_ring_buffer);
+uint32_t ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size);
+uint32_t ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size);
 
 
 #endif

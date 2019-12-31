@@ -1,7 +1,7 @@
 #include "posix_thread.h"
 #include "cfifo.h"
 
-struct ckfifo* ring_buffer_init(void *buffer, uint32_t size)
+struct ckfifo* ckfifo_init(void *buffer, uint32_t size)
 {
     struct ckfifo *ckfifo_ring_buffer;
 
@@ -29,7 +29,7 @@ struct ckfifo* ring_buffer_init(void *buffer, uint32_t size)
     return ckfifo_ring_buffer;
 }
 
-void ring_buffer_free(struct ckfifo *ckfifo_ring_buffer)
+void ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer)
 {
     if (ckfifo_ring_buffer) {
         if (ckfifo_ring_buffer->spin_lock) {
@@ -39,12 +39,12 @@ void ring_buffer_free(struct ckfifo *ckfifo_ring_buffer)
     }
 }
 
-uint32_t __ring_buffer_len(const struct ckfifo *ckfifo_ring_buffer)
+uint32_t __ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
 {
     return (ckfifo_ring_buffer->in - ckfifo_ring_buffer->out);
 }
 
-uint32_t __ring_buffer_get(struct ckfifo *ckfifo_ring_buffer, void * buffer, uint32_t size)
+uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void * buffer, uint32_t size)
 {
     uint32_t len, n;
     assert(ckfifo_ring_buffer && buffer);
@@ -68,20 +68,20 @@ uint32_t __ring_buffer_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer
     return n;
 }
 
-uint32_t ring_buffer_len(const struct ckfifo *ckfifo_ring_buffer)
+uint32_t ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
 {
     uint32_t len;
     posix__pthread_mutex_lock(ckfifo_ring_buffer->spin_lock);
-    len = __ring_buffer_len(ckfifo_ring_buffer);
+    len = __ckfifo_len(ckfifo_ring_buffer);
     posix__pthread_mutex_unlock(ckfifo_ring_buffer->spin_lock);
     return len;
 }
 
-uint32_t ring_buffer_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size)
+uint32_t ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size)
 {
     uint32_t n;
     posix__pthread_mutex_lock(ckfifo_ring_buffer->spin_lock);
-    n = __ring_buffer_get(ckfifo_ring_buffer, buffer, size);
+    n = __ckfifo_get(ckfifo_ring_buffer, buffer, size);
     if (ckfifo_ring_buffer->in == ckfifo_ring_buffer->out) {
         ckfifo_ring_buffer->in = ckfifo_ring_buffer->out = 0;
     }
