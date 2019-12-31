@@ -1,5 +1,5 @@
 #include "posix_thread.h"
-#include "ringbuffer.h"
+#include "cfifo.h"
 
 struct ckfifo* ring_buffer_init(void *buffer, uint32_t size)
 {
