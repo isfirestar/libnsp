@@ -1,5 +1,5 @@
-#ifndef KFIFO_HEADER_H
-#define KFIFO_HEADER_H
+#if !defined LIB_C_KFIFO_H
+#define LIB_C_KFIFO_H
 
 #include "compiler.h"
 
