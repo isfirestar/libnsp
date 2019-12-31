@@ -56,7 +56,7 @@ uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void * buffer, uint32_t
     return n;
 }
 
-uint32_t __ring_buffer_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
+uint32_t __ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
 {
     uint32_t len, n;
     assert(ckfifo_ring_buffer && buffer);
@@ -89,11 +89,11 @@ uint32_t ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t si
     return n;
 }
 
-uint32_t ring_buffer_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
+uint32_t ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
 {
     uint32_t n;
     posix__pthread_mutex_lock(ckfifo_ring_buffer->spin_lock);
-    n = __ring_buffer_put(ckfifo_ring_buffer, buffer, size);
+    n = __ckfifo_put(ckfifo_ring_buffer, buffer, size);
     posix__pthread_mutex_unlock(ckfifo_ring_buffer->spin_lock);
     return n;
 }
