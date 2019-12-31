@@ -162,6 +162,7 @@ namespace nsp {
         }
 
         waitable_handle::waitable_handle(int sync) {
+            posix_waiter_ = new posix__waitable_handle_t;
             if (sync) {
                 ::posix__init_synchronous_waitable_handle((posix__waitable_handle_t *) posix_waiter_);
             } else {
@@ -170,7 +171,12 @@ namespace nsp {
         }
 
         waitable_handle::~waitable_handle() {
-            ::posix__uninit_waitable_handle((posix__waitable_handle_t *) posix_waiter_);
+            if (posix_waiter_) {
+                ::posix__uninit_waitable_handle((posix__waitable_handle_t *) posix_waiter_);
+                delete posix_waiter_;
+                posix_waiter_ = nullptr;
+            }
+
         }
 
         int waitable_handle::wait(uint32_t tsc) {

@@ -531,7 +531,7 @@ int posix__random(const int range_min, const int range_max)
         if (range_max < range_min) {
             u = r;
         } else {
-            /* 区间差值大于7FFFH, 如果不进行调整，则取值区间被截断为 [min, min+7FFFH) */
+            /* Interval difference greater than  7FFFH, If no adjustment is Then the value range is truncated to [min, min+7FFFH) */
             if (range_max - range_min > RAND_MAX) {
                 u = (int) ((double) rand() / (RAND_MAX + 1) * (range_max - range_min) + range_min);
             } else {

@@ -71,7 +71,7 @@ const char *posix__gettmpdir();
 __extern__
 char *posix__gettmpdir2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
 __extern__
-int posix__isdir(const char *const file);
+int posix__isdir(const char *const file); /* inner syscall failed, function return -1, not a dir return 0, is dir, return 0x4000 on linux 0x10 on win32 */
 
 /*ifos-ps*/
 

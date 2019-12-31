@@ -121,7 +121,7 @@ namespace nsp {
 		int getsysmem( uint64_t &total, uint64_t &free, uint64_t &total_swap, uint64_t &free_swap);
 
 		class waitable_handle {
-			unsigned char posix_waiter_[256];
+			void *posix_waiter_ = nullptr;
 		public:
 			waitable_handle( int sync = 1 );
 			~waitable_handle();
