@@ -44,7 +44,7 @@ uint32_t __ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
     return (ckfifo_ring_buffer->in - ckfifo_ring_buffer->out);
 }
 
-uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void * buffer, uint32_t size)
+uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, unsigned char *buffer, uint32_t size)
 {
     uint32_t len, n;
     assert(ckfifo_ring_buffer && buffer);
@@ -56,7 +56,7 @@ uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void * buffer, uint32_t
     return n;
 }
 
-uint32_t __ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
+uint32_t __ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const unsigned char *buffer, uint32_t size)
 {
     uint32_t len, n;
     assert(ckfifo_ring_buffer && buffer);

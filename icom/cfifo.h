@@ -4,7 +4,7 @@
 #include "compiler.h"
 
 struct ckfifo {
-    void           *buffer;
+    unsigned char  *buffer;
     uint32_t     	size;
     uint32_t     	in;
     uint32_t       	out;
