@@ -1,4 +1,4 @@
-#include "posix_thread.h"
+﻿#include "posix_thread.h"
 #include "cfifo.h"
 
 struct ckfifo* ckfifo_init(void *buffer, uint32_t size)
