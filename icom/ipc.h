@@ -12,7 +12,7 @@
 __extern__
 void *posix__shmct(const char *filename, const int size);
 __extern__
-void *posix__shmop(const char *filename);
+void *posix__shmop(const char *filename, const int size);
 __extern__
 void *posix__shmat(const void *shmp);
 __extern__
