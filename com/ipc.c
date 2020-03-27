@@ -9,6 +9,15 @@ struct posix_shared_memory {
 	void *vm;
 };
 
+int posix__shmcb(const void *shmp)
+{
+	if (!shmp) {
+		return -1;
+	}
+
+	return ((struct posix_shared_memory *)shmp)->size;
+}
+
 #if _WIN32
 
 #include <Windows.h>
@@ -88,7 +97,7 @@ void *posix__shmop(const char *filename)
 	}
 	memset(shm, 0, sizeof(struct posix_shared_memory));
 
-	sprintf(shm->filename, "\\\\.\\GLOBAL\\%s", filename);
+	sprintf(shm->filename, "Global\\%s", filename);
 
 	shm->shmid = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shm->filename);
 	if (!shm->shmid) {
@@ -140,7 +149,7 @@ int posix__shmrm(void *shmp)
 	return 0;
 }
 
-#else
+#else  /* POSIX */
 
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -248,12 +257,3 @@ int posix__shmrm(void *shmp)
 }
 
 #endif
-
-int posix__shmcb(const void *shmp)
-{
-	if (!shmp) {
-		return -1;
-	}
-
-	return ((struct posix_shared_memory *)shmp)->size;
-}
