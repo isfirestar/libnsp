@@ -45,12 +45,41 @@ void *posix__shmct(const char *filename, const int size)
 	return shm;
 }
 
+typedef enum _SECTION_INFORMATION_CLASS {
+	SectionBasicInformation,
+	SectionImageInformation
+} SECTION_INFORMATION_CLASS;
+
+typedef struct _SECTION_BASIC_INFORMATION {
+	PVOID         Base;
+	ULONG         Attributes;
+	LARGE_INTEGER Size;
+} SECTION_BASIC_INFORMATION;
+
+typedef DWORD(WINAPI* NTQUERYSECTION)(HANDLE, SECTION_INFORMATION_CLASS, PVOID, ULONG, PULONG);
+static NTQUERYSECTION ZwQuerySection = NULL;
+
 void *posix__shmop(const char *filename)
 {
 	struct posix_shared_memory *shm;
+	HMODULE krnl32;
+	SECTION_BASIC_INFORMATION section_info;
+	NTSTATUS status;
 
 	if (!filename) {
 		return NULL;
+	}
+
+	if (!ZwQuerySection) {
+		krnl32 = LoadLibraryA("kernel32.dll");
+		if (!krnl32) {
+			return NULL;
+		}
+		ZwQuerySection = (NTQUERYSECTION)GetProcAddress(krnl32, "NtQuerySection");
+		FreeLibrary(krnl32);
+		if (!ZwQuerySection) {
+			return NULL;
+		}
 	}
 
 	shm = (struct posix_shared_memory *)malloc(sizeof(struct posix_shared_memory));
@@ -59,7 +88,24 @@ void *posix__shmop(const char *filename)
 	}
 	memset(shm, 0, sizeof(struct posix_shared_memory));
 
-	shm->shmid = (PAGE_READWRITE, FALSE, shm->filename);
+	sprintf(shm->filename, "\\\\.\\GLOBAL\\%s", filename);
+
+	shm->shmid = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shm->filename);
+	if (!shm->shmid) {
+		free(shm);
+		return NULL;
+	}
+
+	/* we need get size from mapping handle by NT section */
+	status = ZwQuerySection(shm->shmid, SectionBasicInformation, &section_info, sizeof(section_info), NULL);
+	if (!NT_SUCCESS(status)) {
+		CloseHandle(shm->shmid);
+		free(shm);
+		return NULL;
+	}
+	shm->size = section_info.Size.LowPart;
+
+	return shm;
 }
 
 void *posix__shmat(const void *shmp)
@@ -196,3 +242,12 @@ int posix__shmrm(void *shmp)
 }
 
 #endif
+
+int posix__shmcb(const void *shmp)
+{
+	if (!shmp) {
+		return -1;
+	}
+
+	return ((struct posix_shared_memory *)shmp)->size;
+}
