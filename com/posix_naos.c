@@ -26,7 +26,8 @@ char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch) {
     return ipstr;
 }
 
-uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) {
+uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) 
+{
     static const int BIT_MOV_FOR_LITTLE_ENDIAN[4] = {24, 16, 8, 0};
     static const int BIT_MOV_FOR_BIG_ENDIAN[4] = {0, 8, 16, 24};
     char *p;
@@ -37,7 +38,9 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) {
     char *Tmp;
     size_t sourceTextLengtchCch;
 
-    if (!ipv4str) return 0;
+	if (!ipv4str) {
+		return 0;
+	}
 
     sourceTextLengtchCch = strlen(ipv4str);
     if (0 == sourceTextLengtchCch) {

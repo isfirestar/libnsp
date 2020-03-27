@@ -193,7 +193,9 @@ wchar_t *posix__wcscpy(wchar_t *target, uint32_t cch, const wchar_t *src) {
 }
 
 char *posix__strdup(const char *src) {
-    if (!src) return NULL;
+	if (!src) {
+		return NULL;
+	}
 #if _WIN32
     return _strdup(src);
 #else
@@ -268,7 +270,9 @@ wchar_t *posix__wcscat(wchar_t *target, uint32_t cch, const wchar_t *src) {
 
 char *posix__strrev(char *src) {
 #if _WIN32
-    if (!src) return NULL;
+	if (!src) {
+		return NULL;
+	}
     return _strrev(src);
 #else
     /* h指向s的头部 */
@@ -417,7 +421,9 @@ int posix__wcscasecmp(const wchar_t* s1, const wchar_t* s2) {
 int posix__strncasecmp(const char* s1, const char* s2, uint32_t n) {
     char c1, c2;
 
-    if (!n) return 0;
+	if (!n) {
+		return 0;
+	}
 
     do {
         c1 = *s1++;
@@ -430,7 +436,9 @@ int posix__strncasecmp(const char* s1, const char* s2, uint32_t n) {
 int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n) {
     wchar_t c1, c2;
 
-    if (!n) return 0;
+	if (!n) {
+		return 0;
+	}
 
     do {
         c1 = *s1++;
