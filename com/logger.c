@@ -370,7 +370,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
         return;
     }
 
-    /* thread safe in count less or equal to 50 */
+    /* securt check for the maximum pending amount */
     if (posix__atomic_inc(&__log_async.pendding_) >= (MAXIMUM_LOGSAVE_COUNT - MAXIMUM_NUMBEROF_CONCURRENT_THREADS)) {
         posix__atomic_dec(&__log_async.pendding_);
         return;
