@@ -13,7 +13,7 @@ struct posix_shared_memory {
 
 #include <Windows.h>
 
-void *posix__shmct(const char *filename, const int size)
+void *posix__shmmk(const char *filename, const int size)
 {
 	struct posix_shared_memory *shm;
 
@@ -149,7 +149,7 @@ int posix__shmrm(void *shmp)
 #include <errno.h>
 #include <string.h>
 
-void *posix__shmct(const char *filename, const int size)
+void *posix__shmmk(const char *filename, const int size)
 {
 	key_t shmkey;
 	struct posix_shared_memory *shm;
@@ -188,12 +188,13 @@ void *posix__shmct(const char *filename, const int size)
 	return shm;
 }
 
-void *posix__shmop(const char *filename, const int size)
+void *posix__shmop(const char *filename)
 {
 	key_t shmkey;
 	struct posix_shared_memory *shm;
+	struct shmid_ds shmds;
 
-	if (!filename || size <= 0 || 0 != (size % PAGE_SIZE)) {
+	if (!filename) {
 		return NULL;
 	}
 
@@ -209,11 +210,16 @@ void *posix__shmop(const char *filename, const int size)
 		return NULL;
 	}
 
-	shm->shmid = shmget(shmkey, size,  SHM_HUGETLB | SHM_NORESERVE);
+	shm->shmid = shmget(shmkey, 0,  SHM_HUGETLB | SHM_NORESERVE);
 	if (shm->shmid < 0) {
 		return NULL;
 	}
 
+	if (shmctl(shm->shmid, IPC_STAT, &shmds) < 0) {
+		return NULL;
+	}
+
+	shm->size = (int)shmds.shm_segsz;
 	return shm;
 }
 

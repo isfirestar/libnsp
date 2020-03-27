@@ -10,7 +10,7 @@
 #include "compiler.h"
 
 __extern__
-void *posix__shmct(const char *filename, const int size);
+void *posix__shmmk(const char *filename, const int size);
 __extern__
 void *posix__shmop(const char *filename);
 __extern__
