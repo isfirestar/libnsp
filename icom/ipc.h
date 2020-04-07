@@ -44,8 +44,17 @@ __extern__ void *posix__shmop(const char *filename);
 __extern__ void *posix__shmat(const void *shmp);
 
 /*
- * 
+ * @posix__shmdt detach virtual memory pointer by @shmp from shared memory segment
+ *	@shmp: the shm object retrun by @posix__shmmk or @posix__shmop.
+ *	@return: zero returned by success call,otherwise -1 is return.
  */
 __extern__ int posix__shmdt(const void *shmp);
+
+/* @posix__shmrm remove the ipc kernel object from system, and the manager object pointer by @shmp is going to destroy.
+	never use @shmp after @posix__shmrm called. */
 __extern__ int posix__shmrm(void *shmp);
+
+/* get the system width size of shared memory segment in bytes */
 __extern__ int posix__shmcb(const void *shmp);
+/* get the mapped virtual memory address in process space. */
+__extern__ void *posix__shmvma(const void *shmp);
