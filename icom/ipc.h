@@ -14,7 +14,7 @@
  *	@filename, pass a null-terminated string relate to the name of shared memory segment
  *				in POSIX platform, "/dev/shm/filename" file are going to open or create.
  *				in WIN32 platform, "Global\filename" section are going to create.
- *	@size: bytes of this shared memory segment acquirement. high 32 bits will be ignored
+ *	@size: bytes of this shared memory segment acquirement. this argument MUST greater than zero and MUST aligned to %PAGESIZE
  *  @return: on success, the shm manager object are returned, it can be use to other calls like: posix__shmat/posix__shmdt/posix__shmrm/posix__shmcb,
  *			otherwise, NULL returned.
  *	@remark: if the kernel object shared memory segment associated with @filename are existed, @posix__shmmk call will failure.
@@ -22,7 +22,7 @@
  *				in WIN32 platform, use "Process Monitor" to see the detail informations of all kernel sections.
  *				after success called, @posix__shmcb can be effect use to get the size of shared memory segment
  */
-__extern__ void *posix__shmmk(const char *filename, const int size);
+__extern__ void *posix__shmmk(const char *filename, int size);
 
 /*
  * @posix__shmop implement use to open a existing shared memory segment

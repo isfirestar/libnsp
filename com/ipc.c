@@ -27,9 +27,13 @@ void *posix__shmvma(const void *shmp)
 	return ((struct posix_shared_memory *)shmp)->vma;
 }
 
+#define SHM_HOST_PREDEFINITION	"nshostSharedMemorySection"
+
 #if _WIN32
 
 #include <Windows.h>
+
+#define SHM_FILE_PREFIX	"\\\\.\\GLOBAL\\"
 
 void *posix__shmmk(const char *filename, const int size)
 {
@@ -44,12 +48,7 @@ void *posix__shmmk(const char *filename, const int size)
 		return NULL;
 	}
 	memset(shmptr, 0, sizeof(struct posix_shared_memory));
-
-	if (filename) {
-		sprintf(shmptr->filename, "\\\\.\\GLOBAL\\%s", filename);
-	} else {
-		strcpy(shmptr->filename, "\\\\.\\GLOBAL\\gzshm");
-	}
+	sprintf(shmptr->filename, SHM_FILE_PREFIX"%s", filename ? filename : SHM_HOST_PREDEFINITION );
 
 	do {
 		shmptr->shmid = CreateFileMappingA(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm->filename);
@@ -108,12 +107,7 @@ void *posix__shmop(const char *filename)
 		return NULL;
 	}
 	memset(shmptr, 0, sizeof(struct posix_shared_memory));
-
-	if (filename) {
-		sprintf(shmptr->filename, "\\\\.\\GLOBAL\\%s", filename);
-	} else {
-		strcpy(shmptr->filename, "\\\\.\\GLOBAL\\gzshm");
-	}
+	sprintf(shmptr->filename, SHM_FILE_PREFIX"%s", filename ? filename : SHM_HOST_PREDEFINITION );
 
 	shmptr->shmid = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shm->filename);
 	if (!shmptr->shmid) {
@@ -170,15 +164,43 @@ int posix__shmrm(void *shmp)
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/types.h>
-#include <stdio.h>
 #include <errno.h>
 #include <string.h>
 
-void *posix__shmmk(const char *filename, const int size)
+#define SHM_FILE_PREFIX 			"/dev/shm/"
+#define SHM_PROCFS_HUGEPAGES		"/proc/sys/vm/nr_hugepages"
+#define SHM_TOK_SYMLOB				';'
+
+static int determine_vm_hugepages()
+{
+	int fd;
+	int retval;
+	char text[16];
+	int n;
+
+	retval = posix__file_open(SHM_PROCFS_HUGEPAGES, FF_RDACCESS | FF_OPEN_EXISTING, 0600, &fd);
+	if (retval < 0) {
+		return -1;
+	}
+
+	n = -1;
+	retval = read(fd, text, sizeof(text));
+	if (retval > 0 && retval < sizeof(text)) {
+		text[retval - 1] = 0;  /* drop last byte : '\n'  */
+		n = atoi(text);
+	}
+
+	close(fd);
+	return n;
+}
+
+void *posix__shmmk(const char *filename, int size)
 {
 	key_t shmkey;
 	struct posix_shared_memory *shmptr;
 	int fd;
+	int shmflg;
+	int hugepages;
 
 	if ( size <= 0 || 0 != (size % PAGE_SIZE)) {
 		return NULL;
@@ -189,12 +211,7 @@ void *posix__shmmk(const char *filename, const int size)
 		return NULL;
 	}
 	memset(shmptr, 0, sizeof(struct posix_shared_memory));
-
-	if (filename) {
-		sprintf(shmptr->filename, "/dev/shm/%s", filename);
-	} else {
-		strcpy(shmptr->filename, "/dev/shm/gzshm");
-	}
+	sprintf(shmptr->filename, SHM_FILE_PREFIX"%s", filename ? filename : SHM_HOST_PREDEFINITION );
 
 	do {
 		if (posix__file_open(shmptr->filename, FF_RDACCESS | FF_OPEN_EXISTING, 0600, &fd) < 0) {
@@ -206,12 +223,21 @@ void *posix__shmmk(const char *filename, const int size)
 		/* afterward, the file object are meaningless */
 		posix__file_close(fd);
 
-		shmkey = ftok(shmptr->filename, ';');
+		shmkey = ftok(shmptr->filename, SHM_TOK_SYMLOB);
 		if (shmkey < 0) {
 			break;
 		}
 
-		shmptr->shmid = shmget(shmkey, size, IPC_CREAT | IPC_EXCL | SHM_HUGETLB | SHM_NORESERVE);
+		shmflg = IPC_CREAT | IPC_EXCL | SHM_NORESERVE;
+		/* examine if the kernel support hugepages. */
+		hugepages = determine_vm_hugepages();
+		if (hugepages > 0) {
+			/* every hugepages size is 2MB. acquirement size MUST less than kernel permission */
+			if (size <= (hugepages << 21)) {
+				shmflg |= SHM_HUGETLB;
+			}
+		}
+		shmptr->shmid = shmget(shmkey, size, shmflg);
 		if (shmptr->shmid < 0) {
 			break;
 		}
@@ -234,24 +260,21 @@ void *posix__shmop(const char *filename)
 		return NULL;
 	}
 	memset(shmptr, 0, sizeof(struct posix_shared_memory));
-
-	if (filename) {
-		sprintf(shmptr->filename, "/dev/shm/%s", filename);
-	} else {
-		strcpy(shmptr->filename, "/dev/shm/gzshm");
-	}
+	sprintf(shmptr->filename, SHM_FILE_PREFIX"%s", filename ? filename : SHM_HOST_PREDEFINITION );
 
 	do {
-		shmkey = ftok(shmptr->filename, ';');
+		shmkey = ftok(shmptr->filename, SHM_TOK_SYMLOB);
 		if (shmkey < 0) {
 			break;
 		}
 
-		shmptr->shmid = shmget(shmkey, 0,  SHM_HUGETLB | SHM_NORESERVE);
+		/* open existing only */
+		shmptr->shmid = shmget(shmkey, 0, 0);
 		if (shmptr->shmid < 0) {
 			break;
 		}
 
+		/* load attributes from segment, main purpose is get size of it */
 		if (shmctl(shmptr->shmid, IPC_STAT, &shmds) < 0) {
 			break;
 		}
