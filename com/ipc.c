@@ -33,7 +33,7 @@ void *posix__shmvma(const void *shmp)
 
 #include <Windows.h>
 
-#define SHM_FILE_PREFIX	"\\\\.\\GLOBAL\\"
+#define SHM_FILE_PREFIX "Global\\"
 
 void *posix__shmmk(const char *filename, const int size)
 {
@@ -57,13 +57,16 @@ void *posix__shmmk(const char *filename, const int size)
 		}
 
 		if (ERROR_ALREADY_EXISTS == GetLastError()) {
-			CloseHandle(shmptr->shmid);
 			break;
 		}
 
 		shmptr->size = size;
 		return shmptr;
 	}while (0);
+
+	if (shmptr->shmid) {
+		CloseHandle(shmptr->shmid);
+	}
 
 	free(shmptr);
 	return NULL;
@@ -109,22 +112,28 @@ void *posix__shmop(const char *filename)
 	memset(shmptr, 0, sizeof(struct posix_shared_memory));
 	sprintf(shmptr->filename, SHM_FILE_PREFIX"%s", filename ? filename : SHM_HOST_PREDEFINITION );
 
-	shmptr->shmid = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shm->filename);
-	if (!shmptr->shmid) {
-		free(shmptr);
-		return NULL;
-	}
+	do {
+		shmptr->shmid = OpenFileMappingA(FILE_MAP_ALL_ACCESS, FALSE, shm->filename);
+		if (!shmptr->shmid) {
+			break;
+		}
 
-	/* we need get size from mapping handle by NT section */
-	status = ZwQuerySection(shmptr->shmid, SectionBasicInformation, &section_info, sizeof(section_info), NULL);
-	if (!NT_SUCCESS(status)) {
+		/* we need get size from mapping handle by NT section */
+		status = ZwQuerySection(shmptr->shmid, SectionBasicInformation, &section_info, sizeof(section_info), NULL);
+		if (!NT_SUCCESS(status)) {
+			break;
+		}
+		shmptr->size = section_info.Size.LowPart;
+
+		return shmptr;
+	} while(0);
+
+	if (shmptr->shmid) {
 		CloseHandle(shmptr->shmid);
-		free(shmptr);
-		return NULL;
 	}
-	shmptr->size = section_info.Size.LowPart;
 
-	return shmptr;
+	free(shmptr);
+	return NULL;
 }
 
 void *posix__shmat(const void *shmp)
@@ -133,7 +142,10 @@ void *posix__shmat(const void *shmp)
 
 	shmptr = (struct posix_shared_memory *)shmp;
 
-	shmptr->vma = MapViewOfFile(shmptr->shmid, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, shm->size);
+	if (!shmptr->vma) {
+		shmptr->vma = MapViewOfFile(shmptr->shmid, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, shm->size);
+	}
+
 	return shmptr->vma;
 }
 
@@ -145,12 +157,12 @@ int posix__shmdt(const void *shmp)
 
 	if (shmptr) {
 		if (UnmapViewOfFile(shmptr->vma)) {
-			shmptr->vma = NULL;
-			return 0;
+			return posix__makeerror(GetLastError());
 		}
+		shmptr->vma = NULL;
  	}
 
-	return -1;
+	return 0;
 }
 
 int posix__shmrm(void *shmp)
@@ -290,12 +302,16 @@ void *posix__shmop(const char *filename)
 void *posix__shmat(const void *shmp)
 {
 	struct posix_shared_memory *shmptr;
+	void *vma;
 
 	shmptr = (struct posix_shared_memory *)shmp;
 
-	shmptr->vma = shmat(shmptr->shmid, NULL, 0);
-	if ((void *)-1 == shmptr->vma) {
-		return NULL;
+	if (!shmptr->vma) {
+		vma = shmat(shmptr->shmid, NULL, 0);
+		if ((void *)-1 == shmptr->vma) {
+			return NULL;
+		}
+		shmptr->vma = vma;
 	}
 
 	return shmptr->vma;
@@ -306,17 +322,32 @@ int posix__shmdt(const void *shmp)
 	struct posix_shared_memory *shmptr;
 
 	shmptr = (struct posix_shared_memory *)shmp;
-	if (!shmptr->vma || (((void *)-1) == shmptr->vma)) {
-		return -1;
+
+	if (shmptr->vma) {
+		if ( shmdt(shmptr->vma) < 0 ) {
+			return posix__makeerror(errno);
+		}
 	}
 
-	return shmdt(shmptr->vma);
+	shmptr->vma = NULL;
+	return 0;
 }
 
 int posix__shmrm(void *shmp)
 {
 	struct shmid_ds shmds;
-	return shmctl(((struct posix_shared_memory *)shmp)->shmid, IPC_RMID, &shmds);
+	struct posix_shared_memory *shmptr;
+	int retval;
+
+	shmptr = (struct posix_shared_memory *)shmp;
+
+	/* try to remove segment or mark it to SHM_DEST */
+	retval = shmctl(shmptr->shmid, IPC_RMID, &shmds);
+	if (-1 == retval) {
+		return posix__makeerror(errno);
+	}
+
+	return retval;
 }
 
 #endif
