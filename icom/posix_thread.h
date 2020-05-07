@@ -39,7 +39,6 @@ struct __posix_pthread {
 
 struct __posix__pthread_mutex {
     pthread_mutex_t handle_;
-    pthread_mutexattr_t attr_;
 } __POSIX_TYPE_ALIGNED__;
 
 #endif /* _WIN32 */

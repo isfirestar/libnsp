@@ -157,6 +157,7 @@ static
 int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
 {
     int retval;
+    pthread_condattr_t condattr;
 
     if (!waiter) {
         return -EINVAL;
@@ -168,31 +169,31 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
         return retval;
     }
 
-    retval = pthread_condattr_init(&waiter->condattr_);
-    if (0 != retval) {
-        posix__pthread_mutex_release(&waiter->mutex_);
-        return posix__makeerror(retval);
-    }
+    pthread_condattr_init(&condattr);
+    do {
+        /* using CLOCK_MONOTONIC time check method */
+        retval = pthread_condattr_setclock(&condattr, CLOCK_MONOTONIC);
+        if (0 != retval) {
+            retval = posix__makeerror(retval);
+            break;
+        }
 
-    /* using CLOCK_MONOTONIC time check method */
-    retval = pthread_condattr_setclock(&waiter->condattr_, CLOCK_MONOTONIC);
-    if (0 != retval) {
-        pthread_condattr_destroy(&waiter->condattr_);
-        posix__pthread_mutex_release(&waiter->mutex_);
-        return posix__makeerror(retval);
-    }
+        /* OK, initial the condition variable now */
+        retval = pthread_cond_init(&waiter->cond_, &condattr);
+        if (0 != retval) {
+            retval = posix__makeerror(retval);
+            break;
+        }
 
-    /* OK, initial the condition variable now */
-    retval = pthread_cond_init(&waiter->cond_, &waiter->condattr_);
-    if (0 != retval) {
-        pthread_condattr_destroy(&waiter->condattr_);
-        posix__pthread_mutex_release(&waiter->mutex_);
-        return posix__makeerror(retval);
-    }
+        /* initialize the pass condition */
+        waiter->pass_ = 0;
+        pthread_condattr_destroy(&condattr);
+        return 0;
+    } while (0);
 
-    /* initialize the pass condition */
-    waiter->pass_ = 0;
-    return 0;
+    posix__pthread_mutex_release(&waiter->mutex_);
+    pthread_condattr_destroy(&condattr);
+    return retval;
 }
 
 int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
@@ -214,8 +215,6 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
 {
     __POSIX_EFFICIENT_ALIGNED_PTR_NR__(waiter);
-
-    pthread_condattr_destroy(&waiter->condattr_);
     pthread_cond_destroy(&waiter->cond_);
     posix__pthread_mutex_release(&waiter->mutex_);
 }

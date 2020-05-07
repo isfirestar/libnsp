@@ -15,7 +15,6 @@ struct __waitable_handle {
 struct __waitable_handle {
     int sync_; /* as boolean check */
     pthread_cond_t cond_;
-    pthread_condattr_t condattr_;
     int pass_;
     posix__pthread_mutex_t mutex_;
 }__POSIX_TYPE_ALIGNED__;

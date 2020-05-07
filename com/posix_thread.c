@@ -391,21 +391,19 @@ int posix__pthread_join(posix__pthread_t *tidp, void **retval)
 /*------------------------ posix__pthread_mutex_ methods ------------------------*/
 int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex)
 {
+    pthread_mutexattr_t mutexattr;
     int retval;
 
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(mutex);
 
-    retval = pthread_mutexattr_init(&mutex->attr_);
+    retval = pthread_mutexattr_init(&mutexattr);
     if (0 != retval) {
         return posix__makeerror(retval);
     }
 
-    pthread_mutexattr_settype(&mutex->attr_, PTHREAD_MUTEX_RECURSIVE_NP);
-    retval = pthread_mutex_init(&mutex->handle_, &mutex->attr_);
-    if ( 0 == retval ) {
-        return 0;
-    }
-
+    pthread_mutexattr_settype(&mutexattr, PTHREAD_MUTEX_RECURSIVE_NP);
+    retval = pthread_mutex_init(&mutex->handle_, &mutexattr);
+    pthread_mutexattr_destroy(&mutexattr);
     return posix__makeerror(retval);
 }
 
@@ -457,7 +455,6 @@ void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex)
 void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex)
 {
     __POSIX_EFFICIENT_ALIGNED_PTR_NR__(mutex);
-    pthread_mutexattr_destroy(&mutex->attr_);
     pthread_mutex_destroy(&mutex->handle_);
 }
 

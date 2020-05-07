@@ -21,7 +21,7 @@ typedef struct avltree_node_t TREENODE_T, *PTREENODE, *TREEROOT;
  *	fight 用于对比的右节点， 数据类型强制转化为struct avltree_node_t *后可用
  *
  *	左节点大于右节点， 返回指定 1
- *	右节点大于左节点， 返回指定 -1
+ *	左节点小于右节点， 返回指定 -1
  *	左右节点相等，     返回指定 0
  */
 typedef int( *compare_routine)(const void *left, const void *right);
