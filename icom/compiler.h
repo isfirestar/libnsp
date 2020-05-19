@@ -26,6 +26,15 @@
     #endif /*__cplusplus */
 #endif
 
+#if !defined __export__
+    #if _WIN32
+#define __export__ __declspec (dllexport)
+    #else
+        #define __export__ __attribute__((visibility("default")))
+    #endif
+#endif
+
+
 #if !defined __ALIGNED_SIZE__
     #define __ALIGNED_SIZE__        4/*(sizeof(void *))*/
 #endif /* !__ALIGNED_SIZE__ */
