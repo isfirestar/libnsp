@@ -35,6 +35,8 @@
 #endif
 #define EXPORT __export__
 
+#define __interface__  __extern__ __export__
+
 
 #if !defined __ALIGNED_SIZE__
     #define __ALIGNED_SIZE__        (sizeof(int))

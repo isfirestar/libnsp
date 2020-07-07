@@ -22,11 +22,11 @@ enum log__levels {
 #define kLogTarget_Stdout       (2)
 #define	kLogTarget_Sysmesg      (4)
 
-__extern__ int log__init();
-__extern__ int log__init2(const char *rootdir);
-__extern__ void log__write(const char *module, enum log__levels level, int target, const char *format, ...);
-__extern__ void log__save(const char *module, enum log__levels level, int target, const char *format, ...);
-__extern__ void log__flush();
+__interface__ int log__init();
+__interface__ int log__init2(const char *rootdir);
+__interface__ void log__write(const char *module, enum log__levels level, int target, const char *format, ...);
+__interface__ void log__save(const char *module, enum log__levels level, int target, const char *format, ...);
+__interface__ void log__flush();
 
 /* Maximum allowable specified log module name length */
 #define  LOG_MODULE_NAME_LEN   (128)

@@ -116,7 +116,7 @@ uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size) {
 }
 
 /*--------------------------------------------BASE64--------------------------------------------*/
-static const char * base64char = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const char base64char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 int base64_encode_len(int binlength)
 {
@@ -180,27 +180,30 @@ int base64_decode_len(const char * base64, int base64_len)
 
 int base64_decode( const char * base64, int base64_len, char * bindata )
 {
-    int i, j;
-    char k;
+    int i, j, k;
     char temp[4];
 
     for ( i = 0, j = 0; i < base64_len; i += 4 ) {
         memset( temp, 0xFF, sizeof(temp) );
         for ( k = 0 ; k < 64 ; k ++ ) {
-            if ( base64char[k] == base64[i] )
+            if ( base64char[k] == base64[i] ) {
                 temp[0]= k;
+            }
         }
         for ( k = 0 ; k < 64 ; k ++ ) {
-            if ( base64char[k] == base64[i+1] )
+            if ( base64char[k] == base64[i+1] ){
                 temp[1]= k;
+            }
         }
         for ( k = 0 ; k < 64 ; k ++ ) {
-            if ( base64char[k] == base64[i+2] )
+            if ( base64char[k] == base64[i+2] ) {
                 temp[2]= k;
+            }
         }
         for ( k = 0 ; k < 64 ; k ++ ) {
-            if ( base64char[k] == base64[i+3] )
+            if ( base64char[k] == base64[i+3] ) {
                 temp[3]= k;
+            }
         }
 
         bindata[j++] = ((char)(((char)(temp[0] << 2))&0xFC)) |

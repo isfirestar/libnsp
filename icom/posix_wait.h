@@ -23,17 +23,17 @@ struct __waitable_handle {
 
 typedef struct __waitable_handle posix__waitable_handle_t;
 
-__extern__
+__interface__
 int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter);
-__extern__
+__interface__
 int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter);
-__extern__
+__interface__
 int posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waiter);
-__extern__
+__interface__
 int posix__allocate_notification_waitable_handle(posix__waitable_handle_t **waiter);
-__extern__
+__interface__
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter);
-__extern__
+__interface__
 void posix__release_waitable_handle(posix__waitable_handle_t *waiter);
 
 /* hang-up calling thread until synchronous event trigger or @timeout condition meet
@@ -54,20 +54,20 @@ void posix__release_waitable_handle(posix__waitable_handle_t *waiter);
 #if !defined INFINITE
 #define INFINITE (0xFFFFFFFF)
 #endif
-__extern__
+__interface__
 int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval/*ms*/);
 
 /* awaken the waitting thread or threads specified by @waiter
  */
-__extern__
+__interface__
 int posix__sig_waitable_handle(posix__waitable_handle_t *waiter);
 
 /* posix__block_waitable_handle/posix__reset_waitable_handle use to mark the waiter-object to block status,this only effective on notification-object.
  * inner codes didn't examine the waiter-obejct category, the behavior are unspecified when calling thread invoke these functions with synchronous-object
  */
-__extern__
+__interface__
 void posix__block_waitable_handle(posix__waitable_handle_t *waiter);
-__extern__
+__interface__
 void posix__reset_waitable_handle(posix__waitable_handle_t *waiter);
 
 #define DECLARE_SYNC_WAITER(name)   \
@@ -79,11 +79,11 @@ void posix__reset_waitable_handle(posix__waitable_handle_t *waiter);
     posix__init_notification_waitable_handle(&name)
 
 /* hang up calling thread, make it upon a dead-wait status. */
-__extern__
+__interface__
 void posix__hang();
 
 /* High precision delay implementation, in microseconds */
-__extern__
+__interface__
 int posix__delay_execution(uint64_t us);
 
 #endif /* POSIX_WAIT_H */

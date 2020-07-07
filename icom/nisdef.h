@@ -5,11 +5,11 @@
 #include "object.h"
 
 #if defined __cplusplus
-#define STD_C_FORMAT extern "C"
-#include <cstdint>
+    #define STD_C_FORMAT extern "C"
+    #include <cstdint>
 #else
-#define STD_C_FORMAT
-#include <stdint.h>
+    #define STD_C_FORMAT
+    #include <stdint.h>
 #endif
 
 /* bytes size of network protocol layer */
@@ -30,16 +30,16 @@ typedef HLNK HTCPLINK;
 typedef HLNK HUDPLINK;
 typedef HLNK HARPLINK;
 
-#if !defined STD_CALL
-#if _WIN32
-#define STD_CALL __stdcall
-#else
-#define STD_CALL
-#endif
+#if !defined visible
+    #if _WIN32
+        #define visible __declspec (dllexport)
+    #else
+        #define visible __attribute__((visibility("default")))
+    #endif
 #endif
 
 /* macro of export format */
-#define interface_format(_Ty) STD_C_FORMAT _Ty STD_CALL
+#define interface_format(_Ty) __extern__ visible _Ty STDCALL
 
 /* definitions of network address family */
 struct nis_endpoint_v4 {
@@ -54,11 +54,11 @@ struct nis_inet_tuple_v4 {
 };
 
 #if !defined INVALID_HTCPLINK
-#define INVALID_HTCPLINK ((HTCPLINK)(~0))
+    #define INVALID_HTCPLINK ((HTCPLINK)(~0))
 #endif
 
 #if !defined INVALID_HUDPLINK
-#define INVALID_HUDPLINK ((HUDPLINK)(~0))
+    #define INVALID_HUDPLINK ((HUDPLINK)(~0))
 #endif
 
 /* common network events */
@@ -117,7 +117,7 @@ struct nis_event {
 typedef struct nis_event nis_event_t;
 
 /* user callback definition for network events */
-typedef void( STD_CALL *nis_callback_t)(const struct nis_event *event, const void *data);
+typedef void( STDCALL *nis_callback_t)(const struct nis_event *event, const void *data);
 typedef nis_callback_t tcp_io_callback_t;
 typedef nis_callback_t udp_io_callback_t;
 typedef nis_callback_t arp_io_callback_t;
@@ -138,8 +138,8 @@ typedef nis_callback_t arp_io_callback_t;
 
     Any negative return of PPT templates will terminate the subsequent operation
  */
-typedef int( STD_CALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
-typedef int( STD_CALL *tcp_ppt_builder_t)(void *data, int cb);
+typedef int( STDCALL *tcp_ppt_parser_t)(void *data, int cb, int *user_data_size);
+typedef int( STDCALL *tcp_ppt_builder_t)(void *data, int cb);
 
 struct __tcp_stream_template {
     tcp_ppt_parser_t parser_;
@@ -160,7 +160,7 @@ typedef struct __tcp_stream_template tst_t;
  *
  *  when @origin pointer to a standard C byte-stream, @serializer is ignore and can be set to null
  */
-typedef int( STD_CALL *nis_serializer_t)(unsigned char *packet, const void *origin, int cb);
+typedef int( STDCALL *nis_serializer_t)(unsigned char *packet, const void *origin, int cb);
 
 struct nis_tcp_data {
     union {
@@ -272,7 +272,7 @@ typedef struct __swnet_version swnet_version_t;
 /*  receiving notification text informations from nshost moudle
     version > 9.6.0
 */
-typedef void( STD_CALL *nis_event_callback_t)(const char *host_event, const char *reserved, int rescb);
+typedef void( STDCALL *nis_event_callback_t)(const char *host_event, const char *reserved, int rescb);
 
 struct __ifmisc {
     char interface_[64];

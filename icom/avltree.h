@@ -37,7 +37,7 @@ typedef int( *compare_routine)(const void *left, const void *right);
  *
  *	数据结构过程使用参数传入指针直接钩链， 而没有进行深拷贝操作， 需要主调函数保证节点指针在调用 avlremove 之前的有效性
  */
-__extern__
+__interface__
 struct avltree_node_t *avlinsert(struct avltree_node_t *tree, struct avltree_node_t *node,
         int( *compare)(const void *, const void *));
 /**
@@ -50,7 +50,7 @@ struct avltree_node_t *avlinsert(struct avltree_node_t *tree, struct avltree_nod
  *
  *  返回删除数据后AVL树的根。
  */
-__extern__
+__interface__
 struct avltree_node_t *avlremove(struct avltree_node_t *tree, struct avltree_node_t *node,
         struct avltree_node_t **rmnode,
         int( *compare)(const void *, const void *));
@@ -63,7 +63,7 @@ struct avltree_node_t *avlremove(struct avltree_node_t *tree, struct avltree_nod
  *
  *  返回匹配数据节点，或者NULL。
  */
-__extern__
+__interface__
 struct avltree_node_t *avlsearch(struct avltree_node_t *tree, struct avltree_node_t *node,
         int( *compare)(const void *, const void *));
 /**
@@ -71,7 +71,7 @@ struct avltree_node_t *avlsearch(struct avltree_node_t *tree, struct avltree_nod
  *
  *  返回最小数据节点，或者NULL（空树）。
  */
-__extern__
+__interface__
 struct avltree_node_t *avlgetmin(struct avltree_node_t *tree);
 
 /**
@@ -79,7 +79,7 @@ struct avltree_node_t *avlgetmin(struct avltree_node_t *tree);
  *
  *  返回最大数据节点，或者NULL（空树）。
  */
-__extern__
+__interface__
 struct avltree_node_t *avlgetmax(struct avltree_node_t *tree);
 
 
