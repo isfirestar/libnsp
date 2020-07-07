@@ -407,17 +407,20 @@ enum byte_order_t {
 #define posix__makeerror(e)   (((int)(e)) <= 0 ? (e) : (int)(~((int)(e)) + 1))
 
 /* the maximum of integer */
-#define NSP_MAX_UINT8       (0xFF)
-#define NSP_MAX_INT8        (0x7f)
+#define MAX_UINT_BIT(n) (pow(2,n) - 1)
+#define MAX_INT_BIT(n)  (pow(2, (n - 1)) - 1)
 
-#define NSP_MAX_UINT16      (0xFFFF)
-#define NSP_MAX_INT16       (0x7FFF)
+#define MAX_UINT8       (0xFF)
+#define MAX_INT8        (0x7f)
 
-#define NSP_MAX_UINT32      (0xFFFFFFFF)
-#define NSP_MAX_INT32       (0x7FFFFFFF)
+#define MAX_UINT16      (0xFFFF)
+#define MAX_INT16       (0x7FFF)
 
-#define NSP_MAX_UINT64      (0xFFFFFFFFFFFFFFFF)
-#define NSP_MAX_INT64       (0x7FFFFFFFFFFFFFFF)
+#define MAX_UINT32      (0xFFFFFFFF)
+#define MAX_INT32       (0x7FFFFFFF)
+
+#define MAX_UINT64      (0xFFFFFFFFFFFFFFFF)
+#define MAX_INT64       (0x7FFFFFFFFFFFFFFF)
 
 #define sal(n, b)               ((n) << (b))
 #define sal_set(n, b)           ((n) <<= (b))

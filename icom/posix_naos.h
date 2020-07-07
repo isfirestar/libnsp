@@ -22,4 +22,8 @@ uint32_t posix__chord32( uint32_t value);
 __interface__
 uint16_t posix__chord16( uint16_t value);
 
+/* verfiy the IP address string */
+__interface__
+boolean_t posix__is_effective_address_v4(const char *ipstr);
+
 #endif
