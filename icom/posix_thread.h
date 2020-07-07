@@ -48,13 +48,13 @@ typedef struct __posix__pthread_mutex   posix__pthread_mutex_t;
 
 /*
  * posix__pthread_create / posix__pthread_critical_create / posix__pthread_realtime_create
- * 分别创建普通/RR（核心）/FIFO（实时）优先级别的线程
- * @tidp 线程对象指针
- * @start_rtn 线程过程函数
- * @arg 线程参数
+ * implementations to create a Thread(LWP) running on normal/RR(kernel)/FIFO(realtime)priority
+ * @tidp both input and output parameter to obtain the thread object when success call.
+ * @start_rtn : thread execute routine
+ * @arg : argument pass to thread function
  */
 __extern__
-int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
+int posix__pthread_create(posix__pthread_t *tidp, void*(*start_rtn)(void*), void *arg);
 __extern__
 int posix__pthread_self(posix__pthread_t *tidp);
 __extern__
@@ -62,17 +62,16 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 __extern__
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 
-/* 设置线程的CPU亲和性, windows暂不支持get 方法 */
+/* set the affinity of CPU-core mark by @mask and thread(LWP) specified by @tidp */
 __extern__
 int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask);
 __extern__
 int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask);
 
-/* posix__pthread_detach 分离线程和 posix__pthread_t 对象， 分离后对象不可用
- * posix__pthread_joinable 检查线程对象是否处于分离状态， 分离返回-1， 否则返回>=0
- * posix__pthread_join 等待线程结束
- * @tidp 线程对象
- * @retval 线程结束返回值 */
+/* posix__pthread_detach implemenation detach the thread and object @tidp, after detach, the object pointer by @tidp are no longer usable.
+ * posix__pthread_joinable examine whether the thread is in detached states or not,  return -1 when detached， otherwise return >=0
+ * posix__pthread_join waitting for the thread end and than join the object pointer.
+ */
 __extern__
 int posix__pthread_detach(posix__pthread_t * tidp);
 __extern__
@@ -104,8 +103,8 @@ __extern__
 void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex);
 #define posix__pthread_mutex_uninit(mutex) posix__pthread_mutex_release(mutex)
 
-/* 主动放弃当前线程执行权
- * 可以主动打断优先级为 SCHED_FIFO 的线程
+/* Give up the current thread execution initiative
+ * this implementation can interrupte the thread running with @SCHED_FIFO priority.
  *  */
 __extern__
 void posix__pthread_yield();

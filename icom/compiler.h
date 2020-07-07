@@ -28,23 +28,26 @@
 
 #if !defined __export__
     #if _WIN32
-#define __export__ __declspec (dllexport)
+        #define __export__ __declspec (dllexport)
     #else
         #define __export__ __attribute__((visibility("default")))
     #endif
 #endif
+#define EXPORT __export__
 
 
 #if !defined __ALIGNED_SIZE__
-    #define __ALIGNED_SIZE__        4/*(sizeof(void *))*/
+    #define __ALIGNED_SIZE__        (sizeof(int))
 #endif /* !__ALIGNED_SIZE__ */
 
-#if !_WIN32
-    #if !defined __POSIX_TYPE_ALIGNED__
+#define SYSTEM_WIDE     (sizeof(void *))
+
+#if !defined __POSIX_TYPE_ALIGNED__
+    #if _WIN32
+        #define __POSIX_TYPE_ALIGNED__
+    #else
         #define __POSIX_TYPE_ALIGNED__ /*__attribute__((aligned(__ALIGNED_SIZE__))) */
     #endif
-#else
-    #define __POSIX_TYPE_ALIGNED__
 #endif
 
 #if !defined __POSIX_POINTER_ALIGNED__
@@ -109,12 +112,16 @@ typedef int boolean_t;
 #endif
 
 #if !defined INET_ADDRSTRLEN
-    #define INET_ADDRSTRLEN 16
+    #define INET_ADDRSTRLEN     (16)
 #endif
 
 #if !defined INET6_ADDRSTRLEN
-    #define INET6_ADDRSTRLEN 46
+    #define INET6_ADDRSTRLEN    (46)
 #endif
+
+/* dotted decimal notation declare for IPv4 text-string */
+#define DDN_IPV4(name)  char name[INET_ADDRSTRLEN]
+#define DDN_IPV6(name)  char name[INET6_ADDRSTRLEN]
 
 #if !_WIN32
     #if defined __USE_MISC
@@ -156,7 +163,7 @@ typedef int boolean_t;
 #endif
 
 #if !defined MAXPATH
-    #define MAXPATH (260)
+    #define MAXPATH (0x7f)
 #endif
 
 #ifndef __cplusplus
@@ -221,15 +228,15 @@ typedef int boolean_t;
 #else /* _GNU_ */
 
 #if !defined smp_mb
-    #define smp_mb() /* asm volatile("mfence" ::: "memory") */
+    #define smp_mb()  do { asm volatile("mfence" ::: "memory"); } while(0)
 #endif
 
 #if !defined smp_rmb
-    #define smp_rmb() /* asm volatile("lfence" ::: "memory") */
+    #define smp_rmb()  do { asm volatile("lfence" ::: "memory"); } while(0)
 #endif
 
 #if !defined smp_wmb
-    #define smp_wmb() /* asm volatile("sfence" ::: "memory")  */
+    #define smp_wmb()  do { asm volatile("sfence" ::: "memory"); } while(0)
 #endif
 
 #endif /* !_WIN32 */

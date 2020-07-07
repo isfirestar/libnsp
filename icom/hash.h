@@ -32,25 +32,29 @@ uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size);
 /*
  * base64_encode 例程对 @incb 长度的 @input 缓冲区作 BASE64 加密操作
  * base64__decode 例程对 @incb 长度的 @input 缓冲区作 BASE64 解密操作
- * 
+ *
  * 参数:
  * @input 输入缓冲区
  * @incb 输入缓冲区字节长度
  * @utput 输出缓冲区
  * @outcb 输出缓冲区字节长度记录在 *outcb
- * 
+ *
  * 备注:
  * 1. @input 必须是有效缓冲区地址
  * 2. @incb 必须保证大于等于0
  * 3. @output 如果为NULL, 则 @outcb 必须是有效缓冲区， 这种情况下 ， *outcb 将记录加密后的缓冲区长度， 但并不执行加密操作
- * 
+ *
  * 返回:
  * 通用判定
  */
 __extern__
-int base64__encode(const char *input, int incb, char *output, int *outcb);
+int base64_encode_len(int binlength);
 __extern__
-int base64__decode(const char *input, int incb, char *output, int *outcb);
+char *base64_encode( const char *bindata, int binlength, char *base64);
+__extern__
+int base64_decode_len(const char * base64, int base64_len);
+__extern__
+int base64_decode( const char *base64, int base64_len, char *bindata);
 
 /* MD5 calc */
 __extern__
@@ -72,7 +76,7 @@ DES__encrypt 过程， 使用DES对内存加密
 备注:
  * @key 可以为NULL, 如果@key为NULL, 则使用默认密钥
  * @cb 必须8字节对齐
- */ 
+ */
 __extern__
 int DES__encrypt(const char* input,size_t cb,const char key[8], char* output);
 __extern__

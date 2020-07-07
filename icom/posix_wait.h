@@ -36,20 +36,20 @@ void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter);
 __extern__
 void posix__release_waitable_handle(posix__waitable_handle_t *waiter);
 
-/*
- * 让一个等待对象执行等待操作
- * @waiter      等待对象
- * @interval    间隔，等待超时的毫秒级设置
+/* hang-up calling thread until synchronous event trigger or @timeout condition meet
+ * @waiter : the wait object assign by posix__allocate_synchronous_waitable_handle/posix__allocate_notification_waitable_handle
+ *           or local variable initialized by posix__init_synchronous_waitable_handle/posix__init_notification_waitable_handle
+ * @interval : the interval in milliseconds for wait timeout
  *
- * 返回定义:
- * 如果 interval <= 0 则有:
- * 0: 事件触发
- * -1: 系统调用失败
+ * definition of return value :
+ *  in case of (interval <= 0):
+ *  0 : the event occured
+ *  -1: syscall failed.
  *
- * 如果 interval > 0 则有：
- * 0: 事件触发
- * ETIMEOUT: 等待超时
- * -1: 系统调用失败
+ * in case of (interval > 0):
+ * 0: the event occured
+ * ETIMEOUT: wait timeout
+ * -1: syscall failed.
  */
 #if !defined INFINITE
 #define INFINITE (0xFFFFFFFF)
@@ -57,18 +57,13 @@ void posix__release_waitable_handle(posix__waitable_handle_t *waiter);
 __extern__
 int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval/*ms*/);
 
-/*
- * 唤醒 @waiter 对象
- * 如果 @waiter 是同步对象， 则使用 @waiter 并处于等待中的线程集合内， 有任意一个线程被唤醒
- * 如果 @waiter 是通告对象， 则使用 @waiter 并处于等待中的线程集合内， 所有线程均被唤醒
- * 如果 @waiter 是通告对象， 则必须显式调用 posix__block_waitable_handle 以设置对象重新阻塞
+/* awaken the waitting thread or threads specified by @waiter
  */
 __extern__
 int posix__sig_waitable_handle(posix__waitable_handle_t *waiter);
 
-/*
- * (通告对象)用于重置通过标记
- * 过程内部没有对对象类型进行判断， 同步对象调用此过程的行为不保证正确性
+/* posix__block_waitable_handle/posix__reset_waitable_handle use to mark the waiter-object to block status,this only effective on notification-object.
+ * inner codes didn't examine the waiter-obejct category, the behavior are unspecified when calling thread invoke these functions with synchronous-object
  */
 __extern__
 void posix__block_waitable_handle(posix__waitable_handle_t *waiter);
@@ -83,11 +78,11 @@ void posix__reset_waitable_handle(posix__waitable_handle_t *waiter);
     struct __waitable_handle name; \
     posix__init_notification_waitable_handle(&name)
 
-/* 挂起当前线程(死等状态) */
+/* hang up calling thread, make it upon a dead-wait status. */
 __extern__
 void posix__hang();
 
-/* 高精度的固定延时执行 */
+/* High precision delay implementation, in microseconds */
 __extern__
 int posix__delay_execution(uint64_t us);
 

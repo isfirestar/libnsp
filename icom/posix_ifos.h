@@ -47,13 +47,13 @@ int posix__pmkdir(const char *const dir);
 __extern__
 int posix__rm(const char *const target);
 
-/* 获取当前执行文件完整路径 */
+/* obtain the fully path of current execute file(ELF/PE) */
 __extern__
 const char *posix__fullpath_current();
 __extern__
 char *posix__fullpath_current2(char *holder, int cb);	/* thread safe method, version > 9.6.0 */
 
-/* 获取当前执行文件及其所在目录 */
+/* obtain the directory contain current execute file(ELF/PE) */
 __extern__
 const char *posix__getpedir();
 __extern__
@@ -75,16 +75,12 @@ int posix__isdir(const char *const file); /* inner syscall failed, function retu
 
 /*ifos-ps*/
 
-/* 获取当前进程优先级
- * @priority 返回进程优先级， 不能为空
- *  */
+/* obtain or adjust the priority of process
+ * support 5,0,-5,-10 priority level on Linux,
+ * corresponding to IDLE_PRIORITY_CLASS NORMAL_PRIORITY_CLASS HIGH_PRIORITY_CLASS REALTIME_PRIORITY_CLASS on MS-API
+ */
 __extern__
 int posix__getpriority(int *priority);
-
-/* 调整进程优先级
- * linux 提供 5,0,-5,-10 四个内置档次的优先级
- * win32 对应 IDLE_PRIORITY_CLASS NORMAL_PRIORITY_CLASS HIGH_PRIORITY_CLASS REALTIME_PRIORITY_CLASS 四个内置档次的优先级
- *  */
 __extern__
 int posix__setpriority_below();
 __extern__
@@ -94,20 +90,20 @@ int posix__setpriority_critical();
 __extern__
 int posix__setpriority_realtime();
 
-/* 调整进程亲和性
- * linux 系统调用不使用位或，windows系统调用使用位或
- * 为了统一平台接口， 这里一律使用位或
+/* obtain or adjust the affinity of process and CPU core.
+ * notes that : MS-API use bit mask to describe the affinity attribute,but Linux without it.
+ *	for portable reason, using bit-mask here unified
  */
 __extern__
 int posix__setaffinity_process(int mask);
 __extern__
 int posix__getaffinity_process(int *mask);
 
-/* 获取CPU核心数量 */
+/* obtain the CPU core-count in this machine */
 __extern__
 int posix__getnprocs();
 
-/* 获取系统内存信息 */
+/* obtain the system meory info */
 typedef struct {
     uint64_t totalram;
     uint64_t freeram;
@@ -118,19 +114,18 @@ typedef struct {
 __extern__
 int posix__getsysmem(sys_memory_t *sysmem);
 
-/* 获取系统分页大小 */
+/* get the system memory page size */
 __extern__
 uint32_t posix__getpagesize();
 
-/* 计入系统级日志 */
+/* wirte syslog */
 __extern__
 void posix__syslog(const char *const logmsg );
 
-/* 编码格式转换
- * from_encode/to_encode 支持列表:
- * utf-8
- * gb2312
- * unicode
+/* cover text encoder, support list:
+ * UTF-8
+ * GB2312
+ * UNICODE
  */
 __extern__
 int posix__iconv(const char *from_encode, const char *to_encode, char **from, size_t from_bytes, char **to, size_t *to_bytes);

@@ -41,6 +41,18 @@ typedef HLNK HARPLINK;
 /* macro of export format */
 #define interface_format(_Ty) STD_C_FORMAT _Ty STD_CALL
 
+/* definitions of network address family */
+struct nis_endpoint_v4 {
+    DDN_IPV4(host);
+    uint32_t inet;
+    uint16_t port;
+};
+
+struct nis_inet_tuple_v4 {
+    struct nis_endpoint_v4 origin;
+    struct nis_endpoint_v4 target;
+};
+
 #if !defined INVALID_HTCPLINK
 #define INVALID_HTCPLINK ((HTCPLINK)(~0))
 #endif
