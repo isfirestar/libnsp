@@ -33,7 +33,10 @@
         #define __export__ __attribute__((visibility("default")))
     #endif
 #endif
-#define EXPORT __export__
+
+#if !defined EXPORT
+    #define EXPORT __export__
+#endif
 
 #define __interface__  __extern__ __export__
 

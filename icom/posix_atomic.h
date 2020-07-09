@@ -7,6 +7,8 @@
 
 #include <Windows.h>
 
+#define posix__atomic_get(ptr)					InterlockedExchangeAdd((volatile LONG *)ptr, 0)
+#define posix__atomic_get64(ptr)					InterlockedExchangeAdd64((volatile LONG64 *)ptr, 0)
 #define posix__atomic_inc(ptr)                  InterlockedIncrement(( LONG volatile *)ptr)
 #define posix__atomic_inc64(ptr)                InterlockedIncrement64(( LONG64 volatile *)ptr)
 #define posix__atomic_dec(ptr)                  InterlockedDecrement(( LONG volatile *) ptr)
@@ -20,6 +22,8 @@
 
 #else /* POSIX */
 
+#define posix__atomic_get(ptr)					__atomic_load_n(ptr, __ATOMIC_ACQUIRE)
+#define posix__atomic_get64(ptr)				__atomic_load_n(ptr, __ATOMIC_ACQUIRE)
 #define posix__atomic_inc(ptr)                  __sync_add_and_fetch(ptr, 1)
 #define posix__atomic_inc64(ptr)                  __sync_add_and_fetch(ptr, 1)
 #define posix__atomic_dec(ptr)                  __sync_sub_and_fetch(ptr, 1)
@@ -30,21 +34,6 @@
 #define posix__atomic_compare_xchange64(ptr, oldval,  newval)   __sync_val_compare_and_swap(ptr, oldval, newval )
 #define posix__atomic_ptr_xchange(ptr, val)     __sync_lock_test_and_set(ptr, val)
 #define posix__atomic_compare_ptr_xchange(ptr, oldptr, newptr) __sync_val_compare_and_swap(ptr, oldptr, newptr )
-
-#if !defined(__ATOMIC_VAR_FORCE_SYNC_MACROS) && defined(__ATOMIC_RELAXED) && !defined(__sun) && \
-	 (!defined(__clang__) || !defined(__APPLE__) || __apple_build_version__ > 4210057)
-#define posix__atomic_get(var,dstvar) do { \
-    dstvar = __atomic_load_n(&var,__ATOMIC_RELAXED); \
-} while(0)
-#define posix__atomic_set(var,value) __atomic_store_n(&var,value,__ATOMIC_RELAXED)
-#elif defined(HAVE_ATOMIC)
-#define posix__atomic_get(var,dstvar) do { \
-    dstvar = __sync_sub_and_fetch(&var,0); \
-} while(0)
-#define posix__atomic_set(var,value) do { \
-    while(!__sync_bool_compare_and_swap(&var,var,value)); \
-} while(0)
-#endif
 
 /*
  * type __sync_lock_test_and_set (type *ptr, type value, ...)
