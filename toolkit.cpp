@@ -674,22 +674,23 @@ namespace nsp {
             ::MD5__Final(&ctx, (unsigned char *) &digest[0]);
         }
 
-        int base64_encode(const char *input, int input_cb, std::string &output) {
-            int outcb, retval = -1;
-            char *temp_output = nullptr;
-
-            if (::base64__encode(input, input_cb, NULL, &outcb) < 0) {
-                return -1;
-            }
-
-            if (outcb <= 0) {
-                return -1;
-            }
+        int base64_encode(const std::string &input, std::string &output) {
+            int outcb;
+            char *temp_output = nullptr, *retptr = nullptr;
+            const char *inptr;
+            int incb;
 
             try {
+                inptr = input.c_str();
+                incb = input.size();
+                outcb = base64_encode_len(incb);
+                if (outcb <= 0) {
+                    return -1;
+                }
+
                 temp_output = new char[outcb];
-                retval = ::base64__encode(input, input_cb, temp_output, &outcb);
-                if ( retval >= 0 ) {
+                retptr = ::base64_encode(inptr, incb, temp_output);
+                if ( retptr ) {
                     output.assign(temp_output, outcb);
                 }
             } catch (...) {
@@ -702,21 +703,22 @@ namespace nsp {
             return 0;
         }
 
-        int base64_encode(const std::string &input, std::string &output) {
-            return base64_encode(input.data(), (int) input.size(), output);
-        }
-
         int base64_decode(const std::string &input, std::string &output) {
             int outcb, retval = -1;
             char *temp_output = nullptr;
-
-            if (::base64__decode(input.c_str(), input.size(), NULL, &outcb) < 0) {
-                return -1;
-            }
+            const char *inptr;
+            int incb;
 
             try {
+                inptr = input.c_str();
+                incb = input.size();
+                outcb = base64_decode_len(inptr, incb);
+                if (outcb <= 0) {
+                    return -1;
+                }
+
                 temp_output = new char[outcb];
-                retval = ::base64__decode(input.c_str(), input.size(), temp_output, &outcb);
+                retval = ::base64_decode(inptr, incb, temp_output);
                 if (retval >= 0) {
                     output.assign(temp_output, outcb);
                 }
