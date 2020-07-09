@@ -11,9 +11,9 @@
 /* Switching IPv4 representation method between Dotted-Decimal-Notation and integer
  */
 __interface__
-uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t byte_order);
+uint32_t posix__ipv4tou(const char *ipstr, enum byte_order_t byte_order);
 __interface__
-char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch);
+char *posix__ipv4tos(uint32_t ip, char *ipstr, uint32_t cch);
 
 /* the same as htonl(3)/ntohl(3)/ntohs(3)/htons(3)
  */

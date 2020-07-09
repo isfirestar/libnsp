@@ -388,8 +388,10 @@ __static_inline_function(void) __write_once_size(volatile void *p, void *res, in
 #endif
 #define PI ((double)3.14159265359)
 
-#define angle2radian(n) (((double)n) * PI / 180)
-#define radian2angle(n) (((double)n) * 180 / PI)
+#define angle2radian(n) (((double)(n)) * PI / 180)
+#define radian2angle(n) (((double)(n)) * 180 / PI)
+#define A2R(a)      angle2radian(a)
+#define R2A(r)      radian2angle(r)
 
 enum byte_order_t {
     kByteOrder_LittleEndian = 0,
