@@ -224,6 +224,45 @@ int base64_decode( const char * base64, int base64_len, char * bindata )
     return j;
 }
 
+int base64__encode(const char *input, int incb, char *output, int *outcb)
+{
+    char *base64ptr;
+
+    if (!input || incb <= 0 || !outcb) {
+        return -1;
+    }
+
+    *outcb = base64_encode_len(incb);
+    if (*outcb <= 0) {
+        return -1;
+    }
+
+    if (!output) {
+        return *outcb;
+    }
+
+    base64ptr = base64_encode(input, incb, output);
+    return (NULL == base64ptr) ? (-1) : (*outcb);
+}
+
+int base64__decode(const char *input, int incb, char *output, int *outcb)
+{
+    if (!input || incb <= 0 || !outcb) {
+        return -1;
+    }
+
+    *outcb = base64_decode_len(input, incb);
+    if (*outcb <= 0) {
+        return -1;
+    }
+
+    if (!output) {
+        return *outcb;
+    }
+
+    return base64_decode(input, incb, output);
+}
+
 /*--------------------------------------------MD5--------------------------------------------*/
 #define S11 7
 #define S12 12

@@ -55,6 +55,12 @@ __interface__
 int base64_decode_len(const char * base64, int base64_len);
 __interface__
 int base64_decode( const char *base64, int base64_len, char *bindata);
+/* for compatible reason, retain the older interface definition */
+__interface__
+int base64__encode(const char *input, int incb, char *output, int *outcb);
+__interface__
+int base64__decode(const char *input, int incb, char *output, int *outcb);
+
 
 /* MD5 calc */
 __interface__
