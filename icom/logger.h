@@ -37,11 +37,13 @@ __interface__ void log__flush();
 #if _WIN32
 #define ECHO(module, fmt, arg, ...) log__save(module, kLogLevel_Info, kLogTarget_Stdout | kLogTarget_Filesystem, fmt, ##arg)
 #define ALERT(module, fmt, arg, ...) log__save(module, kLogLevel_Warning, kLogTarget_Stdout | kLogTarget_Filesystem, fmt, ##arg)
-#define FATAL(module, fmt, arg, ...) log__save(module, kLogLevel_Error, kLogTarget_Filesystem, fmt, ##arg)
+#define FATAL(module, fmt, arg, ...) log__save(module, kLogLevel_Error, kLogTarget_Stdout | kLogTarget_Filesystem, fmt, ##arg)
+#define TRACE(module, fmt, arg, ...) log__save(module, kLogLevel_Error, kLogTarget_Filesystem, fmt, ##arg)
 #else
 #define ECHO(module, fmt, arg...) log__save(module, kLogLevel_Info, kLogTarget_Stdout | kLogTarget_Filesystem, fmt, ##arg)
 #define ALERT(module, fmt, arg...) log__save(module, kLogLevel_Warning, kLogTarget_Stdout | kLogTarget_Filesystem, fmt, ##arg)
-#define FATAL(module, fmt, arg...) log__save(module, kLogLevel_Error, kLogTarget_Filesystem, fmt, ##arg)
+#define FATAL(module, fmt, arg...) log__save(module, kLogLevel_Error, kLogTarget_Stdout | kLogTarget_Filesystem, fmt, ##arg)
+#define TRACE(module, fmt, arg...) log__save(module, kLogLevel_Trace, kLogTarget_Filesystem, fmt, ##arg)
 #endif
 
 #endif
