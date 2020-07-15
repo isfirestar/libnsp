@@ -27,13 +27,15 @@ typedef CRITICAL_SECTION MUTEX_T;
 
 #define INCREASEMENT(n)    InterlockedIncrement(n)
 
-static void mutex_init(MUTEX_T *mutex) {
+static void mutex_init(MUTEX_T *mutex)
+{
     if (mutex) {
         InitializeCriticalSection(mutex);
     }
 }
 
-static void mutex_uninit(MUTEX_T *mutex) {
+static void mutex_uninit(MUTEX_T *mutex)
+{
     if (mutex) {
         DeleteCriticalSection(mutex);
     }
@@ -48,7 +50,8 @@ typedef pthread_mutex_t MUTEX_T;
 
 #define INCREASEMENT(n)    __sync_add_and_fetch(n, 1)
 
-static void mutex_init(MUTEX_T *mutex) {
+static void mutex_init(MUTEX_T *mutex)
+{
     pthread_mutexattr_t attr;
     if (mutex) {
         pthread_mutexattr_init(&attr);
@@ -57,7 +60,8 @@ static void mutex_init(MUTEX_T *mutex) {
     }
 }
 
-static void mutex_uninit(MUTEX_T *mutex) {
+static void mutex_uninit(MUTEX_T *mutex)
+{
     if (mutex) {
         pthread_mutex_destroy(mutex);
     }

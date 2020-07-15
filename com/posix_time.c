@@ -15,7 +15,7 @@ static const uint64_t ET_METHOD_NTKRNL = ((uint64_t) ((uint64_t) 1000 * 1000 * 1
 static const uint64_t NT_EPOCH_ESCAPE = (uint64_t) ((uint64_t) ((uint64_t) 27111902ULL << 32) | 3577643008ULL);
 /* { .dwLowDateTime = 3577643008, .dwHighDateTime = 27111902 }; */
 
-int posix__clock_localtime(posix__systime_t *systime) 
+int posix__clock_localtime(posix__systime_t *systime)
 {
     uint64_t nt_filetime;
     FILETIME file_now, local_file_now;
@@ -40,7 +40,7 @@ int posix__clock_localtime(posix__systime_t *systime)
     return 0;
 }
 
-int posix__localtime_clock(posix__systime_t *systime) 
+int posix__localtime_clock(posix__systime_t *systime)
 {
     SYSTEMTIME now;
     FILETIME fnow;
@@ -70,7 +70,7 @@ uint64_t posix__gettick() {
 #endif
 }
 
-uint64_t posix__clock_epoch() 
+uint64_t posix__clock_epoch()
 {
     SYSTEMTIME system_time;
     FILETIME file_time;
@@ -85,7 +85,7 @@ uint64_t posix__clock_epoch()
     return 0;
 }
 
-uint64_t posix__clock_gettime() 
+uint64_t posix__clock_gettime()
 {
     LARGE_INTEGER counter;
     static LARGE_INTEGER frequency = {0};
@@ -100,6 +100,11 @@ uint64_t posix__clock_gettime()
         return (uint64_t) (ET_METHOD_NTKRNL * ((double) counter.QuadPart / frequency.QuadPart));
     }
     return 0;
+}
+
+uint64_t misc_clock_monotonic()
+{
+    return posix__clock_gettime();
 }
 
 #else /* POSIX */
@@ -188,7 +193,23 @@ uint64_t posix__clock_gettime()
 
     /* CLOCK_REALTIME */
     if (0 == clock_gettime(CLOCK_MONOTONIC, &tsc)) {
-        /* 返回 100ns, 兼容windows的KRNL计时 */
+        /* force format to 10000000 aligned */
+        tick = (uint64_t) tsc.tv_sec * ET_METHOD_NTKRNL + tsc.tv_nsec / 100;
+        return  tick;
+    }
+
+    return 0;
+}
+
+uint64_t misc_clock_monotonic()
+{
+    /* gcc -lrt */
+    struct timespec tsc;
+    uint64_t tick;
+
+    /* CLOCK_REALTIME */
+    if (0 == clock_gettime(CLOCK_MONOTONIC_RAW, &tsc)) {
+        /* force format to 10000000 aligned */
         tick = (uint64_t) tsc.tv_sec * ET_METHOD_NTKRNL + tsc.tv_nsec / 100;
         return  tick;
     }
@@ -199,7 +220,8 @@ uint64_t posix__clock_gettime()
 #endif
 
 
-int posix__localtime(posix__systime_t *systime) {
+int posix__localtime(posix__systime_t *systime)
+{
     if (!systime) {
         return -EINVAL;
     }

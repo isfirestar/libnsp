@@ -13,7 +13,8 @@
 #define VFN_OFFSET_BASIS32		((uint32_t)2166136261UL)
 #define VFN_OFFSET_BASIS64		((uint64_t)14695981039346656037ULL)
 
-uint32_t vfn1_h32(const unsigned char *key, int length) {
+uint32_t vfn1_h32(const unsigned char *key, int length)
+{
 	uint32_t hash;
 	int i;
 
@@ -29,7 +30,8 @@ uint32_t vfn1_h32(const unsigned char *key, int length) {
 	return hash;
 }
 
-uint64_t vfn1_h64(const unsigned char *key, int length) {
+uint64_t vfn1_h64(const unsigned char *key, int length)
+{
 	uint64_t hash;
 	int i;
 
@@ -45,7 +47,8 @@ uint64_t vfn1_h64(const unsigned char *key, int length) {
 	return hash;
 }
 
-uint32_t vfn1a_h32(const unsigned char *key, int length) {
+uint32_t vfn1a_h32(const unsigned char *key, int length)
+{
 	uint32_t hash;
 	int i;
 
@@ -61,7 +64,8 @@ uint32_t vfn1a_h32(const unsigned char *key, int length) {
 	return hash;
 }
 
-uint64_t vfn1a_h64(const unsigned char *key, int length) {
+uint64_t vfn1a_h64(const unsigned char *key, int length)
+{
 	uint64_t hash;
 	int i;
 
@@ -83,7 +87,8 @@ static int is_crc32_inited = 0;
 
 #define CRC32_POLY (0xEDB88320L)
 
-static void make_crc32_table() {
+static void make_crc32_table()
+{
     uint32_t c;
     int i = 0;
     int bit = 0;
@@ -101,7 +106,8 @@ static void make_crc32_table() {
     }
 }
 
-uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size) {
+uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size)
+{
     if (1 == posix__atomic_inc(&is_crc32_inited)) {
         make_crc32_table();
     } else {
@@ -321,7 +327,8 @@ static
 void MD5__memset(uint8_t* output, int value, uint32_t len);
 
 static
-void MD5__Transform(uint32_t state[4], const uint8_t block[64]) {
+void MD5__Transform(uint32_t state[4], const uint8_t block[64])
+{
     uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
     MD5__Decode(x, block, 64);
@@ -407,7 +414,8 @@ void MD5__Transform(uint32_t state[4], const uint8_t block[64]) {
 }
 
 static
-void MD5__Encode(uint8_t *output, const uint32_t *input, uint32_t len) {
+void MD5__Encode(uint8_t *output, const uint32_t *input, uint32_t len)
+{
     uint32_t i, j;
 
     for (i = 0, j = 0; j < len; i++, j += 4) {
@@ -419,7 +427,8 @@ void MD5__Encode(uint8_t *output, const uint32_t *input, uint32_t len) {
 }
 
 static
-void MD5__Decode(uint32_t *output, const uint8_t *input, uint32_t len) {
+void MD5__Decode(uint32_t *output, const uint8_t *input, uint32_t len)
+{
     uint32_t i, j;
 
     for (i = 0, j = 0; j < len; i++, j += 4)
@@ -428,7 +437,8 @@ void MD5__Decode(uint32_t *output, const uint8_t *input, uint32_t len) {
 }
 
 static
-void MD5__memcpy(uint8_t* output, const uint8_t* input, uint32_t len) {
+void MD5__memcpy(uint8_t* output, const uint8_t* input, uint32_t len)
+{
     uint32_t i;
 
     for (i = 0; i < len; i++)
@@ -436,14 +446,16 @@ void MD5__memcpy(uint8_t* output, const uint8_t* input, uint32_t len) {
 }
 
 static
-void MD5__memset(uint8_t* output, int value, uint32_t len) {
+void MD5__memset(uint8_t* output, int value, uint32_t len)
+{
     uint32_t i;
 
     for (i = 0; i < len; i++)
         ((char *) output)[i] = (char) value;
 }
 
-void MD5__Init(MD5_CTX *md5ctx) {
+void MD5__Init(MD5_CTX *md5ctx)
+{
     md5ctx->count[0] = md5ctx->count[1] = 0;
     md5ctx->state[0] = 0x67452301;
     md5ctx->state[1] = 0xefcdab89;
@@ -459,7 +471,8 @@ void MD5__Init(MD5_CTX *md5ctx) {
      * */
 }
 
-void MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen) {
+void MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen)
+{
     uint32_t i, index, partLen;
 
     index = (uint32_t) ((md5ctx->count[0] >> 3) & 0x3F);
@@ -485,7 +498,8 @@ void MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen) {
     MD5__memcpy((uint8_t*) & md5ctx->buffer[index], (uint8_t*) & input[i], inputLen - i);
 }
 
-void MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16]) {
+void MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16])
+{
     uint8_t bits[8];
     uint32_t index, padLen;
 
@@ -615,7 +629,8 @@ static const int DES_PC_2[48] = {
 static const int DES_MOVE_TIMES[16] = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
 
 /* 字节转换成二进制 */
-static void ByteToBit(DES_ElemType ch, DES_ElemType bit[8]) {
+static void ByteToBit(DES_ElemType ch, DES_ElemType bit[8])
+{
     int cnt;
     for (cnt = 0; cnt < 8; cnt++) {
         *(bit + cnt) = (ch >> cnt) & 1;
@@ -623,7 +638,8 @@ static void ByteToBit(DES_ElemType ch, DES_ElemType bit[8]) {
 }
 
 /* 二进制转换成字节 */
-static void BitToByte(DES_ElemType bit[8], DES_ElemType *ch) {
+static void BitToByte(DES_ElemType bit[8], DES_ElemType *ch)
+{
     int cnt;
     for (cnt = 0; cnt < 8; cnt++) {
         *ch |= *(bit + cnt) << cnt;
@@ -631,7 +647,8 @@ static void BitToByte(DES_ElemType bit[8], DES_ElemType *ch) {
 }
 
 /* 将长度为8的字符串转为二进制位串 */
-static void Char8ToBit64(const DES_ElemType ch[8], DES_ElemType bit[64]) {
+static void Char8ToBit64(const DES_ElemType ch[8], DES_ElemType bit[64])
+{
     int cnt;
     for (cnt = 0; cnt < 8; cnt++) {
         ByteToBit(*(ch + cnt), bit + (cnt << 3));
@@ -639,7 +656,8 @@ static void Char8ToBit64(const DES_ElemType ch[8], DES_ElemType bit[64]) {
 }
 
 /* 将二进制位串转为长度为8的字符串 */
-static void Bit64ToChar8(DES_ElemType bit[64], DES_ElemType ch[8]) {
+static void Bit64ToChar8(DES_ElemType bit[64], DES_ElemType ch[8])
+{
     int cnt;
     memset(ch, 0, 8);
     for (cnt = 0; cnt < 8; cnt++) {
@@ -648,7 +666,8 @@ static void Bit64ToChar8(DES_ElemType bit[64], DES_ElemType ch[8]) {
 }
 
 /* 密钥置换方法 */
-static void DES_PC1_Transform(DES_ElemType key[64], DES_ElemType tempbts[56]) {
+static void DES_PC1_Transform(DES_ElemType key[64], DES_ElemType tempbts[56])
+{
     int cnt;
     for (cnt = 0; cnt < 56; cnt++) {
         tempbts[cnt] = key[DES_PC_1[cnt] - 1];
@@ -656,7 +675,8 @@ static void DES_PC1_Transform(DES_ElemType key[64], DES_ElemType tempbts[56]) {
 }
 
 /* 循环左移 */
-static void DES_ROL(DES_ElemType data[56], int time) {
+static void DES_ROL(DES_ElemType data[56], int time)
+{
     DES_ElemType temp[56];
 
     /* 保存将要循环移动到右边的位 */
@@ -673,7 +693,8 @@ static void DES_ROL(DES_ElemType data[56], int time) {
 }
 
 /* 密钥扩展方法 */
-static void DES_PC2_Transform(DES_ElemType key[56], DES_ElemType tempbts[48]) {
+static void DES_PC2_Transform(DES_ElemType key[56], DES_ElemType tempbts[48])
+{
     int cnt;
     for (cnt = 0; cnt < 48; cnt++) {
         tempbts[cnt] = key[DES_PC_2[cnt] - 1];
@@ -681,7 +702,8 @@ static void DES_PC2_Transform(DES_ElemType key[56], DES_ElemType tempbts[48]) {
 }
 
 /* 生成子密钥 */
-static void DES_MakeSubKeys(DES_ElemType key[64], DES_ElemType subKeys[16][48]) {
+static void DES_MakeSubKeys(DES_ElemType key[64], DES_ElemType subKeys[16][48])
+{
     DES_ElemType temp[56];
     int cnt;
     DES_PC1_Transform(key, temp); /* PC1置换 */
@@ -692,7 +714,8 @@ static void DES_MakeSubKeys(DES_ElemType key[64], DES_ElemType subKeys[16][48]) 
 }
 
 /* IP置换 */
-static void DES_IP_Transform(DES_ElemType data[64]) {
+static void DES_IP_Transform(DES_ElemType data[64])
+{
     int cnt;
     DES_ElemType temp[64];
     for (cnt = 0; cnt < 64; cnt++) {
@@ -702,7 +725,8 @@ static void DES_IP_Transform(DES_ElemType data[64]) {
 }
 
 /* IP逆置换 */
-static void DES_IP_1_Transform(DES_ElemType data[64]) {
+static void DES_IP_1_Transform(DES_ElemType data[64])
+{
     int cnt;
     DES_ElemType temp[64];
     for (cnt = 0; cnt < 64; cnt++) {
@@ -712,7 +736,8 @@ static void DES_IP_1_Transform(DES_ElemType data[64]) {
 }
 
 /* 扩展置换 */
-static void DES_E_Transform(DES_ElemType data[48]) {
+static void DES_E_Transform(DES_ElemType data[48])
+{
     int cnt;
     DES_ElemType temp[48];
     for (cnt = 0; cnt < 48; cnt++) {
@@ -722,7 +747,8 @@ static void DES_E_Transform(DES_ElemType data[48]) {
 }
 
 /* P置换 */
-static void DES_P_Transform(DES_ElemType data[32]) {
+static void DES_P_Transform(DES_ElemType data[32])
+{
     int cnt;
     DES_ElemType temp[32];
     for (cnt = 0; cnt < 32; cnt++) {
@@ -732,7 +758,8 @@ static void DES_P_Transform(DES_ElemType data[32]) {
 }
 
 /* 异或 */
-static void DES_XOR(DES_ElemType R[48], DES_ElemType L[48], int count) {
+static void DES_XOR(DES_ElemType R[48], DES_ElemType L[48], int count)
+{
     int cnt;
     for (cnt = 0; cnt < count; cnt++) {
         R[cnt] ^= L[cnt];
@@ -740,7 +767,8 @@ static void DES_XOR(DES_ElemType R[48], DES_ElemType L[48], int count) {
 }
 
 /* 交换 */
-static void DES_Swap(DES_ElemType left[32], DES_ElemType right[32]) {
+static void DES_Swap(DES_ElemType left[32], DES_ElemType right[32])
+{
     DES_ElemType temp[32];
     memcpy(temp, left, 32);
     memcpy(left, right, 32);
@@ -748,7 +776,8 @@ static void DES_Swap(DES_ElemType left[32], DES_ElemType right[32]) {
 }
 
 /* S盒置换 */
-static void DES_SBOX(DES_ElemType data[48]) {
+static void DES_SBOX(DES_ElemType data[48])
+{
     int cnt;
     int line, row, output;
     int cur1, cur2;
@@ -771,7 +800,8 @@ static void DES_SBOX(DES_ElemType data[48]) {
 }
 
 /* 加密单个分组 */
-static void DES_EncryptBlock(const DES_ElemType plainBlock[8], DES_ElemType subKeys[16][48], DES_ElemType cipherBlock[8]) {
+static void DES_EncryptBlock(const DES_ElemType plainBlock[8], DES_ElemType subKeys[16][48], DES_ElemType cipherBlock[8])
+{
     DES_ElemType plainBits[64];
     DES_ElemType copyRight[48];
     int cnt;
@@ -804,7 +834,8 @@ static void DES_EncryptBlock(const DES_ElemType plainBlock[8], DES_ElemType subK
 }
 
 /* 解密单个分组 */
-static void DES_DecryptBlock(const DES_ElemType cipherBlock[8], DES_ElemType subKeys[16][48], DES_ElemType plainBlock[8]) {
+static void DES_DecryptBlock(const DES_ElemType cipherBlock[8], DES_ElemType subKeys[16][48], DES_ElemType plainBlock[8])
+{
     DES_ElemType cipherBits[64];
     DES_ElemType copyRight[48];
     int cnt;
@@ -838,7 +869,8 @@ static void DES_DecryptBlock(const DES_ElemType cipherBlock[8], DES_ElemType sub
 
 #define DEFAULT_DES_KEY     ("3uB#*tTy")
 
-int DES__encrypt(const char* input, size_t cb, const char * key, char* output) {
+int DES__encrypt(const char* input, size_t cb, const char * key, char* output)
+{
     DES_ElemType keyBlock[8], bKey[64];
     DES_ElemType subKeys[16][48];
     size_t offset;
@@ -868,7 +900,8 @@ int DES__encrypt(const char* input, size_t cb, const char * key, char* output) {
     return (int)( cb - length);
 }
 
-int DES__decrypt(const char* input, size_t cb, const char key[8], char* output) {
+int DES__decrypt(const char* input, size_t cb, const char key[8], char* output)
+{
     DES_ElemType keyBlock[8], bKey[64];
     DES_ElemType subKeys[16][48];
     size_t offset;
@@ -919,7 +952,8 @@ static const int SHA256_KEY[64] = {
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
-unsigned char* sha256(const unsigned char* str, int orilen, unsigned char out[32]) {
+unsigned char* sha256(const unsigned char* str, int orilen, unsigned char out[32])
+{
     char *cursor, *end, *oriptr;
     int actlen, i, W[64], T1, T2;
     int hash[8];
