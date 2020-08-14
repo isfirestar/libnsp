@@ -23,6 +23,7 @@ enum log__levels {
 #define	kLogTarget_Sysmesg      (4)
 
 __interface__ int log__init();
+#define log_init log__init
 __interface__ int log__init2(const char *rootdir);
 __interface__ void log__write(const char *module, enum log__levels level, int target, const char *format, ...);
 __interface__ void log__save(const char *module, enum log__levels level, int target, const char *format, ...);

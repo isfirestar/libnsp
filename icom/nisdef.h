@@ -65,6 +65,8 @@ struct nis_inet_tuple_v4 {
 #define EVT_PRE_CLOSE   (0x0002)    /* ready to close*/
 #define EVT_CLOSED      (0x0003)    /* has been closed */
 #define EVT_RECEIVEDATA (0x0004)    /* receive data*/
+#define EVT_PIPEDATA    (0x0005)    /* event from manual pipe notification */
+
 /* TCP events */
 #define EVT_TCP_ACCEPTED    (0x0013)   /* has been Accepted */
 #define EVT_TCP_CONNECTED   (0x0014)  /* success connect to remote */

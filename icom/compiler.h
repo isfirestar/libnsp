@@ -255,11 +255,6 @@ typedef int boolean_t;
     #define barrier_data(ptr) barrier()
 #endif
 
-/* Unreachable code */
-#ifndef unreachable
-    #define unreachable() do { } while (1)
-#endif
-
 /**
  * fls - find last bit set
  * @x: the word to search
