@@ -21,49 +21,47 @@
 /* maximum asynchronous cache */
 #define MAXIMUM_LOGSAVE_COUNT       (500)
 
-/* maximum number of concurrent threads for log_safe */
-#define MAXIMUM_NUMBEROF_CONCURRENT_THREADS   (400)
-
 static const char *LOG__LEVEL_TXT[] = {
     "info", "warning", "error", "fatal", "trace"
 };
 
-typedef struct {
+struct log_file_descriptor {
     struct list_head link_;
     file_descriptor_t fd_;
     posix__systime_t filest_;
     int line_count_;
     char module_[LOG_MODULE_NAME_LEN];
-} log__file_describe_t;
+} ;
 
-static LIST_HEAD(__log__file_head); /* list<log__file_describe_t> */
+static LIST_HEAD(__log__file_head); /* list<struct log_file_descriptor> */
 static posix__pthread_mutex_t __log_file_lock;
 static char __log_root_directory[MAXPATH] = { 0 };
 
-typedef struct {
+struct log_async_node {
     struct list_head link_;
+    int inuse;
     char logstr_[MAXIMUM_LOG_BUFFER_SIZE];
     int target_;
     posix__systime_t logst_;
     int tid_;
     enum log__levels level_;
     char module_[LOG_MODULE_NAME_LEN];
-} log__async_node_t;
+};
 
-typedef struct {
+struct log_async_context {
     int pendding_;
-    struct list_head items_; /* list<log__async_node_t> */
+    struct list_head items_; /* list<struct log_async_node> */
     posix__pthread_mutex_t lock_;
     posix__pthread_t thread_;
     posix__waitable_handle_t alert_;
-    log__async_node_t *misc_memory;
+    struct log_async_node *misc_memory;
     uint64_t misc_index;    /* it must be unsigned int, if not, increase it may be get a negative number and cause the addressing of @misc_memory crash */
-} log__async_context_t;
+};
 
-static log__async_context_t __log_async;
+static struct log_async_context __log_async;
 
 static
-int log__create_file(log__file_describe_t *file, const char *path)
+int log__create_file(struct log_file_descriptor *file, const char *path)
 {
     if (!file || !path) {
         return -EINVAL;
@@ -73,7 +71,7 @@ int log__create_file(log__file_describe_t *file, const char *path)
 }
 
 static
-void log__close_file(log__file_describe_t *file)
+void log__close_file(struct log_file_descriptor *file)
 {
     if (file) {
         posix__file_close(file->fd_);
@@ -82,7 +80,7 @@ void log__close_file(log__file_describe_t *file)
 }
 
 static
-int log__fwrite(log__file_describe_t *file, const void *buf, int count)
+int log__fwrite(struct log_file_descriptor *file, const void *buf, int count)
 {
     int retval;
 
@@ -95,12 +93,12 @@ int log__fwrite(log__file_describe_t *file, const void *buf, int count)
 }
 
 static
-log__file_describe_t *log__attach(const posix__systime_t *currst, const char *module)
+struct log_file_descriptor *log__attach(const posix__systime_t *currst, const char *module)
 {
     char name[128], path[512], pename[128];
     int retval;
     struct list_head *pos;
-    log__file_describe_t *file;
+    struct log_file_descriptor *file;
 
     if (!currst || !module) {
         return NULL;
@@ -109,7 +107,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     file = NULL;
 
     list_for_each(pos, &__log__file_head) {
-        file = containing_record(pos, log__file_describe_t, link_);
+        file = containing_record(pos, struct log_file_descriptor, link_);
         if (0 == posix__strcasecmp(module, file->module_)) {
             break;
         }
@@ -119,10 +117,10 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
     do {
         /* empty object, it means this module is a new one */
         if (!file) {
-            if (NULL == (file = malloc(sizeof ( log__file_describe_t)))) {
+            if (NULL == (file = malloc(sizeof ( struct log_file_descriptor)))) {
                 return NULL;
             }
-            memset(file, 0, sizeof ( log__file_describe_t));
+            memset(file, 0, sizeof ( struct log_file_descriptor));
             file->fd_ = INVALID_FILE_DESCRIPTOR;
             list_add_tail(&file->link_, &__log__file_head);
             break;
@@ -171,7 +169,7 @@ log__file_describe_t *log__attach(const posix__systime_t *currst, const char *mo
 static
 void log__printf(const char *module, enum log__levels level, int target, const posix__systime_t *currst, const char* logstr, int cb)
 {
-    log__file_describe_t *fileptr;
+    struct log_file_descriptor *fileptr;
 
     if (target & kLogTarget_Filesystem) {
         posix__pthread_mutex_lock(&__log_file_lock);
@@ -217,7 +215,7 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 static
 void *log__asnyc_proc(void *argv)
 {
-    log__async_node_t *node;
+    struct log_async_node *node;
 
     while (posix__waitfor_waitable_handle(&__log_async.alert_, 10 * 1000) >= 0) {
         do {
@@ -226,7 +224,7 @@ void *log__asnyc_proc(void *argv)
             posix__pthread_mutex_lock(&__log_async.lock_);
             if (!list_empty(&__log_async.items_)) {
                 posix__atomic_dec(&__log_async.pendding_);
-                node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
+                node = list_first_entry(&__log_async.items_, struct log_async_node, link_);
                 assert(node);
                 list_del_init(&node->link_);
             }
@@ -234,6 +232,7 @@ void *log__asnyc_proc(void *argv)
 
             if (node) {
                 log__printf(node->module_, node->level_, node->target_, &node->logst_, node->logstr_, (int) strlen(node->logstr_));
+                posix__atomic_set(&node->inuse, 0);
             }
         } while (node);
     }
@@ -248,9 +247,9 @@ int log__async_init()
     int misc_memory_size;
 
     __log_async.pendding_ = 0;
-    misc_memory_size = MAXIMUM_LOGSAVE_COUNT * sizeof(log__async_node_t);
+    misc_memory_size = MAXIMUM_LOGSAVE_COUNT * sizeof(struct log_async_node);
 
-    __log_async.misc_memory = (log__async_node_t *)malloc(misc_memory_size);
+    __log_async.misc_memory = (struct log_async_node *)malloc(misc_memory_size);
     if (!__log_async.misc_memory) {
         return -ENOMEM;
     }
@@ -274,27 +273,32 @@ int log__async_init()
 }
 
 static
-void log__create_log_directory(const char *rootdir)
+void log__change_rootdir(const char *rootdir)
 {
 	size_t pos, i;
 
-    if (rootdir) {
-		posix__strcpy(__log_root_directory, cchof(__log_root_directory), rootdir);
-        pos = strlen(__log_root_directory);
-        for (i = pos - 1; i >= 0; i--) {
-            if (__log_root_directory[i] == POSIX__DIR_SYMBOL) {
-                __log_root_directory[i] = 0;
-            } else {
-                break;
-            }
-        }
+    if (0 != __log_root_directory[0]) {
+        return;
+    }
 
-		if (posix__pmkdir(__log_root_directory) < 0) {
-			posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
-		}
-	} else {
-		posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+    if (!rootdir) {
+        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+        return;
 	}
+
+    posix__strcpy(__log_root_directory, cchof(__log_root_directory), rootdir);
+    pos = strlen(__log_root_directory);
+    for (i = pos - 1; i >= 0; i--) {
+        if (__log_root_directory[i] == POSIX__DIR_SYMBOL) {
+            __log_root_directory[i] = 0;
+        } else {
+            break;
+        }
+    }
+
+    if (posix__pmkdir(__log_root_directory) < 0) {
+        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+    }
 }
 
 static int __log__init()
@@ -324,7 +328,7 @@ int log__init()
 
 int log__init2(const char *rootdir)
 {
-    log__create_log_directory(rootdir);
+    log__change_rootdir(rootdir);
 	return __log__init();
 }
 
@@ -362,7 +366,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
 void log__save(const char *module, enum log__levels level, int target, const char *format, ...)
 {
     va_list ap;
-    log__async_node_t *node;
+    struct log_async_node *node;
     uint64_t index;
     char pename[MAXPATH], *p;
 
@@ -371,7 +375,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     }
 
     /* securt check for the maximum pending amount */
-    if (posix__atomic_inc(&__log_async.pendding_) >= (MAXIMUM_LOGSAVE_COUNT - MAXIMUM_NUMBEROF_CONCURRENT_THREADS)) {
+    if (posix__atomic_inc(&__log_async.pendding_) >= MAXIMUM_LOGSAVE_COUNT) {
         posix__atomic_dec(&__log_async.pendding_);
         return;
     }
@@ -379,14 +383,15 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     /* atomic increase index */
     index = posix__atomic_inc64(&__log_async.misc_index);
     /* hash node at index of memory block */
-    node = (log__async_node_t *)&__log_async.misc_memory[index % MAXIMUM_LOGSAVE_COUNT];
+    node = (struct log_async_node *)&__log_async.misc_memory[index % MAXIMUM_LOGSAVE_COUNT];
+    /* this cache node are still in-use, can not cover it. */
+    if ( 1 == posix__atomic_get(&node->inuse) ) {
+        posix__atomic_dec64(&__log_async.misc_index);
+        return;
+    }
     node->target_ = target;
     node->level_ = level;
     posix__localtime(&node->logst_);
-
-    if (0 == __log_root_directory[0]) {
-        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
-    }
 
     if (module) {
         posix__strcpy(node->module_, cchof(node->module_), module);
@@ -409,7 +414,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
 
 void log__flush()
 {
-    log__async_node_t *node;
+    struct log_async_node *node;
 
     do {
         node = NULL;
@@ -417,7 +422,7 @@ void log__flush()
         posix__pthread_mutex_lock(&__log_async.lock_);
         if (!list_empty(&__log_async.items_)) {
             posix__atomic_dec(&__log_async.pendding_);
-            node = list_first_entry(&__log_async.items_, log__async_node_t, link_);
+            node = list_first_entry(&__log_async.items_, struct log_async_node, link_);
             assert(node);
             list_del_init(&node->link_);
         }
