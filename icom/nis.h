@@ -23,7 +23,7 @@ interface_format(int) tcp_connect(HTCPLINK link, const char* ipstr, uint16_t por
 interface_format(int) tcp_connect2(HTCPLINK link, const char* ipstr, uint16_t port);
 interface_format(int) tcp_listen(HTCPLINK link, int block);
 interface_format(int) tcp_write(HTCPLINK link, const void *origin, int size, const nis_serializer_t serializer);
-interface_format(int) tcp_write_pipe(HTCPLINK link, const void *pipedata, int cb);
+interface_format(int) tcp_awaken(HTCPLINK link, const void *pipedata, int cb);
 interface_format(int) tcp_getaddr(HTCPLINK link, int type, uint32_t* ip, uint16_t* port);
 interface_format(int) tcp_setopt(HTCPLINK link, int level, int opt, const char *val, int len);
 interface_format(int) tcp_getopt(HTCPLINK link, int level, int opt, char *val, int *len);
@@ -50,7 +50,7 @@ interface_format(void) udp_uninit();
 interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* ipstr, uint16_t port, int flag);
 interface_format(void) udp_destroy(HUDPLINK link);
 interface_format(int) udp_write(HUDPLINK link, const void *origin, int cb, const char* ipstr, uint16_t port, const nis_serializer_t serializer);
-interface_format(int) udp_write_pipe(HUDPLINK link, const void *pipedata, int cb);
+interface_format(int) udp_awaken(HUDPLINK link, const void *pipedata, int cb);
 interface_format(int) udp_getaddr(HUDPLINK link, uint32_t *ipv4, uint16_t *port);
 interface_format(int) udp_setopt(HUDPLINK link, int level, int opt, const char *val, int len);
 interface_format(int) udp_getopt(HUDPLINK link, int level, int opt, char *val, int *len);
