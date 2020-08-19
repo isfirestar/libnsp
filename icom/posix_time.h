@@ -23,6 +23,8 @@ uint64_t posix__gettick();
 /* obtain the wall clock on current system, in 100ns */
 __interface__
 uint64_t posix__clock_gettime();
+__interface__
+uint64_t posix__clock_monotonic();
 
 /* obtain absolute time elapse from 1970-01-01 00:00:00 000 to the time point of function invoked, in 100ns
  */

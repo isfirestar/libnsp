@@ -102,7 +102,7 @@ uint64_t posix__clock_gettime()
     return 0;
 }
 
-uint64_t misc_clock_monotonic()
+uint64_t posix__clock_monotonic()
 {
     return posix__clock_gettime();
 }
@@ -201,7 +201,7 @@ uint64_t posix__clock_gettime()
     return 0;
 }
 
-uint64_t misc_clock_monotonic()
+uint64_t posix__clock_monotonic()
 {
     /* gcc -lrt */
     struct timespec tsc;
