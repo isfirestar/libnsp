@@ -321,18 +321,18 @@ static int __log__init()
     return __inited__;
 }
 
-int log__init()
+PORTABLEIMPL(int) log__init()
 {
 	return log__init2(NULL);
 }
 
-int log__init2(const char *rootdir)
+PORTABLEIMPL(int) log__init2(const char *rootdir)
 {
     log__change_rootdir(rootdir);
 	return __log__init();
 }
 
-void log__write(const char *module, enum log__levels level, int target, const char *format, ...)
+PORTABLEIMPL(void) log__write(const char *module, enum log__levels level, int target, const char *format, ...)
 {
     va_list ap;
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
@@ -363,7 +363,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     }
 }
 
-void log__save(const char *module, enum log__levels level, int target, const char *format, ...)
+PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int target, const char *format, ...)
 {
     va_list ap;
     struct log_async_node *node;
@@ -412,7 +412,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     posix__sig_waitable_handle(&__log_async.alert_);
 }
 
-void log__flush()
+PORTABLEIMPL(void) log__flush()
 {
     struct log_async_node *node;
 

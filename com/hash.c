@@ -13,7 +13,7 @@
 #define VFN_OFFSET_BASIS32		((uint32_t)2166136261UL)
 #define VFN_OFFSET_BASIS64		((uint64_t)14695981039346656037ULL)
 
-uint32_t vfn1_h32(const unsigned char *key, int length)
+PORTABLEIMPL(uint32_t) vfn1_h32(const unsigned char *key, int length)
 {
 	uint32_t hash;
 	int i;
@@ -30,7 +30,7 @@ uint32_t vfn1_h32(const unsigned char *key, int length)
 	return hash;
 }
 
-uint64_t vfn1_h64(const unsigned char *key, int length)
+PORTABLEIMPL(uint64_t) vfn1_h64(const unsigned char *key, int length)
 {
 	uint64_t hash;
 	int i;
@@ -47,7 +47,7 @@ uint64_t vfn1_h64(const unsigned char *key, int length)
 	return hash;
 }
 
-uint32_t vfn1a_h32(const unsigned char *key, int length)
+PORTABLEIMPL(uint32_t) vfn1a_h32(const unsigned char *key, int length)
 {
 	uint32_t hash;
 	int i;
@@ -64,7 +64,7 @@ uint32_t vfn1a_h32(const unsigned char *key, int length)
 	return hash;
 }
 
-uint64_t vfn1a_h64(const unsigned char *key, int length)
+PORTABLEIMPL(uint64_t) vfn1a_h64(const unsigned char *key, int length)
 {
 	uint64_t hash;
 	int i;
@@ -106,7 +106,7 @@ static void make_crc32_table()
     }
 }
 
-uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size)
+PORTABLEIMPL(uint32_t) crc32(uint32_t crc, const unsigned char *string, uint32_t size)
 {
     if (1 == posix__atomic_inc(&is_crc32_inited)) {
         make_crc32_table();
@@ -124,7 +124,7 @@ uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size)
 /*--------------------------------------------BASE64--------------------------------------------*/
 static const char base64char[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-int base64_encode_len(int binlength)
+PORTABLEIMPL(int) base64_encode_len(int binlength)
 {
     int cnt_symbol_add;
 
@@ -135,7 +135,7 @@ int base64_encode_len(int binlength)
     return (binlength + cnt_symbol_add) / 3 * 4;
 }
 
-char *base64_encode( const char *bindata, int binlength, char *base64)
+PORTABLEIMPL(char *) base64_encode(const char *bindata, int binlength, char *base64)
 {
     int i, j;
     char current;
@@ -170,7 +170,7 @@ char *base64_encode( const char *bindata, int binlength, char *base64)
     return base64;
 }
 
-int base64_decode_len(const char * base64, int base64_len)
+PORTABLEIMPL(int) base64_decode_len(const char * base64, int base64_len)
 {
     int len;
 
@@ -184,7 +184,7 @@ int base64_decode_len(const char * base64, int base64_len)
     return len;
 }
 
-int base64_decode( const char * base64, int base64_len, char * bindata )
+PORTABLEIMPL(int) base64_decode(const char * base64, int base64_len, char * bindata)
 {
     int i, j, k;
     char temp[4];
@@ -230,7 +230,7 @@ int base64_decode( const char * base64, int base64_len, char * bindata )
     return j;
 }
 
-int base64__encode(const char *input, int incb, char *output, int *outcb)
+PORTABLEIMPL(int) base64__encode(const char *input, int incb, char *output, int *outcb)
 {
     char *base64ptr;
 
@@ -251,7 +251,7 @@ int base64__encode(const char *input, int incb, char *output, int *outcb)
     return (NULL == base64ptr) ? (-1) : (*outcb);
 }
 
-int base64__decode(const char *input, int incb, char *output, int *outcb)
+PORTABLEIMPL(int) base64__decode(const char *input, int incb, char *output, int *outcb)
 {
     if (!input || incb <= 0 || !outcb) {
         return -1;
@@ -454,7 +454,7 @@ void MD5__memset(uint8_t* output, int value, uint32_t len)
         ((char *) output)[i] = (char) value;
 }
 
-void MD5__Init(MD5_CTX *md5ctx)
+PORTABLEIMPL(void) MD5__Init(MD5_CTX *md5ctx)
 {
     md5ctx->count[0] = md5ctx->count[1] = 0;
     md5ctx->state[0] = 0x67452301;
@@ -471,7 +471,7 @@ void MD5__Init(MD5_CTX *md5ctx)
      * */
 }
 
-void MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen)
+PORTABLEIMPL(void) MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen)
 {
     uint32_t i, index, partLen;
 
@@ -498,7 +498,7 @@ void MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen)
     MD5__memcpy((uint8_t*) & md5ctx->buffer[index], (uint8_t*) & input[i], inputLen - i);
 }
 
-void MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16])
+PORTABLEIMPL(void) MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16])
 {
     uint8_t bits[8];
     uint32_t index, padLen;
@@ -869,7 +869,7 @@ static void DES_DecryptBlock(const DES_ElemType cipherBlock[8], DES_ElemType sub
 
 #define DEFAULT_DES_KEY     ("3uB#*tTy")
 
-int DES__encrypt(const char* input, size_t cb, const char * key, char* output)
+PORTABLEIMPL(int) DES__encrypt(const char* input, size_t cb, const char * key, char* output)
 {
     DES_ElemType keyBlock[8], bKey[64];
     DES_ElemType subKeys[16][48];
@@ -900,7 +900,7 @@ int DES__encrypt(const char* input, size_t cb, const char * key, char* output)
     return (int)( cb - length);
 }
 
-int DES__decrypt(const char* input, size_t cb, const char key[8], char* output)
+PORTABLEIMPL(int) DES__decrypt(const char* input, size_t cb, const char key[8], char* output)
 {
     DES_ElemType keyBlock[8], bKey[64];
     DES_ElemType subKeys[16][48];
@@ -952,7 +952,7 @@ static const int SHA256_KEY[64] = {
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 };
 
-unsigned char* sha256(const unsigned char* str, int orilen, unsigned char out[32])
+unsigned PORTABLEIMPL(char *) sha256(const unsigned char* str, int orilen, unsigned char out[32])
 {
     char *cursor, *end, *oriptr;
     int actlen, i, W[64], T1, T2;

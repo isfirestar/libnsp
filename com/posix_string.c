@@ -10,7 +10,7 @@
 #include <wchar.h>
 #endif
 
-int posix__strisdigit(const char *str, int len)
+PORTABLEIMPL(int) posix__strisdigit(const char *str, int len)
 {
     int i;
     if (len <= 0 || !str) {
@@ -24,7 +24,7 @@ int posix__strisdigit(const char *str, int len)
     return 0;
 }
 
-const char *posix__strerror()
+PORTABLEIMPL(const char *) posix__strerror()
 {
 #if _WIN32
     char errmsg[128];
@@ -43,7 +43,7 @@ const char *posix__strerror()
 #endif
 }
 
-const char *posix__strerror2(char *estr)
+PORTABLEIMPL(const char *) posix__strerror2(char *estr)
 {
 #if _WIN32
     if (!estr) {
@@ -65,7 +65,7 @@ const char *posix__strerror2(char *estr)
 #endif
 }
 
-char *posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt)
+PORTABLEIMPL(char *) posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt)
 {
 #if _WIN32
     errno_t e;
@@ -95,7 +95,7 @@ char *posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt)
 #endif
 }
 
-wchar_t *posix__wcsncpy(wchar_t *target, uint32_t cch, const wchar_t *src, uint32_t cnt)
+PORTABLEIMPL(wchar_t *) posix__wcsncpy(wchar_t *target, uint32_t cch, const wchar_t *src, uint32_t cnt)
 {
 #if _WIN32
     errno_t e = wcsncpy_s(target, cch, src, cnt);
@@ -121,7 +121,7 @@ wchar_t *posix__wcsncpy(wchar_t *target, uint32_t cch, const wchar_t *src, uint3
 #endif
 }
 
-char *posix__strtok(char *s, const char *delim, char **save_ptr)
+PORTABLEIMPL(char *) posix__strtok(char *s, const char *delim, char **save_ptr)
 {
 #if _WIN32
     return strtok_s(
@@ -131,7 +131,7 @@ char *posix__strtok(char *s, const char *delim, char **save_ptr)
             s, delim, save_ptr);
 }
 
-wchar_t *posix__wcstok(wchar_t *s, const wchar_t *delim, wchar_t **save_ptr)
+PORTABLEIMPL(wchar_t *) posix__wcstok(wchar_t *s, const wchar_t *delim, wchar_t **save_ptr)
 {
 #if _WIN32
     return wcstok_s(s, delim, save_ptr);
@@ -140,7 +140,7 @@ wchar_t *posix__wcstok(wchar_t *s, const wchar_t *delim, wchar_t **save_ptr)
 #endif
 }
 
-char *posix__strcpy(char *target, uint32_t cch, const char *src)
+PORTABLEIMPL(char *) posix__strcpy(char *target, uint32_t cch, const char *src)
 {
 #if _WIN32
     errno_t e;
@@ -175,7 +175,7 @@ char *posix__strcpy(char *target, uint32_t cch, const char *src)
 #endif
 }
 
-wchar_t *posix__wcscpy(wchar_t *target, uint32_t cch, const wchar_t *src)
+PORTABLEIMPL(wchar_t *) posix__wcscpy(wchar_t *target, uint32_t cch, const wchar_t *src)
 {
 #if _WIN32
     wcscpy_s(target, cch, src);
@@ -201,7 +201,7 @@ wchar_t *posix__wcscpy(wchar_t *target, uint32_t cch, const wchar_t *src)
 #endif
 }
 
-char *posix__strdup(const char *src)
+PORTABLEIMPL(char *) posix__strdup(const char *src)
 {
 	if (!src) {
 		return NULL;
@@ -214,7 +214,7 @@ char *posix__strdup(const char *src)
 #endif
 }
 
-wchar_t *posix__wcsdup(const wchar_t *src)
+PORTABLEIMPL(wchar_t *) posix__wcsdup(const wchar_t *src)
 {
 #if _WIN32
     return _wcsdup(src);
@@ -224,7 +224,7 @@ wchar_t *posix__wcsdup(const wchar_t *src)
 #endif
 }
 
-char *posix__strcat(char *target, uint32_t cch, const char *src)
+PORTABLEIMPL(char *) posix__strcat(char *target, uint32_t cch, const char *src)
 {
 #if _WIN32
     errno_t e = strcat_s(target, cch, src);
@@ -253,7 +253,7 @@ char *posix__strcat(char *target, uint32_t cch, const char *src)
 #endif
 }
 
-wchar_t *posix__wcscat(wchar_t *target, uint32_t cch, const wchar_t *src)
+PORTABLEIMPL(wchar_t *) posix__wcscat(wchar_t *target, uint32_t cch, const wchar_t *src)
 {
 #if _WIN32
     errno_t e = wcscat_s(target, cch, src);
@@ -281,7 +281,7 @@ wchar_t *posix__wcscat(wchar_t *target, uint32_t cch, const wchar_t *src)
 #endif
 }
 
-char *posix__strrev(char *src)
+PORTABLEIMPL(char *) posix__strrev(char *src)
 {
 #if _WIN32
 	if (!src) {
@@ -316,7 +316,7 @@ char *posix__strrev(char *src)
 #endif
 }
 
-wchar_t *posix__wcsrev(wchar_t *src)
+PORTABLEIMPL(wchar_t *) posix__wcsrev(wchar_t *src)
 {
 #if _WIN32
     return _wcsrev(src);
@@ -342,7 +342,7 @@ wchar_t *posix__wcsrev(wchar_t *src)
 #endif
 }
 
-int posix__vsnprintf(char *const target, uint32_t cch, const char *format, va_list ap)
+PORTABLEIMPL(int) posix__vsnprintf(char *const target, uint32_t cch, const char *format, va_list ap)
 {
 	if (!target || !format) {
 		return -1;
@@ -354,7 +354,7 @@ int posix__vsnprintf(char *const target, uint32_t cch, const char *format, va_li
 #endif
 }
 
-int posix__vsnwprintf(wchar_t * const target, uint32_t cch, const wchar_t *format, va_list ap)
+PORTABLEIMPL(int) posix__vsnwprintf(wchar_t * const target, uint32_t cch, const wchar_t *format, va_list ap)
 {
 #if _WIN32
     return _vsnwprintf_s(target, cch, _TRUNCATE, format, ap);
@@ -363,7 +363,7 @@ int posix__vsnwprintf(wchar_t * const target, uint32_t cch, const wchar_t *forma
 #endif
 }
 
-int posix__vsprintf(char *const target, uint32_t cch, const char *format, va_list ap)
+PORTABLEIMPL(int) posix__vsprintf(char *const target, uint32_t cch, const char *format, va_list ap)
 {
 	if (!target) {
 		return -1;
@@ -375,7 +375,7 @@ int posix__vsprintf(char *const target, uint32_t cch, const char *format, va_lis
 #endif
 }
 
-int posix__vswprintf(wchar_t * const target, uint32_t cch, const wchar_t *format, va_list ap)
+PORTABLEIMPL(int) posix__vswprintf(wchar_t * const target, uint32_t cch, const wchar_t *format, va_list ap)
 {
 #if _WIN32
     return vswprintf_s(target, cch, format, ap);
@@ -384,7 +384,7 @@ int posix__vswprintf(wchar_t * const target, uint32_t cch, const wchar_t *format
 #endif
 }
 
-int posix__sprintf(char *const target, uint32_t cch, const char *fmt, ...)
+PORTABLEIMPL(int) posix__sprintf(char *const target, uint32_t cch, const char *fmt, ...)
 {
     va_list ap;
 	if (!target || !fmt) {
@@ -396,7 +396,7 @@ int posix__sprintf(char *const target, uint32_t cch, const char *fmt, ...)
     return retval;
 }
 
-int posix__swprintf(wchar_t * const target, uint32_t cch, const wchar_t *fmt, ...)
+PORTABLEIMPL(int) posix__swprintf(wchar_t * const target, uint32_t cch, const wchar_t *fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -405,12 +405,12 @@ int posix__swprintf(wchar_t * const target, uint32_t cch, const wchar_t *fmt, ..
     return retval;
 }
 
-int posix__strcmp(const char *s1, const char *s2)
+PORTABLEIMPL(int) posix__strcmp(const char *s1, const char *s2)
 {
     return strcmp(s1, s2);
 }
 
-int posix__wcscmp(const wchar_t *s1, const wchar_t *s2)
+PORTABLEIMPL(int) posix__wcscmp(const wchar_t *s1, const wchar_t *s2)
 {
     return wcscmp(s1, s2);
 }
@@ -418,7 +418,7 @@ int posix__wcscmp(const wchar_t *s1, const wchar_t *s2)
 /****************************************************************************
  STRCASECMP() - Case-insensitive strcmp.
  *****************************************************************************/
-int posix__strcasecmp(const char* s1, const char* s2)
+PORTABLEIMPL(int) posix__strcasecmp(const char* s1, const char* s2)
 {
     char c1, c2;
     do {
@@ -429,7 +429,7 @@ int posix__strcasecmp(const char* s1, const char* s2)
     return tolower(c1) - tolower(c2);
 }
 
-int posix__wcscasecmp(const wchar_t* s1, const wchar_t* s2)
+PORTABLEIMPL(int) posix__wcscasecmp(const wchar_t* s1, const wchar_t* s2)
 {
     wchar_t c1, c2;
     do {
@@ -443,7 +443,7 @@ int posix__wcscasecmp(const wchar_t* s1, const wchar_t* s2)
 /****************************************************************************
  STRNCASECMP() - Case-insensitive strncmp.
  ****************************************************************************/
-int posix__strncasecmp(const char* s1, const char* s2, uint32_t n)
+PORTABLEIMPL(int) posix__strncasecmp(const char* s1, const char* s2, uint32_t n)
 {
     char c1, c2;
 
@@ -459,7 +459,7 @@ int posix__strncasecmp(const char* s1, const char* s2, uint32_t n)
     return tolower(c1) - tolower(c2);
 }
 
-int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n)
+PORTABLEIMPL(int) posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n)
 {
     wchar_t c1, c2;
 
@@ -475,7 +475,7 @@ int posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint32_t n)
     return tolower(c1) - tolower(c2);
 }
 
-char *posix__strtrim(char *str)
+PORTABLEIMPL(char *) posix__strtrim(char *str)
 {
     char *cursor;
     size_t i;
@@ -507,7 +507,7 @@ char *posix__strtrim(char *str)
     return cursor;
 }
 
-char *posix__strtrimdup(const char *origin)
+PORTABLEIMPL(char *) posix__strtrimdup(const char *origin)
 {
     char *dup, *trimmed;
 

@@ -20,7 +20,7 @@ uint32_t WINAPI ThProc(void* parameter)
     return 0;
 }
 
-int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg)
+PORTABLEIMPL(int) posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg)
 {
     HANDLE th;
 	struct WIN32_THPAR *thpar;
@@ -42,7 +42,7 @@ int posix__pthread_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), voi
     return 0;
 }
 
-int posix__pthread_self(posix__pthread_t *tidp)
+PORTABLEIMPL(int) posix__pthread_self(posix__pthread_t *tidp)
 {
     if (!tidp) {
         return -EINVAL;
@@ -52,7 +52,7 @@ int posix__pthread_self(posix__pthread_t *tidp)
     return (int)tidp->pid_;
 }
 
-int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg)
+PORTABLEIMPL(int) posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg)
 {
     HANDLE th;
 	struct WIN32_THPAR *thpar;
@@ -79,7 +79,7 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     return 0;
 }
 
-int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg)
+PORTABLEIMPL(int) posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg)
 {
     HANDLE th;
 	struct WIN32_THPAR *thpar;
@@ -109,7 +109,7 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     return 0;
 }
 
-int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask)
+PORTABLEIMPL(int) posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask)
 {
     if (0 == mask) {
         return -1;
@@ -122,12 +122,12 @@ int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask)
     return posix__makeerror(GetLastError());
 }
 
-int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask)
+PORTABLEIMPL(int) posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask)
 {
     return -1;
 }
 
-int posix__pthread_detach(posix__pthread_t * tidp) {
+PORTABLEIMPL(int) posix__pthread_detach(posix__pthread_t * tidp) {
     if (!tidp) {
         return -EINVAL;
     }
@@ -145,7 +145,7 @@ int posix__pthread_detach(posix__pthread_t * tidp) {
     return 0;
 }
 
-int posix__pthread_join(posix__pthread_t *tidp, void **exitCode)
+PORTABLEIMPL(int) posix__pthread_join(posix__pthread_t *tidp, void **exitCode)
 {
 	DWORD LocalExitCode;
 	if (!tidp) {
@@ -166,7 +166,7 @@ int posix__pthread_join(posix__pthread_t *tidp, void **exitCode)
 	return -1;
 }
 
-int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex)
+PORTABLEIMPL(int) posix__pthread_mutex_init(posix__pthread_mutex_t *mutex)
 {
     if (mutex) {
         InitializeCriticalSection(&mutex->handle_);
@@ -175,14 +175,14 @@ int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex)
 	return -EINVAL;
 }
 
-void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex)
+PORTABLEIMPL(void) posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex)
 {
     if (mutex) {
         EnterCriticalSection(&mutex->handle_);
     }
 }
 
-int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex)
+PORTABLEIMPL(int) posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex)
 {
     if (!mutex) {
 		return -EINVAL;
@@ -195,26 +195,26 @@ int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex)
 	return posix__makeerror(GetLastError());
 }
 
-int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires)
+PORTABLEIMPL(int) posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires)
 {
     return -1;
 }
 
-void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex)
+PORTABLEIMPL(void) posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex)
 {
     if (mutex) {
         LeaveCriticalSection(&mutex->handle_);
     }
 }
 
-void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex)
+PORTABLEIMPL(void) posix__pthread_mutex_release(posix__pthread_mutex_t *mutex)
 {
     if (mutex) {
         DeleteCriticalSection(&mutex->handle_);
     }
 }
 
-void posix__pthread_yield()
+PORTABLEIMPL(void) posix__pthread_yield()
 {
     SwitchToThread();
 }
@@ -464,7 +464,7 @@ void posix__pthread_yield() {
 
 #endif
 
-boolean_t posix__pthread_joinable(posix__pthread_t * tidp)
+PORTABLEIMPL(boolean_t) posix__pthread_joinable(posix__pthread_t * tidp)
 {
     if (!tidp) {
         return NO;

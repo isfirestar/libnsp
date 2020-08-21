@@ -1,7 +1,8 @@
-﻿#include "posix_thread.h"
-#include "cfifo.h"
+﻿#include "cfifo.h"
 
-struct ckfifo* ckfifo_init(void *buffer, uint32_t size)
+#include "posix_thread.h"
+
+PORTABLEIMPL(struct ckfifo*) ckfifo_init(void *buffer, uint32_t size)
 {
     struct ckfifo *ckfifo_ring_buffer;
 
@@ -29,7 +30,7 @@ struct ckfifo* ckfifo_init(void *buffer, uint32_t size)
     return ckfifo_ring_buffer;
 }
 
-void ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer)
+PORTABLEIMPL(void) ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer)
 {
     if (ckfifo_ring_buffer) {
         if (ckfifo_ring_buffer->spin_lock) {
@@ -39,12 +40,12 @@ void ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer)
     }
 }
 
-uint32_t __ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
+PORTABLEIMPL(uint32_t) __ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
 {
     return (ckfifo_ring_buffer->in - ckfifo_ring_buffer->out);
 }
 
-uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, unsigned char *buffer, uint32_t size)
+PORTABLEIMPL(uint32_t) __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, unsigned char *buffer, uint32_t size)
 {
     uint32_t len, n;
     assert(ckfifo_ring_buffer && buffer);
@@ -56,7 +57,7 @@ uint32_t __ckfifo_get(struct ckfifo *ckfifo_ring_buffer, unsigned char *buffer, 
     return n;
 }
 
-uint32_t __ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const unsigned char *buffer, uint32_t size)
+PORTABLEIMPL(uint32_t) __ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const unsigned char *buffer, uint32_t size)
 {
     uint32_t len, n;
     assert(ckfifo_ring_buffer && buffer);
@@ -68,7 +69,7 @@ uint32_t __ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const unsigned char *bu
     return n;
 }
 
-uint32_t ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
+PORTABLEIMPL(uint32_t) ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
 {
     uint32_t len;
     posix__pthread_mutex_lock(ckfifo_ring_buffer->spin_lock);
@@ -77,7 +78,7 @@ uint32_t ckfifo_len(const struct ckfifo *ckfifo_ring_buffer)
     return len;
 }
 
-uint32_t ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size)
+PORTABLEIMPL(uint32_t) ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size)
 {
     uint32_t n;
     posix__pthread_mutex_lock(ckfifo_ring_buffer->spin_lock);
@@ -89,7 +90,7 @@ uint32_t ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t si
     return n;
 }
 
-uint32_t ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
+PORTABLEIMPL(uint32_t) ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size)
 {
     uint32_t n;
     posix__pthread_mutex_lock(ckfifo_ring_buffer->spin_lock);

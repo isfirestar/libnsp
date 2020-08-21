@@ -8,7 +8,7 @@
 namespace nsp {
     namespace tcpip {
 
-        void STD_CALL swnet::tcp_io(const nis_event_t *tcp_evt, const void *data) {
+        void STDCALL swnet::tcp_io(const nis_event_t *tcp_evt, const void *data) {
             if (!tcp_evt) {
                 return;
             }
@@ -45,7 +45,7 @@ namespace nsp {
             }
         }
 
-        void STD_CALL swnet::udp_io(const nis_event_t *udp_evt, const void *data) {
+        void STDCALL swnet::udp_io(const nis_event_t *udp_evt, const void *data) {
             if (!udp_evt) {
                 return;
             }
@@ -75,7 +75,7 @@ namespace nsp {
             }
         }
 
-        void STD_CALL swnet::ecr(const char *host_event, const char *reserved, int rescb) {
+        void STDCALL swnet::ecr(const char *host_event, const char *reserved, int rescb) {
             if (host_event) {
                 log__save("nshost", kLogLevel_Trace, kLogTarget_Filesystem, "%s", host_event);
             }

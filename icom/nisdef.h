@@ -4,14 +4,6 @@
 #include "compiler.h"
 #include "object.h"
 
-#if defined __cplusplus
-    #define STD_C_FORMAT extern "C"
-    #include <cstdint>
-#else
-    #define STD_C_FORMAT
-    #include <stdint.h>
-#endif
-
 /* bytes size of network protocol layer */
 #define MTU       			               (1500)
 
@@ -29,17 +21,6 @@ typedef objhld_t HLNK;
 typedef HLNK HTCPLINK;
 typedef HLNK HUDPLINK;
 typedef HLNK HARPLINK;
-
-#if !defined visible
-    #if _WIN32
-        #define visible __declspec (dllexport)
-    #else
-        #define visible __attribute__((visibility("default")))
-    #endif
-#endif
-
-/* macro of export format */
-#define interface_format(_Ty) __extern__ visible _Ty STDCALL
 
 /* definitions of network address family */
 struct nis_endpoint_v4 {

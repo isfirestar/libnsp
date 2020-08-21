@@ -59,7 +59,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL parser(void *dat, int cb/*传入数据长度*/, int *pkt_cb/*返回包中记录的不含包头的长度, 也就是build阶段的指定长度*/) {
+                int STDCALL parser(void *dat, int cb/*传入数据长度*/, int *pkt_cb/*返回包中记录的不含包头的长度, 也就是build阶段的指定长度*/) {
                     if (!dat) return -1;
 
                     TCP_STREAM_HEADER head;
@@ -78,7 +78,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL builder(void *dat, int cb) {
+                int STDCALL builder(void *dat, int cb) {
                     PTCP_STREAM_HEADER TcpStreamHead = (PTCP_STREAM_HEADER) dat;
                     TcpStreamHead->wFlagHead = PACKET_FLAG_DATA;
                     TcpStreamHead->wPacketFlag = 0;
@@ -109,7 +109,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL parser(void *dat, int cb/*传入数据长度*/, int *pkt_cb/*返回包中记录的不含包头的长度, 也就是build阶段的指定长度*/) {
+                int STDCALL parser(void *dat, int cb/*传入数据长度*/, int *pkt_cb/*返回包中记录的不含包头的长度, 也就是build阶段的指定长度*/) {
                     if (!dat) return -1;
 
                     head_t *head = (head_t *) dat;
@@ -120,7 +120,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL builder(void *dat, int cb) {
+                int STDCALL builder(void *dat, int cb) {
                     if (cb > MAXIMUM_IEEE104_PKTCB) return -1;
 
                     head_t *head = (head_t *) dat;
@@ -149,7 +149,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL parser(void *dat, int cb, int *pkt_cb) {
+                int STDCALL parser(void *dat, int cb, int *pkt_cb) {
                     if (!dat) {
                         return -1;
                     }
@@ -163,7 +163,7 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL builder(void *dat, int cb) {
+                int STDCALL builder(void *dat, int cb) {
                     if (!dat || cb <= 0) {
                         return -1;
                     }
@@ -185,12 +185,12 @@ namespace nsp {
                 }
 
                 static
-                int STD_CALL parser(void *dat, int cb, int *pkt_cb) {
+                int STDCALL parser(void *dat, int cb, int *pkt_cb) {
                     return -1;
                 }
 
                 static
-                int STD_CALL builder(void *dat, int cb) {
+                int STDCALL builder(void *dat, int cb) {
                     return 0;
                 }
             };

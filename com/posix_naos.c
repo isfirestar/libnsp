@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch)
+PORTABLEIMPL(char *) posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch)
 {
     unsigned char ipByte[4];
     char seg[4][4];
@@ -27,7 +27,7 @@ char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch)
     return ipstr;
 }
 
-uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
+PORTABLEIMPL(uint32_t) posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
 {
     static const int BIT_MOV_FOR_LITTLE_ENDIAN[4] = {24, 16, 8, 0};
     static const int BIT_MOV_FOR_BIG_ENDIAN[4] = {0, 8, 16, 24};
@@ -76,7 +76,7 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
     return ipv4Digit;
 }
 
-uint32_t posix__chord32(uint32_t value)
+PORTABLEIMPL(uint32_t) posix__chord32(uint32_t value)
 {
     uint32_t dst = 0;
     int i;
@@ -88,7 +88,7 @@ uint32_t posix__chord32(uint32_t value)
     return dst;
 }
 
-uint16_t posix__chord16(uint16_t value)
+PORTABLEIMPL(uint16_t) posix__chord16(uint16_t value)
 {
     uint16_t dst = 0;
     int i;
@@ -100,7 +100,7 @@ uint16_t posix__chord16(uint16_t value)
     return dst;
 }
 
-boolean_t posix__is_effective_address_v4(const char *ipstr)
+PORTABLEIMPL(boolean_t) posix__is_effective_address_v4(const char *ipstr)
 {
     const char *cursor;
     int i, j, k;

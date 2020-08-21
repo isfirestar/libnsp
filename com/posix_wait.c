@@ -19,7 +19,7 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
 	return 0;
 }
 
-int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(int) posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
         return -EINVAL;
@@ -29,7 +29,7 @@ int posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter)
     return __posix_init_waitable_handle(waiter);
 }
 
-int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(int) posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
         return -EINVAL;
@@ -39,7 +39,7 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
 	return __posix_init_waitable_handle(waiter);
 }
 
-void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(void) posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (waiter) {
 		if (waiter->cond_) {
@@ -49,7 +49,7 @@ void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
     }
 }
 
-int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval)
+PORTABLEIMPL(int) posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interval)
 {
     DWORD waitRes;
 
@@ -78,7 +78,7 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
     }
 }
 
-int posix__sig_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(int) posix__sig_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (!waiter) {
         return -EINVAL;
@@ -91,7 +91,7 @@ int posix__sig_waitable_handle(posix__waitable_handle_t *waiter)
 	return SetEvent(waiter->cond_);
 }
 
-void posix__block_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(void) posix__block_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (waiter) {
 		if (waiter->cond_ && waiter->sync_ == 0) {
@@ -100,7 +100,7 @@ void posix__block_waitable_handle(posix__waitable_handle_t *waiter)
     }
 }
 
-int posix__delay_execution( uint64_t us )
+PORTABLEIMPL(int) posix__delay_execution(uint64_t us)
 {
     typedef NTSTATUS( WINAPI * DelayExecution )( BOOL bAlertable, PLARGE_INTEGER pTimeOut );
     static DelayExecution ZwDelayExecution = NULL;
@@ -363,7 +363,7 @@ int posix__delay_execution( uint64_t us )
 #endif
 
 /*--------------------------------------------------------------------------------------------------------------------------*/
-int posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waiter)
+PORTABLEIMPL(int) posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waiter)
 {
     posix__waitable_handle_t *inner;
     int retval;
@@ -386,7 +386,7 @@ int posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waite
     return 0;
 }
 
-int posix__allocate_notification_waitable_handle(posix__waitable_handle_t **waiter)
+PORTABLEIMPL(int) posix__allocate_notification_waitable_handle(posix__waitable_handle_t **waiter)
 {
     posix__waitable_handle_t *inner;
     int retval;
@@ -409,7 +409,7 @@ int posix__allocate_notification_waitable_handle(posix__waitable_handle_t **wait
     return 0;
 }
 
-void posix__release_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(void) posix__release_waitable_handle(posix__waitable_handle_t *waiter)
 {
     if (waiter) {
         posix__uninit_waitable_handle(waiter);
@@ -417,12 +417,12 @@ void posix__release_waitable_handle(posix__waitable_handle_t *waiter)
     }
 }
 
-void posix__reset_waitable_handle(posix__waitable_handle_t *waiter)
+PORTABLEIMPL(void) posix__reset_waitable_handle(posix__waitable_handle_t *waiter)
 {
     posix__block_waitable_handle(waiter);
 }
 
-void posix__hang()
+PORTABLEIMPL(void) posix__hang()
 {
     DECLARE_SYNC_WAITER(waiter);
     posix__waitfor_waitable_handle(&waiter, -1);

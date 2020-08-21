@@ -17,17 +17,12 @@ struct __MD5_CTX {
 typedef struct __MD5_CTX MD5_CTX;
 
 /*--------------------------------------------VFN1/VFN1a--------------------------------------------*/
-__interface__
-uint32_t vfn1_h32( const unsigned char *key, int length );
-__interface__
-uint64_t vfn1_h64( const unsigned char *key, int length );
-__interface__
-uint32_t vfn1a_h32( const unsigned char *key, int length );
-__interface__
-uint64_t vfn1a_h64( const unsigned char *key, int length );
+PORTABLEAPI(uint32_t) vfn1_h32( const unsigned char *key, int length );
+PORTABLEAPI(uint64_t) vfn1_h64( const unsigned char *key, int length );
+PORTABLEAPI(uint32_t) vfn1a_h32( const unsigned char *key, int length );
+PORTABLEAPI(uint64_t) vfn1a_h64( const unsigned char *key, int length );
 
-__interface__
-uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size);
+PORTABLEAPI(uint32_t) crc32(uint32_t crc, const unsigned char *string, uint32_t size);
 
 /*
  * base64_encode 例程对 @incb 长度的 @input 缓冲区作 BASE64 加密操作
@@ -47,28 +42,19 @@ uint32_t crc32(uint32_t crc, const unsigned char *string, uint32_t size);
  * 返回:
  * 通用判定
  */
-__interface__
-int base64_encode_len(int binlength);
-__interface__
-char *base64_encode( const char *bindata, int binlength, char *base64);
-__interface__
-int base64_decode_len(const char * base64, int base64_len);
-__interface__
-int base64_decode( const char *base64, int base64_len, char *bindata);
+PORTABLEAPI(int) base64_encode_len(int binlength);
+PORTABLEAPI(char *) base64_encode( const char *bindata, int binlength, char *base64);
+PORTABLEAPI(int) base64_decode_len(const char * base64, int base64_len);
+PORTABLEAPI(int) base64_decode( const char *base64, int base64_len, char *bindata);
 /* for compatible reason, retain the older interface definition */
-__interface__
-int base64__encode(const char *input, int incb, char *output, int *outcb);
-__interface__
-int base64__decode(const char *input, int incb, char *output, int *outcb);
+PORTABLEAPI(int) base64__encode(const char *input, int incb, char *output, int *outcb);
+PORTABLEAPI(int) base64__decode(const char *input, int incb, char *output, int *outcb);
 
 
 /* MD5 calc */
-__interface__
-void MD5__Init(MD5_CTX *md5ctx);
-__interface__
-void MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen);
-__interface__
-void MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16]);
+PORTABLEAPI(void) MD5__Init(MD5_CTX *md5ctx);
+PORTABLEAPI(void) MD5__Update(MD5_CTX *md5ctx, const uint8_t *input, uint32_t inputLen);
+PORTABLEAPI(void) MD5__Final(MD5_CTX *md5ctx, uint8_t digest[16]);
 
 /*
 DES__encrypt 过程， 使用DES对内存加密
@@ -83,17 +69,14 @@ DES__encrypt 过程， 使用DES对内存加密
  * @key 可以为NULL, 如果@key为NULL, 则使用默认密钥
  * @cb 必须8字节对齐
  */
-__interface__
-int DES__encrypt(const char* input,size_t cb,const char key[8], char* output);
-__interface__
-int DES__decrypt(const char* input,size_t cb,const char key[8], char* output);
+PORTABLEAPI(int) DES__encrypt(const char* input,size_t cb,const char key[8], char* output);
+PORTABLEAPI(int) DES__decrypt(const char* input,size_t cb,const char key[8], char* output);
 
 /**
  sha256 过程对 @orilen 长度的 @input 数据进行sha256加密， 加密结果通过 @out反馈给调用线程
  操作成功返回值等于 @out 的指针， 否则为NULL
  http://www.ttmd5.com/hash.php?type=9 这里可以在线验证
  **/
-__interface__
-unsigned char* sha256(const unsigned char* input, int orilen, unsigned char out[32]);
+PORTABLEAPI(unsigned char*) sha256(const unsigned char* input, int orilen, unsigned char out[32]);
 
 #endif

@@ -19,7 +19,7 @@ static struct avltree_node_t *avlsinglerotateright(struct avltree_node_t *tree);
 static struct avltree_node_t *avldoublerotateleft(struct avltree_node_t *tree);
 static struct avltree_node_t *avldoublerotateright(struct avltree_node_t *tree);
 
-struct avltree_node_t *
+PORTABLEIMPL(struct avltree_node_t * )
 avlinsert(struct avltree_node_t *tree, struct avltree_node_t *node,
         int( *compare)(const void *, const void *))
 {
@@ -62,7 +62,7 @@ avlinsert(struct avltree_node_t *tree, struct avltree_node_t *node,
     return tree;
 }
 
-struct avltree_node_t *
+PORTABLEIMPL(struct avltree_node_t * )
 avlremove(struct avltree_node_t *tree, struct avltree_node_t *node, struct avltree_node_t **rmnode,
         int( *compare)(const void *, const void *))
 {
@@ -172,7 +172,7 @@ avlremove(struct avltree_node_t *tree, struct avltree_node_t *node, struct avltr
     return tree;
 }
 
-struct avltree_node_t *
+PORTABLEIMPL(struct avltree_node_t * )
 avlsearch(struct avltree_node_t *tree, struct avltree_node_t *node,
         int( *compare)(const void *, const void *))
 {
@@ -193,7 +193,7 @@ avlsearch(struct avltree_node_t *tree, struct avltree_node_t *node,
     return NULL;
 }
 
-struct avltree_node_t *
+PORTABLEIMPL(struct avltree_node_t * )
 avlgetmin(struct avltree_node_t *tree)
 {
     struct avltree_node_t *t;
@@ -206,7 +206,7 @@ avlgetmin(struct avltree_node_t *tree)
     return t;
 }
 
-struct avltree_node_t *
+PORTABLEIMPL(struct avltree_node_t * )
 avlgetmax(struct avltree_node_t *tree)
 {
     struct avltree_node_t *t;

@@ -19,17 +19,17 @@
  *  1. instantiation must use @shared_ptr object, initial by using @std::make_shared implement
  *  2. framwork will keep one reference count of object after @create framwork method success, it means
  *      object can not automatic deconstruction by zeroing reference count in only user layer, unless @close framwork method called
- *  3. It is strong recommended to use the @proto_interface framework to serialize or build network packets. 
+ *  3. It is strong recommended to use the @proto_interface framework to serialize or build network packets.
  *      and than post  the packets by calling framework method @psend, it is simpler and more reliable
- *  4. receive data by overwrite framework virtual method @on_recvdata(const std::string &) associated TCP protocol or 
+ *  4. receive data by overwrite framework virtual method @on_recvdata(const std::string &) associated TCP protocol or
  *      @on_recvdata(const std::string &, const endpoint &) associated UDP protocol
- *  5. during receive proce, the thread layout of Linux is very difference from MS-WINDOWNS, 
- *      applications do not need to pay special attention to the way these threads are laid out, 
+ *  5. during receive proce, the thread layout of Linux is very difference from MS-WINDOWNS,
+ *      applications do not need to pay special attention to the way these threads are laid out,
  *      however, it is recommended to switch threads to complete the long time-consuming operations, such as disk-IO or any wait method
  *
  *  Terminology:
  *
- *  Session: 
+ *  Session:
  *      A stateful interaction between a Client and a Server. Some Sessions last only as long as the Network
  *       Connection, others can span multiple consecutive Network Connections between a Client and a Server
  */
@@ -37,7 +37,7 @@
 namespace nsp {
     namespace tcpip {
 
-        inline int STD_CALL packet_serialize(unsigned char *dest, const void *origin, int cb) {
+        inline int STDCALL packet_serialize(unsigned char *dest, const void *origin, int cb) {
             const proto::proto_interface *package = (const proto::proto_interface *)origin;
             return (NULL != package->serialize(dest)) ? 0 : -1;
         }
@@ -58,7 +58,7 @@ namespace nsp {
 
                 try {
                     sptr->bind_object(shared_from_this());
-                    
+
                     // the server can declined the establish request when initial connected
                     if (sptr->on_established() < 0){
                         throw -ENETRESET;
@@ -205,7 +205,7 @@ namespace nsp {
 				;
             }
 
-            // if using @proto::proto_interface mode to serialize or deserialize, 
+            // if using @proto::proto_interface mode to serialize or deserialize,
             // calling thread can send packets direct by @proto::proto_interface object
             // this operation is recommended by framework
             int psend(const proto::proto_interface *package) {
@@ -219,7 +219,7 @@ namespace nsp {
             virtual void bind_object(const std::shared_ptr<obtcp> &object) override final {
                 tcp_application_server_ = std::static_pointer_cast< tcp_application_service<tcp_application_client < T>> >(object);
             }
-            
+
             // overwrite this virtual method to handle the event of inital connection created
             // return negative integer value to cancel the enstablished link
             virtual int on_established() {
@@ -242,7 +242,7 @@ namespace nsp {
 			// syn request in cleint session? this maybe a fatal error.
             virtual void on_accepted(HTCPLINK lnk) override final {
                 abort();
-            } 
+            }
 
             virtual void on_disconnected(const HTCPLINK previous) {
 				;

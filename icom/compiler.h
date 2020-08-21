@@ -10,12 +10,31 @@
 #include <stddef.h>
 #include <assert.h>
 
+/* windows cl compiler macros:
+_M_IX86 : 32bit processor
+_M_AMD64 : 64bit AMD processor (befor VC2008)
+_M_X64 : 64bit AMD and Intel processor(after VC2008)
+_M_IX64 : 64bit Itanium processor
+_WIN32 : Defined for both 32bit and 64bit processor
+_WIN64 : Defined for 64bit processor
+*/
+
 #if !defined STDCALL
-    #if _WIN32
+	#if _WIN32 && _M_X64
         #define STDCALL __stdcall
     #else
         #define STDCALL
     #endif
+#endif
+
+typedef int boolean_t;
+#if !defined __true__
+    #define __true__ (1)
+    #define YES     ((boolean_t)__true__)
+#endif
+#if !defined __false__
+    #define __false__ (0)
+    #define NO    ((boolean_t)__false__)
 #endif
 
 #if !defined __extern__
@@ -34,12 +53,8 @@
     #endif
 #endif
 
-#if !defined EXPORT
-    #define EXPORT __export__
-#endif
-
-#define __interface__  __extern__ __export__
-
+#define PORTABLEAPI(__type__)  __extern__ __export__ __type__ STDCALL
+#define PORTABLEIMPL(__type__)   __type__ STDCALL
 
 #if !defined __ALIGNED_SIZE__
     #define __ALIGNED_SIZE__        (sizeof(int))
@@ -104,16 +119,6 @@
         #define POSIX__DIR_SYMBOL       '/'
         #define POSIX__DIR_SYMBOL_STR   "/"
     #endif
-#endif
-
-typedef int boolean_t;
-#if !defined __true__
-    #define __true__ (1)
-    #define YES     ((boolean_t)__true__)
-#endif
-#if !defined __false__
-    #define __false__ (0)
-    #define NO    ((boolean_t)__false__)
 #endif
 
 #if !defined INET_ADDRSTRLEN

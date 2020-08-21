@@ -1,5 +1,7 @@
-#if !defined LIB_C_KFIFO_H
-#define LIB_C_KFIFO_H
+#if !defined LIB_CKFIFO_H
+#define LIB_CKFIFO_H
+
+#include <stdint.h>
 
 #include "compiler.h"
 
@@ -11,11 +13,10 @@ struct ckfifo {
     void 		   *spin_lock;
 };
 
-__interface__ struct ckfifo* ckfifo_init(void *buffer, uint32_t size);
-__interface__ void ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer);
-__interface__ uint32_t ckfifo_len(const struct ckfifo *ckfifo_ring_buffer);
-__interface__ uint32_t ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size);
-__interface__ uint32_t ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size);
-
+PORTABLEAPI(struct ckfifo*) ckfifo_init(void *buffer, uint32_t size);
+PORTABLEAPI(void) ckfifo_uninit(struct ckfifo *ckfifo_ring_buffer);
+PORTABLEAPI(uint32_t) ckfifo_len(const struct ckfifo *ckfifo_ring_buffer);
+PORTABLEAPI(uint32_t) ckfifo_get(struct ckfifo *ckfifo_ring_buffer, void *buffer, uint32_t size);
+PORTABLEAPI(uint32_t) ckfifo_put(struct ckfifo *ckfifo_ring_buffer, const void *buffer, uint32_t size);
 
 #endif

@@ -115,8 +115,7 @@ static struct _object_manager g_objmgr = {
 };
 #endif
 
-static
-struct avltree_node_t **__hld2root(objhld_t hld)
+static struct avltree_node_t **__hld2root(objhld_t hld)
 {
     struct avltree_node_t **root;
     objhld_t idx;
@@ -135,8 +134,7 @@ struct avltree_node_t **__hld2root(objhld_t hld)
     return root;
 }
 
-static
-objhld_t __objtabinst(object_t *obj)
+static objhld_t __objtabinst(object_t *obj)
 {
     objhld_t hld;
     struct avltree_node_t **root;
@@ -170,8 +168,7 @@ objhld_t __objtabinst(object_t *obj)
     return obj->hld_;
 }
 
-static
-int __objtabrmve(objhld_t hld, object_t **removed)
+static int __objtabrmve(objhld_t hld, object_t **removed)
 {
 	object_t node;
     struct avltree_node_t **root, *rmnode;
@@ -192,8 +189,7 @@ int __objtabrmve(objhld_t hld, object_t **removed)
     return ((NULL == rmnode) ? (-1) : (0));
 }
 
-static
-object_t *__objtabsrch(const objhld_t hld)
+static object_t *__objtabsrch(const objhld_t hld)
 {
     object_t node;
     struct avltree_node_t **root, *target;
@@ -211,8 +207,7 @@ object_t *__objtabsrch(const objhld_t hld)
     return containing_record(target, object_t, hash_clash_);
 }
 
-static
-void __objtagfree(object_t *target)
+static void __objtagfree(object_t *target)
 {
     /* release the object context and free target memory when object removed from table
         call the unload routine if not null */
@@ -224,7 +219,7 @@ void __objtagfree(object_t *target)
     }
 }
 
-void objinit()
+PORTABLEIMPL(void) objinit()
 {
     static long inited = 0;
     if ( 1 == INCREASEMENT(&inited)) {
@@ -234,12 +229,12 @@ void objinit()
     }
 }
 
-void objuninit()
+PORTABLEIMPL(void) objuninit()
 {
     mutex_uninit(&g_objmgr.object_locker_);
 }
 
-objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx)
+PORTABLEIMPL(objhld_t) objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader, const void *initctx, unsigned int cbctx)
 {
     object_t *obj;
 
@@ -281,12 +276,12 @@ objhld_t objallo(int user_size, objinitfn_t initializer, objuninitfn_t unloader,
     return obj->hld_;
 }
 
-objhld_t objallo2(int user_size)
+PORTABLEIMPL(objhld_t) objallo2(int user_size)
 {
     return objallo(user_size, NULL, NULL, NULL, 0);
 }
 
-void *objrefr(objhld_t hld)
+PORTABLEIMPL(void *) objrefr(objhld_t hld)
 {
     object_t *obj;
     unsigned char *user_data;
@@ -308,7 +303,7 @@ void *objrefr(objhld_t hld)
     return (void *)user_data;
 }
 
-void *objreff(objhld_t hld)
+PORTABLEIMPL(void *) objreff(objhld_t hld)
 {
     object_t *obj;
     unsigned char *user_data;
@@ -334,7 +329,7 @@ void *objreff(objhld_t hld)
     return (void *)user_data;
 }
 
-void objdefr(objhld_t hld)
+PORTABLEIMPL(void) objdefr(objhld_t hld)
 {
     object_t *obj, *removed;
 
@@ -365,7 +360,7 @@ void objdefr(objhld_t hld)
     }
 }
 
-void objclos(objhld_t hld)
+PORTABLEIMPL(void) objclos(objhld_t hld)
 {
     object_t *removed, *obj;
 
@@ -389,9 +384,3 @@ void objclos(objhld_t hld)
         __objtagfree(removed);
     }
 }
-
-void objregs()
-{
-    ;
-}
-

@@ -15,18 +15,18 @@
 
 #include "nisdef.h"
 
-interface_format(int) tcp_init();
-interface_format(void) tcp_uninit();
-interface_format(HTCPLINK) tcp_create(tcp_io_callback_t callback, const char* ipstr, uint16_t port);
-interface_format(void) tcp_destroy(HTCPLINK link);
-interface_format(int) tcp_connect(HTCPLINK link, const char* ipstr, uint16_t port);
-interface_format(int) tcp_connect2(HTCPLINK link, const char* ipstr, uint16_t port);
-interface_format(int) tcp_listen(HTCPLINK link, int block);
-interface_format(int) tcp_write(HTCPLINK link, const void *origin, int size, const nis_serializer_t serializer);
-interface_format(int) tcp_awaken(HTCPLINK link, const void *pipedata, int cb);
-interface_format(int) tcp_getaddr(HTCPLINK link, int type, uint32_t* ip, uint16_t* port);
-interface_format(int) tcp_setopt(HTCPLINK link, int level, int opt, const char *val, int len);
-interface_format(int) tcp_getopt(HTCPLINK link, int level, int opt, char *val, int *len);
+PORTABLEAPI(int) tcp_init();
+PORTABLEAPI(void) tcp_uninit();
+PORTABLEAPI(HTCPLINK) tcp_create(tcp_io_callback_t callback, const char* ipstr, uint16_t port);
+PORTABLEAPI(void) tcp_destroy(HTCPLINK link);
+PORTABLEAPI(int) tcp_connect(HTCPLINK link, const char* ipstr, uint16_t port);
+PORTABLEAPI(int) tcp_connect2(HTCPLINK link, const char* ipstr, uint16_t port);
+PORTABLEAPI(int) tcp_listen(HTCPLINK link, int block);
+PORTABLEAPI(int) tcp_write(HTCPLINK link, const void *origin, int size, const nis_serializer_t serializer);
+PORTABLEAPI(int) tcp_awaken(HTCPLINK link, const void *pipedata, int cb);
+PORTABLEAPI(int) tcp_getaddr(HTCPLINK link, int type, uint32_t* ip, uint16_t* port);
+PORTABLEAPI(int) tcp_setopt(HTCPLINK link, int level, int opt, const char *val, int len);
+PORTABLEAPI(int) tcp_getopt(HTCPLINK link, int level, int opt, char *val, int *len);
 
 /*  the following are some obsolete interface definition:
 	NOTE: New applications should use the @nis_cntl interface (available since version 9.8.1),
@@ -35,51 +35,51 @@ interface_format(int) tcp_getopt(HTCPLINK link, int level, int opt, char *val, i
 	@NI_GETTST to instead @tcp_gettst
 	@NI_SETATTR to instead @tcp_setattr
 	@NI_GETATTR to instead @tcp_getattr */
-interface_format(int) tcp_settst(HTCPLINK link, const tst_t *tst);
-interface_format(int) tcp_gettst(HTCPLINK link, tst_t *tst);
-interface_format(int) tcp_setattr(HTCPLINK link, int cmd, int enable);
-interface_format(int) tcp_getattr(HTCPLINK link, int cmd, int *enabled);
+PORTABLEAPI(int) tcp_settst(HTCPLINK link, const tst_t *tst);
+PORTABLEAPI(int) tcp_gettst(HTCPLINK link, tst_t *tst);
+PORTABLEAPI(int) tcp_setattr(HTCPLINK link, int cmd, int enable);
+PORTABLEAPI(int) tcp_getattr(HTCPLINK link, int cmd, int *enabled);
 
-interface_format(int) udp_init();
-interface_format(void) udp_uninit();
+PORTABLEAPI(int) udp_init();
+PORTABLEAPI(void) udp_uninit();
 
 /* NOTE: New applications should NOT set the @flag when calling @udp_create  (available since version 9.8.1),
  *			every udp link can change the attributes(flag) any time by interface @nis_cntl call with parameter @NI_SETATTR,
  *			more useful: that broadcast attributes can now be cancelled.
  */
-interface_format(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* ipstr, uint16_t port, int flag);
-interface_format(void) udp_destroy(HUDPLINK link);
-interface_format(int) udp_write(HUDPLINK link, const void *origin, int cb, const char* ipstr, uint16_t port, const nis_serializer_t serializer);
-interface_format(int) udp_awaken(HUDPLINK link, const void *pipedata, int cb);
-interface_format(int) udp_getaddr(HUDPLINK link, uint32_t *ipv4, uint16_t *port);
-interface_format(int) udp_setopt(HUDPLINK link, int level, int opt, const char *val, int len);
-interface_format(int) udp_getopt(HUDPLINK link, int level, int opt, char *val, int *len);
-interface_format(int) udp_joingrp(HUDPLINK link, const char *ipstr, uint16_t port);
-interface_format(int) udp_dropgrp(HUDPLINK link);
+PORTABLEAPI(HUDPLINK) udp_create(udp_io_callback_t user_callback, const char* ipstr, uint16_t port, int flag);
+PORTABLEAPI(void) udp_destroy(HUDPLINK link);
+PORTABLEAPI(int) udp_write(HUDPLINK link, const void *origin, int cb, const char* ipstr, uint16_t port, const nis_serializer_t serializer);
+PORTABLEAPI(int) udp_awaken(HUDPLINK link, const void *pipedata, int cb);
+PORTABLEAPI(int) udp_getaddr(HUDPLINK link, uint32_t *ipv4, uint16_t *port);
+PORTABLEAPI(int) udp_setopt(HUDPLINK link, int level, int opt, const char *val, int len);
+PORTABLEAPI(int) udp_getopt(HUDPLINK link, int level, int opt, char *val, int *len);
+PORTABLEAPI(int) udp_joingrp(HUDPLINK link, const char *ipstr, uint16_t port);
+PORTABLEAPI(int) udp_dropgrp(HUDPLINK link);
 
 #if _WIN32
-interface_format(int) udp_initialize_grp(HUDPLINK link, packet_grp_t *grp);
-interface_format(void) udp_release_grp(packet_grp_t *grp);
-interface_format(int) udp_raise_grp(HUDPLINK link, const char *ipstr, uint16_t port);
-interface_format(void) udp_detach_grp(HUDPLINK link);
-interface_format(int) udp_write_grp(HUDPLINK link, packet_grp_t *grp);
+PORTABLEAPI(int) udp_initialize_grp(HUDPLINK link, packet_grp_t *grp);
+PORTABLEAPI(void) udp_release_grp(packet_grp_t *grp);
+PORTABLEAPI(int) udp_raise_grp(HUDPLINK link, const char *ipstr, uint16_t port);
+PORTABLEAPI(void) udp_detach_grp(HUDPLINK link);
+PORTABLEAPI(int) udp_write_grp(HUDPLINK link, packet_grp_t *grp);
 #endif
 
 /* NOTE: Before using ARP low level network protocol, application MUST call @udp_init method
  *			any ARP io/file-descriptor willbe bind on UDP threads.
  *			ensure that calling thread HAVE root/administrator access right/equal or or higher execution priority
  */
-interface_format(HARPLINK) arp_create(arp_io_callback_t user_callback, const char *ipstr);
-interface_format(int) arp_nrequest(HARPLINK link, uint32_t target);
-interface_format(int) arp_request(HARPLINK link, const char *target);
-interface_format(void) arp_destroy(HARPLINK link);
+PORTABLEAPI(HARPLINK) arp_create(arp_io_callback_t user_callback, const char *ipstr);
+PORTABLEAPI(int) arp_nrequest(HARPLINK link, uint32_t target);
+PORTABLEAPI(int) arp_request(HARPLINK link, const char *target);
+PORTABLEAPI(void) arp_destroy(HARPLINK link);
 
-interface_format(int) nis_getver(swnet_version_t *version);
+PORTABLEAPI(int) nis_getver(swnet_version_t *version);
 /* parse the domain name, get the first parse result of obtained, convert it to Little-Endian*/
-interface_format(int) nis_gethost(const char *name, uint32_t *ipv4);
-interface_format(char *) nis_lgethost(char *name, int cb);
+PORTABLEAPI(int) nis_gethost(const char *name, uint32_t *ipv4);
+PORTABLEAPI(char *) nis_lgethost(char *name, int cb);
 /* set/change ECR(event callback routine) for nshost use, return the previous ecr address. */
-interface_format(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr);
+PORTABLEAPI(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr);
 
 /* use @nis_getifmisc to view all local network adapter information
 	the @ifv pointer must large enough and specified by @*cbifv to storage all device interface info
@@ -109,7 +109,7 @@ interface_format(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr)
 			}
 		}
 	 ] */
-interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
+PORTABLEAPI(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
 
 /*
  *	NI_SETATTR(int)
@@ -130,6 +130,6 @@ interface_format(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
  *		get the tcp stream template of specify object current set
  *
  */
-interface_format(int) nis_cntl(objhld_t link, int cmd, ...);
+PORTABLEAPI(int) nis_cntl(objhld_t link, int cmd, ...);
 
 #endif

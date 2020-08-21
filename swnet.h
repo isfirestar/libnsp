@@ -39,10 +39,10 @@ namespace nsp {
             ~swnet();
 
             //io
-            static void STD_CALL tcp_io(const nis_event_t *pParam1, const void *pParam2);
-            static void STD_CALL udp_io(const nis_event_t *pParam1, const void *pParam2);
-            static void STD_CALL ecr(const char *host_event, const char *reserved, int rescb);
-            
+            static void STDCALL tcp_io(const nis_event_t *pParam1, const void *pParam2);
+            static void STDCALL udp_io(const nis_event_t *pParam1, const void *pParam2);
+            static void STDCALL ecr(const char *host_event, const char *reserved, int rescb);
+
         public:
             // TCP
             int tcp_create(const std::shared_ptr<obtcp> &object, const char *ipstr, const port_t port);
