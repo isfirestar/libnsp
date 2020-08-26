@@ -13,8 +13,9 @@ struct __posix_pthread {
 };
 
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
-            posix__pthread_t name ={ .pid_ = NULL }
-#define POSIX_PTHREAD_TYPE_INIT  { .pid_ = NULL }
+            posix__pthread_t name = { .detached_ = NO, .pid_ = NULL }
+#define POSIX_PTHREAD_TYPE_INIT  \
+            { .detached_ = NO,, .pid_ = NULL }
 
 struct __posix__pthread_mutex {
     CRITICAL_SECTION handle_;
@@ -28,11 +29,10 @@ struct __posix__pthread_mutex {
 struct __posix_pthread {
     boolean_t detached_;
     pthread_t pid_;
-    pthread_attr_t attr_;
 } __POSIX_TYPE_ALIGNED__;
 
 #define POSIX_PTHREAD_TYPE_DECLARE(name)    \
-            posix__pthread_t name ={ .detached_ = NO, .pid_ = 0 }
+            posix__pthread_t name = { .detached_ = NO, .pid_ = 0 }
 
 #define POSIX_PTHREAD_TYPE_INIT \
             {.detached_ = NO, .pid_ = 0 }

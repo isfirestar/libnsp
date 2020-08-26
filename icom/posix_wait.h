@@ -17,6 +17,7 @@ struct __waitable_handle {
     pthread_cond_t cond_;
     int pass_;
     posix__pthread_mutex_t mutex_;
+    int effective;
 }__POSIX_TYPE_ALIGNED__;
 
 #endif

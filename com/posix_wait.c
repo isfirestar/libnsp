@@ -159,9 +159,7 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
     int retval;
     pthread_condattr_t condattr;
 
-    if (!waiter) {
-        return -EINVAL;
-    }
+    assert(waiter);
 
     /* waitable handle MUST locked by a internal mutex object */
     retval = posix__pthread_mutex_init(&waiter->mutex_);
@@ -187,6 +185,7 @@ int __posix_init_waitable_handle(posix__waitable_handle_t *waiter)
 
         /* initialize the pass condition */
         waiter->pass_ = 0;
+        waiter->effective = 1;
         pthread_condattr_destroy(&condattr);
         return 0;
     } while (0);
@@ -215,7 +214,17 @@ int posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter)
 void posix__uninit_waitable_handle(posix__waitable_handle_t *waiter)
 {
     __POSIX_EFFICIENT_ALIGNED_PTR_NR__(waiter);
+
+    /* It shall be safe to destroy an initialized condition variable upon which no threads are currently blocked.
+       Attempting to destroy a condition variable upon which other threads are currently blocked results in undefined behavior.
+    */
+    posix__pthread_mutex_lock(&waiter->mutex_);
+    waiter->pass_ = 1;
+    waiter->effective = 0;
+    /* I'm going to awaken all threads who keep the condition variable object, no matter synchronous model or notification model. */
+    pthread_cond_broadcast(&waiter->cond_);
     pthread_cond_destroy(&waiter->cond_);
+    posix__pthread_mutex_unlock(&waiter->mutex_);
     posix__pthread_mutex_release(&waiter->mutex_);
 }
 
@@ -229,26 +238,41 @@ int __posix__infinite_waitfor_waitable_handle(posix__waitable_handle_t *waiter)
     retval = 0;
 
     posix__pthread_mutex_lock(&waiter->mutex_);
-    if (waiter->sync_) {
-        while (!waiter->pass_) {
-            if (0 != (retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_))) {
-                break;
+
+    do {
+        if (!waiter->effective) {
+            retval = -1;
+            break;
+        }
+
+        if (waiter->sync_) {
+            while (!waiter->pass_) {
+                if (0 != (retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_))) {
+                    break;
+                }
+            }
+
+            /* reset @pass_ flag to zero immediately after wait syscall,
+                to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
+            if (waiter->effective) {
+                waiter->pass_ = 0;
+            } else {
+                retval = -1;  /* condition variable object order to exit, maybe destroy request are pending on other thread */
+            }
+        } else {
+            /* for notification waitable handle,
+                all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
+                the object is always in a state of signal before method @posix__reset_waitable_handle called.
+                */
+            if (!waiter->pass_) {
+                retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
+            }
+
+            if (!waiter->effective) {
+                retval = -1;
             }
         }
-
-        /* reset @pass_ flag to zero immediately after wait syscall,
-            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
-        waiter->pass_ = 0;
-    } else {
-
-        /* for notification waitable handle,
-            all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
-            the object is always in a state of signal before method @posix__reset_waitable_handle called.
-            */
-        if (!waiter->pass_) {
-            retval = pthread_cond_wait(&waiter->cond_, &waiter->mutex_.handle_);
-        }
-    }
+    } while (0);
 
     posix__pthread_mutex_unlock(&waiter->mutex_);
     return posix__makeerror(retval);
@@ -282,26 +306,41 @@ int posix__waitfor_waitable_handle(posix__waitable_handle_t *waiter, int interva
 
     posix__pthread_mutex_lock(&waiter->mutex_);
 
-    if (waiter->sync_) {
-        while (!waiter->pass_) {
-            retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
-            if (0 != retval) { /* timedout or fatal syscall cause the loop break */
-                break;
-            }
+    do {
+        if (!waiter->effective) {
+            retval = -1;
+            break;
         }
 
-        /* reset @pass_ flag to zero immediately after wait syscall,
-            to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
-        waiter->pass_ = 0;
-    } else {
-        /* for notification waitable handle,
-            all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
-            the object is always in a state of signal before method @posix__reset_waitable_handle called.
-            */
-        if (!waiter->pass_) {
-            retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+        if (waiter->sync_) {
+            while (!waiter->pass_) {
+                retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+                if (0 != retval) { /* timedout or fatal syscall cause the loop break */
+                    break;
+                }
+            }
+
+            /* reset @pass_ flag to zero immediately after wait syscall,
+                to maintain semantic consistency with ms-windows-API WaitForSingleObject*/
+            if (waiter->effective) {
+                waiter->pass_ = 0;
+            } else {
+                retval = -1;  /* condition variable object order to exit, maybe destroy request are pending on other thread */
+            }
+        } else {
+            /* for notification waitable handle,
+                all thread blocked on wait method will be awaken by pthread_cond_broadcast(3P)(@posix__sig_waitable_handle)
+                the object is always in a state of signal before method @posix__reset_waitable_handle called.
+                */
+            if (!waiter->pass_) {
+                retval = pthread_cond_timedwait(&waiter->cond_, &waiter->mutex_.handle_, &abstime);
+            }
+
+            if (!waiter->effective) {
+                retval = -1;
+            }
         }
-    }
+    } while(0);
 
     posix__pthread_mutex_unlock(&waiter->mutex_);
 
