@@ -65,6 +65,7 @@ PORTABLEIMPL(const char *) posix__strerror2(char *estr)
 #endif
 }
 
+#if 0
 PORTABLEIMPL(char *) posix__strncpy(char *target, uint32_t cch, const char *src, uint32_t cnt)
 {
 #if _WIN32
@@ -118,25 +119,6 @@ PORTABLEIMPL(wchar_t *) posix__wcsncpy(wchar_t *target, uint32_t cch, const wcha
     }
     target[cpyoff] = 0;
     return target;
-#endif
-}
-
-PORTABLEIMPL(char *) posix__strtok(char *s, const char *delim, char **save_ptr)
-{
-#if _WIN32
-    return strtok_s(
-#else
-    return strtok_r(
-#endif
-            s, delim, save_ptr);
-}
-
-PORTABLEIMPL(wchar_t *) posix__wcstok(wchar_t *s, const wchar_t *delim, wchar_t **save_ptr)
-{
-#if _WIN32
-    return wcstok_s(s, delim, save_ptr);
-#else
-    return wcstok(s, delim, save_ptr);
 #endif
 }
 
@@ -201,29 +183,6 @@ PORTABLEIMPL(wchar_t *) posix__wcscpy(wchar_t *target, uint32_t cch, const wchar
 #endif
 }
 
-PORTABLEIMPL(char *) posix__strdup(const char *src)
-{
-	if (!src) {
-		return NULL;
-	}
-#if _WIN32
-    return _strdup(src);
-#else
-    /* -D_POSIX_C_SOURCE >= 200809L 见 man*/
-    return strdup(src);
-#endif
-}
-
-PORTABLEIMPL(wchar_t *) posix__wcsdup(const wchar_t *src)
-{
-#if _WIN32
-    return _wcsdup(src);
-#else
-    /* -D_POSIX_C_SOURCE >= 200809L 见 man*/
-    return wcsdup(src);
-#endif
-}
-
 PORTABLEIMPL(char *) posix__strcat(char *target, uint32_t cch, const char *src)
 {
 #if _WIN32
@@ -280,6 +239,7 @@ PORTABLEIMPL(wchar_t *) posix__wcscat(wchar_t *target, uint32_t cch, const wchar
     return target;
 #endif
 }
+#endif
 
 PORTABLEIMPL(char *) posix__strrev(char *src)
 {
@@ -342,47 +302,7 @@ PORTABLEIMPL(wchar_t *) posix__wcsrev(wchar_t *src)
 #endif
 }
 
-PORTABLEIMPL(int) posix__vsnprintf(char *const target, uint32_t cch, const char *format, va_list ap)
-{
-	if (!target || !format) {
-		return -1;
-	}
-#if _WIN32
-    return vsnprintf_s(target, cch, _TRUNCATE, format, ap);
-#else
-    return vsnprintf(target, cch, format, ap);
-#endif
-}
-
-PORTABLEIMPL(int) posix__vsnwprintf(wchar_t * const target, uint32_t cch, const wchar_t *format, va_list ap)
-{
-#if _WIN32
-    return _vsnwprintf_s(target, cch, _TRUNCATE, format, ap);
-#else
-    return vswprintf(target, cch, format, ap);
-#endif
-}
-
-PORTABLEIMPL(int) posix__vsprintf(char *const target, uint32_t cch, const char *format, va_list ap)
-{
-	if (!target) {
-		return -1;
-	}
-#if _WIN32
-    return vsprintf_s(target, cch, format, ap);
-#else
-    return vsnprintf(target, cch, format, ap);
-#endif
-}
-
-PORTABLEIMPL(int) posix__vswprintf(wchar_t * const target, uint32_t cch, const wchar_t *format, va_list ap)
-{
-#if _WIN32
-    return vswprintf_s(target, cch, format, ap);
-#else
-    return vswprintf(target, cch, format, ap);
-#endif
-}
+#if 0
 
 PORTABLEIMPL(int) posix__sprintf(char *const target, uint32_t cch, const char *fmt, ...)
 {
@@ -405,15 +325,6 @@ PORTABLEIMPL(int) posix__swprintf(wchar_t * const target, uint32_t cch, const wc
     return retval;
 }
 
-PORTABLEIMPL(int) posix__strcmp(const char *s1, const char *s2)
-{
-    return strcmp(s1, s2);
-}
-
-PORTABLEIMPL(int) posix__wcscmp(const wchar_t *s1, const wchar_t *s2)
-{
-    return wcscmp(s1, s2);
-}
 
 /****************************************************************************
  STRCASECMP() - Case-insensitive strcmp.
@@ -474,6 +385,7 @@ PORTABLEIMPL(int) posix__wcsncasecmp(const wchar_t* s1, const wchar_t* s2, uint3
 
     return tolower(c1) - tolower(c2);
 }
+#endif
 
 PORTABLEIMPL(char *) posix__strtrim(char *str)
 {

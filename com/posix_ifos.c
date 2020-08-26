@@ -766,7 +766,7 @@ int __posix__rmdir(const char *dir)
     /* > rm -rf dir */
     struct dirent *ent;
     DIR *dirp;
-    char filename[MAXPATH];
+    char filename[512];
 
     if (!dir) {
         return -EINVAL;
@@ -993,7 +993,7 @@ const char *posix__fullpath_current()
         return NULL;
     }
 
-    posix__sprintf(link, cchof(link), "/proc/%d/exe", pid);
+    posix__sprintf(link, cchof(link), "/proc/%ld/exe", pid);
     if (readlink(link, fullpath, sizeof ( fullpath)) < 0) {
         return NULL;
     }
@@ -1015,7 +1015,7 @@ char *posix__fullpath_current2(char *holder, int cb)
         return NULL;
     }
 
-    posix__sprintf(link, cchof(link), "/proc/%d/exe", pid);
+    posix__sprintf(link, cchof(link), "/proc/%ld/exe", pid);
     if (readlink(link, holder, cb) < 0) {
         return NULL;
     }

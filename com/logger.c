@@ -203,7 +203,7 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 
     p = logstr;
     pos = 0;
-    pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (currst->low / 10000));
+    pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (unsigned int)(currst->low / 10000));
     pos += posix__sprintf(&p[pos], cch - pos, "%s ", LOG__LEVEL_TXT[level]);
     pos += posix__sprintf(&p[pos], cch - pos, "%04X # ", tid);
     pos += posix__vsprintf(&p[pos], cch - pos, format, ap);
