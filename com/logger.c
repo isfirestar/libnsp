@@ -146,14 +146,8 @@ struct log_file_descriptor *log__attach(const posix__systime_t *currst, const ch
     posix__getpename2(pename, cchof(pename));
 
     /* New or any form of file switching occurs in log posts  */
-#if _WIN32 && _M_X64
-	/* using %zu format to avoid VC compiler warning C4313 'sprintf_s  : '%u' in format string conflicts with argument 2 of type 'char [128]'*/
-	posix__sprintf(name, cchof(name), "%s_%04zu%02zu%02zu_%02zu%02zu%02zu.log", 
-		module, currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
-#else
     posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", 
 		module, currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
-#endif
     posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR, __log_root_directory, pename );
     posix__pmkdir(path);
     posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR"%s", __log_root_directory, pename, name);
@@ -209,11 +203,7 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 
     p = logstr;
     pos = 0;
-#if _WIN32 && _M_X64
-	pos += posix__sprintf(&p[pos], cch - pos, "%02zu:%02zu:%02zu %04zu ", currst->hour, currst->minute, currst->second, (unsigned int)(currst->low / 10000));
-#else
 	pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (unsigned int)(currst->low / 10000));
-#endif
     pos += posix__sprintf(&p[pos], cch - pos, "%s ", LOG__LEVEL_TXT[level]);
     pos += posix__sprintf(&p[pos], cch - pos, "%04X # ", tid);
     pos += posix__vsprintf(&p[pos], cch - pos, format, ap);
