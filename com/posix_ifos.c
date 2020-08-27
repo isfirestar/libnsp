@@ -228,85 +228,6 @@ PORTABLEIMPL(char *) posix__fullpath_current2(char *holder, int cb)
     return holder;
 }
 
-PORTABLEIMPL(const char *) posix__getpedir()
-{
-    char *p;
-    static char dir[MAXPATH];
-    const char *fullpath = posix__fullpath_current();
-
-    if (!fullpath) {
-        return NULL;
-    }
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-    posix__strncpy(dir, (uint32_t) (cchof(dir)), fullpath, (uint32_t) (p - fullpath));
-    return dir;
-}
-
-PORTABLEIMPL(char *) posix__getpedir2(char *holder, int cb)
-{
-    char *p;
-    char fullpath[MAXPATH];
-
-    if (!holder || cb <= 0) {
-        return NULL;
-    }
-
-    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
-    if (!p) {
-        return NULL;
-    }
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-    posix__strncpy(holder, (uint32_t) (cb), fullpath, (uint32_t) (p - fullpath));
-    return holder;
-}
-
-PORTABLEIMPL(const char *) posix__getpename()
-{
-    const char *p;
-    static char name[MAXPATH];
-    const char *fullpath = posix__fullpath_current();
-    if (!fullpath) {
-        return NULL;
-    }
-
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-
-    posix__strcpy(name, cchof(name), p + 1);
-    return &name[0];
-}
-
-PORTABLEIMPL(char *) posix__getpename2(char *holder, int cb)
-{
-    char *p;
-    char fullpath[MAXPATH];
-
-    if (!holder || cb <= 0) {
-        return NULL;
-    }
-
-    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
-    if (!p) {
-        return NULL;
-    }
-
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-
-    posix__strcpy(holder, cb, p + 1);
-    return holder;
-}
-
 PORTABLEIMPL(const char *) posix__gettmpdir()
 {
     static char buffer[MAXPATH];
@@ -1022,85 +943,6 @@ char *posix__fullpath_current2(char *holder, int cb)
     return holder;
 }
 
-const char *posix__getpedir()
-{
-    char *p;
-    static char dir[MAXPATH];
-    const char *fullpath = posix__fullpath_current();
-
-    if (!fullpath) {
-        return NULL;
-    }
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-    posix__strncpy(dir, (uint32_t) (cchof(dir)), fullpath, (uint32_t) (p - fullpath));
-    return dir;
-}
-
-char *posix__getpedir2(char *holder, int cb)
-{
-    char *p;
-    char fullpath[MAXPATH];
-
-    if (!holder || cb <= 0) {
-        return NULL;
-    }
-
-    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
-    if (!p) {
-        return NULL;
-    }
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-    posix__strncpy(holder, (uint32_t) (cb), fullpath, (uint32_t) (p - fullpath));
-    return holder;
-}
-
-const char *posix__getpename()
-{
-    const char *p;
-    static char name[MAXPATH];
-    const char *fullpath = posix__fullpath_current();
-    if (!fullpath) {
-        return NULL;
-    }
-
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-
-    posix__strcpy(name, cchof(name), p + 1);
-    return &name[0];
-}
-
-char *posix__getpename2(char *holder, int cb)
-{
-    char *p;
-    char fullpath[MAXPATH];
-
-    if (!holder || cb <= 0) {
-        return NULL;
-    }
-
-    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
-    if (!p) {
-        return NULL;
-    }
-
-    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
-    if (!p) {
-        return NULL;
-    }
-
-    posix__strcpy(holder, cb, p + 1);
-    return holder;
-}
-
 const char *posix__gettmpdir()
 {
     static char buffer[MAXPATH];
@@ -1577,6 +1419,94 @@ int posix__file_seek(file_descriptor_t fd, uint64_t offset)
 }
 
 #endif
+
+PORTABLEIMPL(const char *) posix__getpedir()
+{
+    char *p;
+    static char dir[MAXPATH];
+    const char *fullpath;
+
+    fullpath = posix__fullpath_current();
+    if (!fullpath) {
+        return NULL;
+    }
+
+    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
+    if (!p) {
+        return NULL;
+    }
+
+    *p = 0;
+    posix__strcpy(dir, cchof(dir), fullpath);
+    return dir;
+}
+
+PORTABLEIMPL(char *) posix__getpedir2(char *holder, int cb)
+{
+    char *p;
+    char fullpath[MAXPATH];
+
+    if (!holder || cb <= 0) {
+        return NULL;
+    }
+
+    p = posix__fullpath_current2(fullpath, cchof(fullpath));
+    if (!p) {
+        return NULL;
+    }
+
+    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
+    if (!p) {
+        return NULL;
+    }
+
+    *p = 0;
+    posix__strcpy(holder, cb, fullpath);
+    return holder;
+}
+
+PORTABLEIMPL(const char *) posix__getpename()
+{
+    const char *p;
+    static char name[MAXPATH];
+    const char *fullpath;
+
+    fullpath = posix__fullpath_current();
+    if (!fullpath) {
+        return NULL;
+    }
+
+    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
+    if (!p) {
+        return NULL;
+    }
+
+    posix__strcpy(name, cchof(name), p + 1);
+    return &name[0];
+}
+
+PORTABLEIMPL(char *) posix__getpename2(char *holder, int cb)
+{
+    char *p;
+    char fullpath[MAXPATH];
+
+    if (!holder || cb <= 0) {
+        return NULL;
+    }
+
+    p = posix__fullpath_current2(fullpath, sizeof(fullpath));
+    if (!p) {
+        return NULL;
+    }
+
+    p = strrchr(fullpath, POSIX__DIR_SYMBOL);
+    if (!p) {
+        return NULL;
+    }
+
+    posix__strcpy(holder, cb, p + 1);
+    return holder;
+}
 
 PORTABLEIMPL(int) posix__iconv(const char *from_encode, const char *to_encode, char **from, size_t from_bytes, char **to, size_t *to_bytes) {
     if (0 == posix__strcasecmp(from_encode, "gb2312") && 0 == posix__strcasecmp(to_encode, "unicode")) {

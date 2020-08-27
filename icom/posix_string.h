@@ -19,6 +19,13 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 #if _WIN32
 
 #define posix__strcpy(dest, maxlen, src)	strcpy_s(dest, maxlen, src)
+
+/* [man 3 strncpy] The strncpy() function is similar, except that at most n bytes of src are copied.
+	Warning: If there is no null byte among the first n bytes of src, the string placed in dest will not be null-terminated.
+
+	[C standard]  If count is reached before the entire array src was copied, the resulting character array is not null-terminated.
+ If, after copying the terminating null character from src, count is not reached,
+ additional null characters are written to dest until the total of count characters have been written.*/
 #define posix__strncpy(dest, maxlen, src, n) strncpy_s(dest, maxlen, src, n)
 #define posix__strcat(dest, maxlen, src)	strcat_s(dest, maxlen, src)
 #define posix__strtok(str, delim, saveptr) strtok_s(str, delim, saveptr)
@@ -44,8 +51,12 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 
 #define posix__strcpy(dest, maxlen, src)	strcpy(dest, src)
 /* [man 3 strncpy] The strncpy() function is similar, except that at most n bytes of src are copied.
-	Warning: If there is no null byte among the first n bytes of src, the string placed in dest will not be null-terminated. */
-#define posix__strncpy(dest, maxlen, src, n) *(strncpy(dest, src, n) + n) = 0
+	Warning: If there is no null byte among the first n bytes of src, the string placed in dest will not be null-terminated.
+
+	[C standard]  If count is reached before the entire array src was copied, the resulting character array is not null-terminated.
+ If, after copying the terminating null character from src, count is not reached,
+ additional null characters are written to dest until the total of count characters have been written.*/
+#define posix__strncpy(dest, maxlen, src, n) strncpy(dest, src, n)
 #define posix__strcat(dest, maxlen, src)	strcat(dest, src)
 #define posix__strtok(str, delim, saveptr) strtok_r(str, delim, saveptr)
 #define posix__strdup(s) strdup(s) /* -D_POSIX_C_SOURCE >= 200809L */
