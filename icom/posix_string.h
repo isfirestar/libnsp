@@ -43,7 +43,9 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 #else
 
 #define posix__strcpy(dest, maxlen, src)	strcpy(dest, src)
-#define posix__strncpy(dest, maxlen, src, n) strncpy(dest, src, n)
+/* [man 3 strncpy] The strncpy() function is similar, except that at most n bytes of src are copied.
+	Warning: If there is no null byte among the first n bytes of src, the string placed in dest will not be null-terminated. */
+#define posix__strncpy(dest, maxlen, src, n) *(strncpy(dest, src, n) + n) = 0
 #define posix__strcat(dest, maxlen, src)	strcat(dest, src)
 #define posix__strtok(str, delim, saveptr) strtok_r(str, delim, saveptr)
 #define posix__strdup(s) strdup(s) /* -D_POSIX_C_SOURCE >= 200809L */
