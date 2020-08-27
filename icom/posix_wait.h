@@ -24,11 +24,20 @@ struct __waitable_handle {
 
 typedef struct __waitable_handle posix__waitable_handle_t;
 
+/* initialize wait object @waiter, the calling thread have responsibility to guarantee pointer @waiter aligned to 4 bytes
+*/
 PORTABLEAPI(int) posix__init_synchronous_waitable_handle(posix__waitable_handle_t *waiter);
 PORTABLEAPI(int) posix__init_notification_waitable_handle(posix__waitable_handle_t *waiter);
+
+/* assign a wait object and than initialize it, store and retun by @waiter,
+    object pointer assigned by success call MUST explicit call @posix__release_waitable_handle to free it's memory
+*/
 PORTABLEAPI(int) posix__allocate_synchronous_waitable_handle(posix__waitable_handle_t **waiter);
 PORTABLEAPI(int) posix__allocate_notification_waitable_handle(posix__waitable_handle_t **waiter);
+
+/* uninitialize wait object either synchronous or nitifications */
 PORTABLEAPI(void) posix__uninit_waitable_handle(posix__waitable_handle_t *waiter);
+/* uninitialize and release wait object which assigned by above two allocation interface */
 PORTABLEAPI(void) posix__release_waitable_handle(posix__waitable_handle_t *waiter);
 
 /* hang-up calling thread until synchronous event trigger or @timeout condition meet

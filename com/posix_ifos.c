@@ -973,18 +973,15 @@ int posix__isdir(const char *const file)
         return posix__makeerror(errno);
     }
 
-    /* 如果符号链接目标是一个目录， 同样会解释为一个目录， 而不是 __S_IFLNK
-     * __S_IFLNK 仅针对指向文件的符号链接
-     * 使用符号链接目录的相对路径同样可以正常open文件
-     * 例如：
-     * /home/Julie/escape/configs -> /etc
-     * int fd = open("/home/Julie/escape/configs/passwd", O_RDONLY); 可以正常打开文件
+    /* if the target of symbolic link is a directory, @st.st_mode should be __S_IFDIR not be __S_IFLINK
+     * __S_IFLINK only indicate a symbolic link which linked to a regular file.
+     * using a relative path of symbolic link which linked to directory is effective, it can open file normal
+     * for example:
+     * /root/configures -> /etc
+     * int fd = open("/root/configure/passwd", O_RDONLY); can be work normaly
      *
-     * shell 中查找所有符号链接的命令:
-     * find . -type l
-     * 删除所有的符号链接
-     * find . -type l | xargs rm
-    */
+     * we can use shell command 'find . -type l' to search all symbolic links
+     */
     if (st.st_mode & __S_IFDIR) {
         return S_IFDIR;
     }
@@ -1134,8 +1131,7 @@ uint32_t posix__getpagesize()
 
 void posix__syslog(const char *const logmsg)
 {
-    /*
-     * cat /var/log/messages | tail -n1
+    /* cat /var/log/messages | tail -n1
      */
     if (logmsg) {
         syslog(LOG_USER | LOG_ERR, "[%d]# %s", getpid(), logmsg);
@@ -1467,7 +1463,7 @@ PORTABLEIMPL(char *) posix__getpedir2(char *holder, int cb)
 
 PORTABLEIMPL(const char *) posix__getpename()
 {
-    const char *p;
+    char *p;
     static char name[MAXPATH];
     const char *fullpath;
 

@@ -26,8 +26,8 @@
 
 #define posix__atomic_get(ptr)					__atomic_load_n(ptr, __ATOMIC_ACQUIRE)
 #define posix__atomic_get64(ptr)				__atomic_load_n(ptr, __ATOMIC_ACQUIRE)
-#define posix__atomic_set(ptr,value) 			__atomic_store_n(ptr, value, __ATOMIC_RELAXED)
-#define posix__atomic_set64(ptr,value) 			__atomic_store_n(ptr, value, __ATOMIC_RELAXED)
+#define posix__atomic_set(ptr,value) 			__atomic_store_n(ptr, value, __ATOMIC_RELEASE)
+#define posix__atomic_set64(ptr,value) 			__atomic_store_n(ptr, value, __ATOMIC_RELEASE)
 #define posix__atomic_inc(ptr)                  __sync_add_and_fetch(ptr, 1)
 #define posix__atomic_inc64(ptr)                  __sync_add_and_fetch(ptr, 1)
 #define posix__atomic_dec(ptr)                  __sync_sub_and_fetch(ptr, 1)
@@ -41,18 +41,18 @@
 
 /*
  * type __sync_lock_test_and_set (type *ptr, type value, ...)
- *          行为: *ptr = value, 返回 *ptr交换前的值
+ *          behavior: (type n = *ptr; *ptr = value; return n;)
  *
  * bool __sync_bool_compare_and_swap (type*ptr, type oldval, type newval, ...)
- *          行为: 如果 (*ptr == oldval) 则 *ptr = newval, 返回1
- *                否则 返回 0, ptr/ *ptr不变
+ *          behavior: if (*ptr == oldval) then *ptr = newval, return value is 1
+ *                otherwise return value is 0, ptr and *ptr remain the same
  *
  * type __sync_val_compare_and_swap (type *ptr, type oldval,  type newval, ...)
- *          行为: 如果 (*ptr == oldval) 则 *ptr = newval, 返回 *ptr 交换前的值
- *                否则 返回 *ptr, ptr/ *ptr不变
+ *          behavior: if (*ptr == oldval) then *ptr = newval, return value of *ptr before exchange
+ *                otherwise return *ptr, ptr and *ptr remain the same
  *
  * void __sync_lock_release (type *ptr, ...)
- *          行为: *ptr = 0
+ *          behavior: *ptr = 0
  *  */
 
 #endif /* end POSIX */
