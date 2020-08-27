@@ -27,7 +27,7 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 #define posix__strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
 #define posix__vsprintf(str, maxlen, format, ap)	vsprintf_s(str, maxlen, format, ap)
 #define posix__vsnprintf(str, maxlen, format, ap)	vsnprintf_s(str, maxlen, _TRUNCATE, format, ap);
-#define posix__sprintf(str, maxlen, format, arg, ...) sprintf_s(str, maxlen, format, ##arg)
+#define posix__sprintf(str, maxlen, format, ...) sprintf_s(str, maxlen, format, ##__VA_ARGS__)
 
 #define posix__wcscat(dest, maxlen, src)	wcscat_s(dest, maxlen, src)
 #define posix__wcscpy(dest, maxlen, src)	wcscpy_s(dest, maxlen, src)
@@ -38,7 +38,7 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 #define posix__wcsncasecmp(s1, s2, n) _wcsnicmp(s1, s2, n)
 #define posix__vswprintf(wcs, maxlen, format, arg) vswprintf_s(wcs, maxlen, format, arg)
 #define posix__vsnwprintf(wcs, maxlen, format, arg) _vsnwprintf_s(wcs, maxlen, _TRUNCATE, format, arg);
-#define posix__swprintf(wcs, maxlen, format, arg, ...) swprintf_s(wcs, maxlen, format, ##arg)
+#define posix__swprintf(wcs, maxlen, format, ...) swprintf_s(wcs, maxlen, format, ##__VA_ARGS__)
 
 #else
 
@@ -51,7 +51,7 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 #define posix__strncasecmp(s1, s2, n) strncasecmp(s1, s2, n)
 #define posix__vsprintf(str, maxlen, format, ap)	vsnprintf(str, maxlen, format, ap)
 #define posix__vsnprintf(str, maxlen, format, ap)	vsnprintf(str, maxlen, format, ap)
-#define posix__sprintf(str, maxlen, format, arg...) sprintf(str, format, ##arg)
+#define posix__sprintf(str, maxlen, format...) sprintf(str, format, ##arg)
 
 #define posix__wcscpy(dest, maxlen, src)	wcscpy(dest, src)
 #define posix__wcsncpy(dest, maxlen, src, n) wcsncpy(dest, src, n)
@@ -62,7 +62,7 @@ PORTABLEAPI(char *) posix__strtrimdup(const char *origin); /* the caller is alwa
 #define posix__wcsncasecmp(s1, s2, n) wcsncasecmp(s1, s2, n)
 #define posix__vswprintf(wcs, maxlen, format, arg) vswprintf(wcs, maxlen, format, arg)
 #define posix__vsnwprintf(wcs, maxlen, format, arg) vswprintf(wcs, maxlen, format, arg)
-#define posix__swprintf(wcs, maxlen, format, arg...) swprintf(wcs, maxlen, format, ##arg)
+#define posix__swprintf(wcs, maxlen, format...) swprintf(wcs, maxlen, format, ##arg)
 
 #endif
 

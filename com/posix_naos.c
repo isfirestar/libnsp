@@ -7,24 +7,22 @@
 #include <stdlib.h>
 #include <time.h>
 
-PORTABLEIMPL(char *) posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch)
+PORTABLEIMPL(char *) posix__ipv4tos(uint32_t inet, char *inetstr, uint32_t cch)
 {
-    unsigned char ipByte[4];
-    char seg[4][4];
+    unsigned char inetby[4];
     int i;
 
-    if (!ipstr || 0 == cch) {
+	if (!inetstr || 0 == cch) {
         return NULL;
     }
 
     for (i = 0; i < 4; i++) {
-        ipByte[i] = (unsigned char) (ip & 0xFF);
-        ip >>= 8;
-        posix__sprintf(seg[i], sizeof ( seg[i]), "%u", ipByte[i]);
+		inetby[i] = (unsigned char)(inet & 0xFF);
+		inet >>= 8;
     }
 
-    posix__sprintf(ipstr, cch, "%s.%s.%s.%s", seg[3], seg[2], seg[1], seg[0]);
-    return ipstr;
+	posix__sprintf(inetstr, cch, "%u.%u.%u.%u", inetby[3], inetby[2], inetby[1], inetby[0]);
+	return inetstr;
 }
 
 PORTABLEIMPL(uint32_t) posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
