@@ -53,30 +53,30 @@ typedef struct __posix__pthread_mutex   posix__pthread_mutex_t;
  * @start_rtn : thread execute routine
  * @arg : argument pass to thread function
  */
-__extern__
+__interface__
 int posix__pthread_create(posix__pthread_t *tidp, void*(*start_rtn)(void*), void *arg);
-__extern__
+__interface__
 int posix__pthread_self(posix__pthread_t *tidp);
-__extern__
+__interface__
 int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
-__extern__
+__interface__
 int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(void*), void * arg);
 
 /* set the affinity of CPU-core mark by @mask and thread(LWP) specified by @tidp */
-__extern__
+__interface__
 int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask);
-__extern__
+__interface__
 int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask);
 
 /* posix__pthread_detach implemenation detach the thread and object @tidp, after detach, the object pointer by @tidp are no longer usable.
  * posix__pthread_joinable examine whether the thread is in detached states or not,  return -1 when detached， otherwise return >=0
  * posix__pthread_join waitting for the thread end and than join the object pointer.
  */
-__extern__
+__interface__
 int posix__pthread_detach(posix__pthread_t * tidp);
-__extern__
+__interface__
 boolean_t posix__pthread_joinable(posix__pthread_t * tidp);
-__extern__
+__interface__
 int posix__pthread_join(posix__pthread_t * tidp, void **retval);
 
 #if _WIN32
@@ -85,28 +85,28 @@ int posix__pthread_join(posix__pthread_t * tidp, void **retval);
 #define posix__pthread_exit(exit_code) pthread_exit(exit_code)
 #endif
 
-__extern__
+__interface__
 int posix__pthread_mutex_init(posix__pthread_mutex_t *mutex);
-__extern__
+__interface__
 void posix__pthread_mutex_lock(posix__pthread_mutex_t *mutex);
-__extern__
+__interface__
 int posix__pthread_mutex_trylock(posix__pthread_mutex_t *mutex);
 
 /* try to get lock in @expires milliseconds
  * WIN32 programing not support
  */
-__extern__
+__interface__
 int posix__pthread_mutex_timedlock(posix__pthread_mutex_t *mutex, uint32_t expires);
-__extern__
+__interface__
 void posix__pthread_mutex_unlock(posix__pthread_mutex_t *mutex);
-__extern__
+__interface__
 void posix__pthread_mutex_release(posix__pthread_mutex_t *mutex);
 #define posix__pthread_mutex_uninit(mutex) posix__pthread_mutex_release(mutex)
 
 /* Give up the current thread execution initiative
  * this implementation can interrupte the thread running with @SCHED_FIFO priority.
  *  */
-__extern__
+__interface__
 void posix__pthread_yield();
 
 #endif /* POSIX_THREAD_H */

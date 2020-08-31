@@ -7,7 +7,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch) {
+char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch)
+{
     unsigned char ipByte[4];
     char seg[4][4];
     int i;
@@ -26,7 +27,7 @@ char *posix__ipv4tos(uint32_t ip, char * ipstr, uint32_t cch) {
     return ipstr;
 }
 
-uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method) 
+uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
 {
     static const int BIT_MOV_FOR_LITTLE_ENDIAN[4] = {24, 16, 8, 0};
     static const int BIT_MOV_FOR_BIG_ENDIAN[4] = {0, 8, 16, 24};
@@ -75,7 +76,8 @@ uint32_t posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
     return ipv4Digit;
 }
 
-uint32_t posix__chord32(uint32_t value) {
+uint32_t posix__chord32(uint32_t value)
+{
     uint32_t dst = 0;
     int i;
 
@@ -86,7 +88,8 @@ uint32_t posix__chord32(uint32_t value) {
     return dst;
 }
 
-uint16_t posix__chord16(uint16_t value) {
+uint16_t posix__chord16(uint16_t value)
+{
     uint16_t dst = 0;
     int i;
 
@@ -95,4 +98,79 @@ uint16_t posix__chord16(uint16_t value) {
         dst <<= ((i) < (sizeof ( value) - 1) ? BITS_P_BYTE : (0));
     }
     return dst;
+}
+
+boolean_t posix__is_effective_address_v4(const char *ipstr)
+{
+    const char *cursor;
+    int i, j, k;
+    char segm[4][4];
+    boolean_t success;
+
+    if (!ipstr) {
+        return NO;
+    }
+
+    success = YES;
+    cursor = ipstr;
+    i = j = k = 0;
+    memset(segm, 0, sizeof(segm));
+
+    while (*cursor) {
+        if ((INET_ADDRSTRLEN - 1) == i) { /* 255.255.255.255. */
+            success = NO;
+            break;
+        }
+
+        if (k > 3) {  /* 192.168.1.0.1 */
+            success = NO;
+            break;
+        }
+
+        if (*cursor == '.' ) {
+            if (0 == segm[k]) { /* .192.168.2.2 or 192..168.0.1 */
+                success = NO;
+                break;
+            }
+
+            if (atoi(segm[k]) > MAX_UINT8) { /* 256.1.1.0 */
+                success = NO;
+                break;
+            }
+
+            cursor++;
+            i++;
+            k++;
+            j = 0;
+            continue;
+        }
+
+        if (*cursor >= '0' && *cursor <= '9' ) {
+            if (j >= 3) {  /* 1922.0.0.1 */
+                success = NO;
+                break;
+            }
+            segm[k][j] = *cursor;
+            cursor++;
+            i++;
+            j++;
+            continue;
+        }
+
+        /* any other characters */
+        success = NO;
+        break;
+    }
+
+    if (success) {
+        if ( 3 != k ) { /* 192.168 */
+            return NO;
+        }
+
+        if (0 == j) {   /* 192.168.0. */
+            return NO;
+        }
+    }
+
+    return success;
 }

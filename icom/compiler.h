@@ -33,7 +33,12 @@
         #define __export__ __attribute__((visibility("default")))
     #endif
 #endif
-#define EXPORT __export__
+
+#if !defined EXPORT
+    #define EXPORT __export__
+#endif
+
+#define __interface__  __extern__ __export__
 
 
 #if !defined __ALIGNED_SIZE__
@@ -250,11 +255,6 @@ typedef int boolean_t;
     #define barrier_data(ptr) barrier()
 #endif
 
-/* Unreachable code */
-#ifndef unreachable
-    #define unreachable() do { } while (1)
-#endif
-
 /**
  * fls - find last bit set
  * @x: the word to search
@@ -386,8 +386,10 @@ __static_inline_function(void) __write_once_size(volatile void *p, void *res, in
 #endif
 #define PI ((double)3.14159265359)
 
-#define angle2radian(n) (((double)n) * PI / 180)
-#define radian2angle(n) (((double)n) * 180 / PI)
+#define angle2radian(n) (((double)(n)) * PI / 180)
+#define radian2angle(n) (((double)(n)) * 180 / PI)
+#define A2R(a)      angle2radian(a)
+#define R2A(r)      radian2angle(r)
 
 enum byte_order_t {
     kByteOrder_LittleEndian = 0,
@@ -405,17 +407,20 @@ enum byte_order_t {
 #define posix__makeerror(e)   (((int)(e)) <= 0 ? (e) : (int)(~((int)(e)) + 1))
 
 /* the maximum of integer */
-#define NSP_MAX_UINT8       (0xFF)
-#define NSP_MAX_INT8        (0x7f)
+#define MAX_UINT_BIT(n) (pow(2,n) - 1)
+#define MAX_INT_BIT(n)  (pow(2, (n - 1)) - 1)
 
-#define NSP_MAX_UINT16      (0xFFFF)
-#define NSP_MAX_INT16       (0x7FFF)
+#define MAX_UINT8       (0xFF)
+#define MAX_INT8        (0x7f)
 
-#define NSP_MAX_UINT32      (0xFFFFFFFF)
-#define NSP_MAX_INT32       (0x7FFFFFFF)
+#define MAX_UINT16      (0xFFFF)
+#define MAX_INT16       (0x7FFF)
 
-#define NSP_MAX_UINT64      (0xFFFFFFFFFFFFFFFF)
-#define NSP_MAX_INT64       (0x7FFFFFFFFFFFFFFF)
+#define MAX_UINT32      (0xFFFFFFFF)
+#define MAX_INT32       (0x7FFFFFFF)
+
+#define MAX_UINT64      (0xFFFFFFFFFFFFFFFF)
+#define MAX_INT64       (0x7FFFFFFFFFFFFFFF)
 
 #define sal(n, b)               ((n) << (b))
 #define sal_set(n, b)           ((n) <<= (b))

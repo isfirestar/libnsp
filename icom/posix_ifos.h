@@ -13,64 +13,64 @@
 #endif
 
 /* ifos-ps */
-__extern__
+__interface__
 long posix__gettid();
-__extern__
+__interface__
 long posix__getpid();
 
 /* ifos-getspnam */
-__extern__
+__interface__
 int posix__syslogin(const char *user, const char *key);
 
-__extern__
+__interface__
 void posix__sleep(uint64_t ms);
 
 /* ifos-dl */
-__extern__
+__interface__
 void *posix__dlopen(const char *file);
-__extern__
+__interface__
 void* posix__dlsym(void* handle, const char* symbol);
-__extern__
+__interface__
 int posix__dlclose(void *handle);
-__extern__
+__interface__
 const char *posix__dlerror();
-__extern__
+__interface__
 const char *posix__dlerror2(char *estr);
 
 /* @posix__pmkdir Allow recursive construction of directory trees */
-__extern__
+__interface__
 int posix__mkdir(const char *const dir);
-__extern__
+__interface__
 int posix__pmkdir(const char *const dir);
 
 /* if @target is a directory, this method is the same as rm -fr */
-__extern__
+__interface__
 int posix__rm(const char *const target);
 
 /* obtain the fully path of current execute file(ELF/PE) */
-__extern__
+__interface__
 const char *posix__fullpath_current();
-__extern__
+__interface__
 char *posix__fullpath_current2(char *holder, int cb);	/* thread safe method, version > 9.6.0 */
 
 /* obtain the directory contain current execute file(ELF/PE) */
-__extern__
+__interface__
 const char *posix__getpedir();
-__extern__
+__interface__
 char *posix__getpedir2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
-__extern__
+__interface__
 const char *posix__getpename();
-__extern__
+__interface__
 char *posix__getpename2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
-__extern__
+__interface__
 const char *posix__getelfname();
-__extern__
+__interface__
 char *posix__getelfname2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
-__extern__
+__interface__
 const char *posix__gettmpdir();
-__extern__
+__interface__
 char *posix__gettmpdir2(char *holder, int cb); /* thread safe method, version > 9.6.0 */
-__extern__
+__interface__
 int posix__isdir(const char *const file); /* inner syscall failed, function return -1, not a dir return 0, is dir, return 0x4000 on linux 0x10 on win32 */
 
 /*ifos-ps*/
@@ -79,28 +79,28 @@ int posix__isdir(const char *const file); /* inner syscall failed, function retu
  * support 5,0,-5,-10 priority level on Linux,
  * corresponding to IDLE_PRIORITY_CLASS NORMAL_PRIORITY_CLASS HIGH_PRIORITY_CLASS REALTIME_PRIORITY_CLASS on MS-API
  */
-__extern__
+__interface__
 int posix__getpriority(int *priority);
-__extern__
+__interface__
 int posix__setpriority_below();
-__extern__
+__interface__
 int posix__setpriority_normal();
-__extern__
+__interface__
 int posix__setpriority_critical();
-__extern__
+__interface__
 int posix__setpriority_realtime();
 
 /* obtain or adjust the affinity of process and CPU core.
  * notes that : MS-API use bit mask to describe the affinity attribute,but Linux without it.
  *	for portable reason, using bit-mask here unified
  */
-__extern__
+__interface__
 int posix__setaffinity_process(int mask);
-__extern__
+__interface__
 int posix__getaffinity_process(int *mask);
 
 /* obtain the CPU core-count in this machine */
-__extern__
+__interface__
 int posix__getnprocs();
 
 /* obtain the system meory info */
@@ -111,15 +111,15 @@ typedef struct {
     uint64_t freeswap;
 } sys_memory_t;
 
-__extern__
+__interface__
 int posix__getsysmem(sys_memory_t *sysmem);
 
 /* get the system memory page size */
-__extern__
+__interface__
 uint32_t posix__getpagesize();
 
 /* wirte syslog */
-__extern__
+__interface__
 void posix__syslog(const char *const logmsg );
 
 /* cover text encoder, support list:
@@ -127,16 +127,16 @@ void posix__syslog(const char *const logmsg );
  * GB2312
  * UNICODE
  */
-__extern__
+__interface__
 int posix__iconv(const char *from_encode, const char *to_encode, char **from, size_t from_bytes, char **to, size_t *to_bytes);
 
 /*  Generate random numbers in the half-closed interval
  *  [range_min, range_max). In other words,
  *  range_min <= random number < range_max
  */
-__extern__
+__interface__
 int posix__random(const int range_min, const int range_max);
-__extern__
+__interface__
 int posix__random_block(unsigned char *buffer, int size);
 
 #if _WIN32
@@ -171,21 +171,21 @@ int posix__random_block(unsigned char *buffer, int size);
 #define FF_CREATE_ALWAYS	(8)		/* truncate and open file when it is existed, otherwise create new one with zero size */
 /* windows application ignore @mode parameter
    @descriptor return the file-descriptor/file-handle when all syscall successed */
-__extern__
+__interface__
 int posix__file_open(const char *path, int flag, int mode, file_descriptor_t *descriptor);
-__extern__
+__interface__
 int64_t posix__file_fgetsize(file_descriptor_t fd);
-__extern__
+__interface__
 int64_t posix__file_getsize(const char *path);
-__extern__
+__interface__
 int posix__file_seek(file_descriptor_t fd, uint64_t offset);
-__extern__
+__interface__
 int posix__file_read(file_descriptor_t fd, void *buffer, int size);
-__extern__
+__interface__
 int posix__file_write(file_descriptor_t fd, const void *buffer, int size);
-__extern__
+__interface__
 void posix__file_close(file_descriptor_t fd);
-__extern__
+__interface__
 int posix__file_flush(file_descriptor_t fd);
 
 #if !defined EBADFD
