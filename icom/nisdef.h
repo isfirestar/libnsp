@@ -258,10 +258,10 @@ typedef struct __swnet_version swnet_version_t;
 typedef void( STDCALL *nis_event_callback_t)(const char *host_event, const char *reserved, int rescb);
 
 struct __ifmisc {
-    char interface_[64];
-    unsigned int addr_;
-    unsigned int netmask_;
-    unsigned int boardcast_;
+    char interface[64];
+    unsigned int inet;
+    unsigned int mask;
+    unsigned int boardcast;
 }__POSIX_TYPE_ALIGNED__;
 typedef struct __ifmisc ifmisc_t;
 

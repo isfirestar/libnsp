@@ -110,6 +110,7 @@ PORTABLEAPI(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr);
 		}
 	 ] */
 PORTABLEAPI(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
+PORTABLEAPI(int) nis_getifmac(char *eth_name, unsigned char *pyhaddr);
 
 /*
  *	NI_SETATTR(int)

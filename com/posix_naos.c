@@ -25,7 +25,7 @@ PORTABLEIMPL(char *) posix__ipv4tos(uint32_t inet, char *inetstr, uint32_t cch)
 	return inetstr;
 }
 
-PORTABLEIMPL(uint32_t) posix__ipv4tou(const char *ipv4str, enum byte_order_t method)
+PORTABLEIMPL(uint32_t) posix__ipv4tou(const char *inetstr, enum byte_order_t method)
 {
     static const int BIT_MOV_FOR_LITTLE_ENDIAN[4] = {24, 16, 8, 0};
     static const int BIT_MOV_FOR_BIG_ENDIAN[4] = {0, 8, 16, 24};
@@ -37,11 +37,11 @@ PORTABLEIMPL(uint32_t) posix__ipv4tou(const char *ipv4str, enum byte_order_t met
     char *Tmp;
     size_t sourceTextLengtchCch;
 
-	if (!ipv4str) {
+	if (!inetstr) {
 		return 0;
 	}
 
-    sourceTextLengtchCch = strlen(ipv4str);
+    sourceTextLengtchCch = strlen(inetstr);
     if (0 == sourceTextLengtchCch) {
         return 0;
     }
@@ -53,7 +53,7 @@ PORTABLEIMPL(uint32_t) posix__ipv4tou(const char *ipv4str, enum byte_order_t met
     if (!Tmp) {
         return 0;
     }
-    posix__strcpy(Tmp, (int) (sourceTextLengtchCch + 1), ipv4str);
+    posix__strcpy(Tmp, (int) (sourceTextLengtchCch + 1), inetstr);
 
 #if _WIN32
     nextToken = NULL;
@@ -98,19 +98,19 @@ PORTABLEIMPL(uint16_t) posix__chord16(uint16_t value)
     return dst;
 }
 
-PORTABLEIMPL(boolean_t) posix__is_effective_address_v4(const char *ipstr)
+PORTABLEIMPL(boolean_t) posix__is_effective_address_v4(const char *inetstr)
 {
     const char *cursor;
     int i, j, k;
     char segm[4][4];
     boolean_t success;
 
-    if (!ipstr) {
+    if (!inetstr) {
         return NO;
     }
 
     success = YES;
-    cursor = ipstr;
+    cursor = inetstr;
     i = j = k = 0;
     memset(segm, 0, sizeof(segm));
 
