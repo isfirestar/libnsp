@@ -110,6 +110,15 @@ PORTABLEAPI(nis_event_callback_t) nis_checr(const nis_event_callback_t ecr);
 		}
 	 ] */
 PORTABLEAPI(int) nis_getifmisc(ifmisc_t *ifv, int *cbifv);
+
+/*  @nis_getifmac interface implementation a method to get the physical address(MAC) of the specified network interface named @eth_name.
+ *  for POSIX, the @eth_name should be one of the network interface name by command ifconfig(8)
+ *		for example: "enp0s8"
+ *  for win32, the @eth_name should be one of the network adapter description by command ipconfig /all, The string to the right of the colon.
+ *		for example: "Intel(R) Dual Band Wireless-AC 3165"
+ *	input paramter @pyhaddr is a buffer larger than 6 bytes use to save the mac address when interface success invoked.
+ *	on success, the return value should be zero, otherwise, negative integer number return, it's absolute value indicate the error number definied in <errno.h>
+*/
 PORTABLEAPI(int) nis_getifmac(char *eth_name, unsigned char *pyhaddr);
 
 /*
