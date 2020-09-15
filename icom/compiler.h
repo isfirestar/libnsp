@@ -252,12 +252,14 @@ typedef int boolean_t;
 #endif /* !_WIN32 */
 
 /* Optimization barrier */
+#if 0
 #ifndef barrier
     #define barrier() __memory_barrier()
 #endif
 
 #ifndef barrier_data
     #define barrier_data(ptr) barrier()
+#endif
 #endif
 
 /**
