@@ -25,6 +25,13 @@ typedef struct avltree_node_t TREENODE_T, *PTREENODE, *TREEROOT;
  *	左右节点相等，     返回指定 0
  */
 typedef int( *compare_routine)(const void *left, const void *right);
+typedef compare_routine avlcompare_t;
+
+#define avl_simple_compare(left, right, field)   \
+    ( ((left)->field > (right)->field) ? (1) : ( ((left)->field < (right)->field) ? (-1) : (0) ) )
+
+#define avl_type_compare(type, leaf, field, left, right) \
+    avl_simple_compare(container_of(left, type, leaf), container_of(right, type, leaf), field)
 
 /**
  *  向根为tree的AVL树插入数据。
