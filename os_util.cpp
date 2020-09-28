@@ -173,7 +173,7 @@ namespace nsp {
         waitable_handle::~waitable_handle() {
             if (posix_waiter_) {
                 ::posix__uninit_waitable_handle((posix__waitable_handle_t *) posix_waiter_);
-                delete posix_waiter_;
+                delete (posix__waitable_handle_t *)posix_waiter_;
                 posix_waiter_ = nullptr;
             }
 

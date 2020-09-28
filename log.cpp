@@ -43,7 +43,9 @@ namespace nsp {
 
             loex &loex::operator<<(const wchar_t *str) {
                 if (str) {
+#if _WIN32
                     ::posix__sprintf(&str_[strlen(str_)], sizeof ( str_) - strlen(str_), "%ws", str);
+#endif
                 }
                 return *this;
             }
