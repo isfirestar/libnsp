@@ -208,6 +208,11 @@ namespace nsp {
             return ::posix__clock_epoch();
         }
 
+        uint64_t clock_monotonic()
+        {
+            return ::posix__clock_monotonic();
+        }
+
         uint64_t gettick() {
             return ::posix__gettick();
         }

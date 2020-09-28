@@ -158,6 +158,7 @@ namespace nsp {
 		uint64_t gettick();
 		uint64_t clock_gettime();
 		uint64_t clock_epoch();
+		uint64_t clock_monotonic();
 
 		// 动态库加载例程 gcc -ldl
 		void *dlopen( const char *file );
