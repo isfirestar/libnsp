@@ -7,14 +7,18 @@
 /* bytes size of network protocol layer */
 #define MTU       			               (1500)
 
-/* common application layer protocol size(include IP layer) */
-#define UDP_PROTOCOL_LAYER_SIZE             (28)
-#define TCP_PROTOCOL_LAYER_SIZE             (40)
+#define IP_PROTOLCOL_LAYER_SIZE             (20)
 
-#define MAX_UDP_UNIT        ((MTU - UDP_PROTOCOL_LAYER_SIZE))
+/* common application layer protocol size(include IP layer) */
+#define UDP_PROTOCOL_LAYER_SIZE             (8)
+#define TCP_PROTOCOL_LAYER_SIZE             (32)
+
+#define MAX_UDP_UNIT        (MTU - IP_PROTOLCOL_LAYER_SIZE - UDP_PROTOCOL_LAYER_SIZE)
+#define MAX_TCP_UNIT        (MTU - IP_PROTOLCOL_LAYER_SIZE - TCP_PROTOCOL_LAYER_SIZE)
 
 #define IIS_MTU             (576)
-#define IIS_MAX_UDP_UNIT    ((IIS_MTU - UDP_PROTOCOL_LAYER_SIZE))
+#define IIS_MAX_UDP_UNIT    (IIS_MTU - IP_PROTOLCOL_LAYER_SIZE - UDP_PROTOCOL_LAYER_SIZE)
+#define IIS_MAX_TCP_UNIT    (IIS_MTU - IP_PROTOLCOL_LAYER_SIZE - TCP_PROTOCOL_LAYER_SIZE)
 
 /* types of nshost handle */
 typedef objhld_t HLNK;
