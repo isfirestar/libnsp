@@ -194,7 +194,7 @@ void log__printf(const char *module, enum log__levels level, int target, const p
 static
 char *log__format_string(enum log__levels level, int tid, const char* format, va_list ap, const posix__systime_t *currst, char *logstr, int cch)
 {
-    int pos;
+    int pos, n;
     char *p;
 
     if (level >= kLogLevel_Maximum || !currst || !format || !logstr) {
@@ -206,8 +206,18 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 	pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (unsigned int)(currst->low / 10000));
     pos += posix__sprintf(&p[pos], cch - pos, "%s ", LOG__LEVEL_TXT[level]);
     pos += posix__sprintf(&p[pos], cch - pos, "%04X # ", tid);
-    pos += posix__vsprintf(&p[pos], cch - pos, format, ap);
+#if _WIN32
+	n = vsnprintf(&p[pos], cch - pos - 1 - sizeof(POSIX__EOL), format, ap);
+	if (n < 0) {
+		pos = MAXIMUM_LOG_BUFFER_SIZE - 1 - sizeof(POSIX__EOL);
+	} else {
+		pos += n;
+	}
+#else
+#endif
+    /*pos += posix__vsprintf(&p[pos], cch - pos, format, ap);*/
     pos += posix__sprintf(&p[pos], cch - pos, "%s", POSIX__EOL);
+	p[pos] = 0;
 
     return p;
 }
