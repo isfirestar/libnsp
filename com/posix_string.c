@@ -345,22 +345,23 @@ PORTABLEIMPL(int) posix__vswprintf(wchar_t * const target, uint32_t cch, const w
 PORTABLEIMPL(int) posix__sprintf(char *const target, uint32_t cch, const char *fmt, ...)
 {
     va_list ap;
-	if (!target || !fmt) {
-		return -1;
-	}
+    int n;
+
     va_start(ap, fmt);
-    int retval = posix__vsprintf(target, cch, fmt, ap);
+    n = posix__vsprintf(target, cch, fmt, ap);
     va_end(ap);
-    return retval;
+    return n;
 }
 
 PORTABLEIMPL(int) posix__swprintf(wchar_t * const target, uint32_t cch, const wchar_t *fmt, ...)
 {
     va_list ap;
+    int n;
+
     va_start(ap, fmt);
-    int retval = posix__vswprintf(target, cch, fmt, ap);
+    n = posix__vswprintf(target, cch, fmt, ap);
     va_end(ap);
-    return retval;
+    return n;
 }
 
 /****************************************************************************

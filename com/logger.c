@@ -146,7 +146,7 @@ struct log_file_descriptor *log__attach(const posix__systime_t *currst, const ch
     posix__getpename2(pename, cchof(pename));
 
     /* New or any form of file switching occurs in log posts  */
-    posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log", 
+    posix__sprintf(name, cchof(name), "%s_%04u%02u%02u_%02u%02u%02u.log",
 		module, currst->year, currst->month, currst->day, currst->hour, currst->minute, currst->second);
     posix__sprintf(path, cchof(path), "%s"POSIX__DIR_SYMBOL_STR"log"POSIX__DIR_SYMBOL_STR"%s"POSIX__DIR_SYMBOL_STR, __log_root_directory, pename );
     posix__pmkdir(path);
@@ -194,7 +194,7 @@ void log__printf(const char *module, enum log__levels level, int target, const p
 static
 char *log__format_string(enum log__levels level, int tid, const char* format, va_list ap, const posix__systime_t *currst, char *logstr, int cch)
 {
-    int pos, n;
+    int pos, n, c;
     char *p;
 
     if (level >= kLogLevel_Maximum || !currst || !format || !logstr) {
@@ -206,16 +206,18 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 	pos += posix__sprintf(&p[pos], cch - pos, "%02u:%02u:%02u %04u ", currst->hour, currst->minute, currst->second, (unsigned int)(currst->low / 10000));
     pos += posix__sprintf(&p[pos], cch - pos, "%s ", LOG__LEVEL_TXT[level]);
     pos += posix__sprintf(&p[pos], cch - pos, "%04X # ", tid);
+
+    c = cch - pos - 1 - sizeof(POSIX__EOL);
+	n = vsnprintf(&p[pos], c, format, ap);
 #if _WIN32
-	n = vsnprintf(&p[pos], cch - pos - 1 - sizeof(POSIX__EOL), format, ap);
 	if (n < 0) {
+#else
+    if (n >= c) {
+#endif
 		pos = MAXIMUM_LOG_BUFFER_SIZE - 1 - sizeof(POSIX__EOL);
 	} else {
 		pos += n;
 	}
-#else
-#endif
-    /*pos += posix__vsprintf(&p[pos], cch - pos, format, ap);*/
     pos += posix__sprintf(&p[pos], cch - pos, "%s", POSIX__EOL);
 	p[pos] = 0;
 
