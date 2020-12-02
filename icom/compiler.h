@@ -27,6 +27,12 @@ _WIN64 : Defined for 64bit processor
     #endif
 #endif
 
+#if defined NISV
+#undef NISV
+#endif
+
+#define NISV 991u
+
 typedef int boolean_t;
 #if !defined __true__
     #define __true__ (1)

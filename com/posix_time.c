@@ -62,7 +62,8 @@ PORTABLEIMPL(int) posix__localtime_clock(posix__systime_t *systime)
     return 0;
 }
 
-PORTABLEIMPL(uint64_t) posix__gettick() {
+PORTABLEIMPL(uint64_t) posix__gettick()
+{
 #if _WIN32_WINNT > _WIN32_WINNT_VISTA
     return GetTickCount64();
 #else
@@ -72,17 +73,15 @@ PORTABLEIMPL(uint64_t) posix__gettick() {
 
 PORTABLEIMPL(uint64_t) posix__clock_epoch()
 {
-    SYSTEMTIME system_time;
     FILETIME file_time;
     uint64_t epoch;
 
-    GetSystemTime(&system_time);
-    if (SystemTimeToFileTime(&system_time, &file_time)) {
-        epoch = (uint64_t) ((uint64_t) file_time.dwHighDateTime << 32 | file_time.dwLowDateTime);
-        epoch -= NT_EPOCH_ESCAPE;
-        return epoch;
-    }
-    return 0;
+    /* this is the interface to obtain high resolution epcoh as file-time */
+    GetSystemTimeAsFileTime(&file_time);
+    epoch = (uint64_t)file_time.dwHighDateTime << 32;
+    epoch |= file_time.dwLowDateTime;
+    epoch -= NT_EPOCH_ESCAPE;
+    return epoch;
 }
 
 PORTABLEIMPL(uint64_t) posix__clock_gettime()
