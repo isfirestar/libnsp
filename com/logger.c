@@ -448,7 +448,6 @@ PORTABLEIMPL(void) log__flush()
 
         posix__pthread_mutex_lock(&__log_async.lock);
         if (!list_empty(&__log_async.busy)) {
-            posix__atomic_dec(&__log_async.pending);
             node = list_first_entry(&__log_async.busy, struct log_async_node, link);
             assert(node);
         }
@@ -456,9 +455,10 @@ PORTABLEIMPL(void) log__flush()
 
         if (node) {
             log__printf(node->module, node->level, node->target, &node->timestamp, node->logstr, (int) strlen(node->logstr));
-
             /* recycle node from busy queue to idle list */
             log__recycle_async_node(node);
+            /* reduce the pending count */
+            posix__atomic_dec(&__log_async.pending);
         }
     } while (node);
 }
