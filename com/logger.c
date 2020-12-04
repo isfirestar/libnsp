@@ -38,8 +38,7 @@ static posix__pthread_mutex_t __log_file_lock;
 static char __log_root_directory[MAXPATH] = { 0 };
 
 struct log_async_node {
-    struct list_head asnyc_link;
-    struct list_head cache_link;
+    struct list_head link;
     char logstr[MAXIMUM_LOG_BUFFER_SIZE];
     int target;
     posix__systime_t timestamp;
@@ -49,10 +48,9 @@ struct log_async_node {
 
 struct log_async_context {
     int pending;
-    struct list_head free_cache_head;
-    struct list_head busy_cache_head;
-    posix__pthread_mutex_t async_lock;
-    posix__pthread_mutex_t cache_lock;
+    struct list_head idle;
+    struct list_head busy;
+    posix__pthread_mutex_t lock;
     posix__pthread_t async_thread;
     posix__waitable_handle_t notify;
     struct log_async_node *misc_memory;
@@ -225,25 +223,26 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 }
 
 static
-struct log_async_node *log__get_async_node()
+struct log_async_node *log__get_idle_node()
 {
     struct log_async_node *node;
 
     node = NULL;
 
-    posix__pthread_mutex_lock(&__log_async.cache_lock);
+    posix__pthread_mutex_lock(&__log_async.lock);
 
     do {
-        if (list_empty(&__log_async.free_cache_head)) {
+        if (list_empty(&__log_async.idle)) {
             break;
         }
 
-        node = list_first_entry(&__log_async.free_cache_head, struct log_async_node, cache_link);
+        node = list_first_entry(&__log_async.idle, struct log_async_node, link);
         assert(node);
-        list_del_init(&node->cache_link);
-        list_add_tail(&node->cache_link, &__log_async.busy_cache_head);
+        list_del_init(&node->link);
+        /* do NOT add node into busy queue now, data are not ready.
+        list_add_tail(&node->link, &__log_async.busy); */
     } while(0);
-    posix__pthread_mutex_unlock(&__log_async.cache_lock);
+    posix__pthread_mutex_unlock(&__log_async.lock);
 
     return node;
 }
@@ -252,10 +251,10 @@ static
 void log__recycle_async_node(struct log_async_node *node)
 {
     assert(node);
-    posix__pthread_mutex_lock(&__log_async.cache_lock);
-    list_del_init(&node->cache_link);
-    list_add_tail(&node->cache_link, &__log_async.free_cache_head);
-    posix__pthread_mutex_unlock(&__log_async.cache_lock);
+    posix__pthread_mutex_lock(&__log_async.lock);
+    list_del_init(&node->link);
+    list_add_tail(&node->link, &__log_async.idle);
+    posix__pthread_mutex_unlock(&__log_async.lock);
 }
 
 static
@@ -284,27 +283,25 @@ int log__async_init()
     }
     memset(__log_async.misc_memory, 0, misc_memory_size);
 
-    INIT_LIST_HEAD(&__log_async.free_cache_head);
-    INIT_LIST_HEAD(&__log_async.busy_cache_head);
+    INIT_LIST_HEAD(&__log_async.idle);
+    INIT_LIST_HEAD(&__log_async.busy);
 
-    posix__pthread_mutex_init(&__log_async.async_lock);
-    posix__pthread_mutex_init(&__log_async.cache_lock);
+    posix__pthread_mutex_init(&__log_async.lock);
 
     posix__init_synchronous_waitable_handle(&__log_async.notify);
 
+    /* all miscellaneous memory nodes are inital adding to free list */
+    for (i = 0; i < MAXIMUM_LOGSAVE_COUNT; i++) {
+        list_add_tail(&__log_async.misc_memory[i].link, &__log_async.idle);
+    }
+
     if (posix__pthread_create(&__log_async.async_thread, &log__async_proc, NULL) < 0) {
-        posix__pthread_mutex_release(&__log_async.async_lock);
+        posix__pthread_mutex_release(&__log_async.lock);
         posix__uninit_waitable_handle(&__log_async.notify);
         free(__log_async.misc_memory);
         __log_async.misc_memory = NULL;
         return -1;
     }
-
-    /* all miscellaneous memory nodes are inital adding to free list */
-    for (i = 0; i < MAXIMUM_LOGSAVE_COUNT; i++) {
-        list_add_tail(&__log_async.misc_memory[i].cache_link, &__log_async.free_cache_head);
-    }
-
     return 0;
 }
 
@@ -416,7 +413,7 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     }
 
     /* hash node at index of memory block */
-    if ( NULL == (node = log__get_async_node()) ) {
+    if ( NULL == (node = log__get_idle_node()) ) {
         return;
     }
     node->target = target;
@@ -436,9 +433,9 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     log__format_string(node->level, posix__gettid(), format, ap, &node->timestamp, node->logstr, sizeof (node->logstr));
     va_end(ap);
 
-    posix__pthread_mutex_lock(&__log_async.async_lock);
-    list_add_tail(&node->asnyc_link, &__log_async.busy_cache_head);
-    posix__pthread_mutex_unlock(&__log_async.async_lock);
+    posix__pthread_mutex_lock(&__log_async.lock);
+    list_add_tail(&node->link, &__log_async.busy);
+    posix__pthread_mutex_unlock(&__log_async.lock);
     posix__sig_waitable_handle(&__log_async.notify);
 }
 
@@ -449,17 +446,18 @@ PORTABLEIMPL(void) log__flush()
     do {
         node = NULL;
 
-        posix__pthread_mutex_lock(&__log_async.async_lock);
-        if (!list_empty(&__log_async.busy_cache_head)) {
+        posix__pthread_mutex_lock(&__log_async.lock);
+        if (!list_empty(&__log_async.busy)) {
             posix__atomic_dec(&__log_async.pending);
-            node = list_first_entry(&__log_async.busy_cache_head, struct log_async_node, asnyc_link);
+            node = list_first_entry(&__log_async.busy, struct log_async_node, link);
             assert(node);
-            list_del_init(&node->asnyc_link);
         }
-        posix__pthread_mutex_unlock(&__log_async.async_lock);
+        posix__pthread_mutex_unlock(&__log_async.lock);
 
         if (node) {
             log__printf(node->module, node->level, node->target, &node->timestamp, node->logstr, (int) strlen(node->logstr));
+
+            /* recycle node from busy queue to idle list */
             log__recycle_async_node(node);
         }
     } while (node);

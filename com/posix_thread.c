@@ -254,13 +254,15 @@ int posix__pthread_critical_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 {
     int retval;
     pthread_attr_t attr;
+    struct sched_param param;
 
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
 
     pthread_attr_init(&attr);
-    if (0 != (retval = pthread_attr_setschedpolicy(&attr, SCHED_RR)) ) {
-        return posix__makeerror(retval);
-    }
+    pthread_attr_setschedpolicy(&attr, SCHED_RR);
+    param.sched_priority = 51;
+    pthread_attr_setschedparam(&attr,&param);
+    pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
 
     tidp->detached_ = NO;
     retval = pthread_create(&tidp->pid_, &attr, start_rtn, arg);
@@ -273,15 +275,17 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
 {
     int retval;
     pthread_attr_t attr;
+    struct sched_param param;
 
     __POSIX_EFFICIENT_ALIGNED_PTR_IR__(tidp);
 
-    pthread_attr_init(&attr);
     /* raiseup policy for realtime thread */
     if (0 == nice(-5)) {
-        if (0 != (retval = pthread_attr_setschedpolicy(&attr, SCHED_FIFO)) ) {
-            return posix__makeerror(retval);
-        }
+        pthread_attr_init(&attr);
+        pthread_attr_setschedpolicy(&attr, /* SCHED_FIFO */SCHED_RR);
+        param.sched_priority = 21;
+        pthread_attr_setschedparam(&attr,&param);
+        pthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);
     }
 
     tidp->detached_ = NO;
