@@ -223,7 +223,7 @@ char *log__format_string(enum log__levels level, int tid, const char* format, va
 }
 
 static
-struct log_async_node *log__get_idle_node()
+struct log_async_node *log__get_idle_cache_node()
 {
     struct log_async_node *node;
 
@@ -248,7 +248,7 @@ struct log_async_node *log__get_idle_node()
 }
 
 static
-void log__recycle_async_node(struct log_async_node *node)
+void log__recycle_cache_node(struct log_async_node *node)
 {
     assert(node);
     posix__pthread_mutex_lock(&__log_async.lock);
@@ -413,7 +413,7 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     }
 
     /* hash node at index of memory block */
-    if ( NULL == (node = log__get_idle_node()) ) {
+    if ( NULL == (node = log__get_idle_cache_node()) ) {
         return;
     }
     node->target = target;
@@ -456,7 +456,7 @@ PORTABLEIMPL(void) log__flush()
         if (node) {
             log__printf(node->module, node->level, node->target, &node->timestamp, node->logstr, (int) strlen(node->logstr));
             /* recycle node from busy queue to idle list */
-            log__recycle_async_node(node);
+            log__recycle_cache_node(node);
             /* reduce the pending count */
             posix__atomic_dec(&__log_async.pending);
         }

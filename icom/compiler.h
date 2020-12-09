@@ -27,6 +27,10 @@ _WIN64 : Defined for 64bit processor
     #endif
 #endif
 
+#if !defined STD_CALL
+#define STD_CALL __stdcall /* compatible with nshost 9.8 */
+#endif
+
 #if defined NISV
 #undef NISV
 #endif
@@ -160,7 +164,7 @@ typedef int boolean_t;
     #if _WIN32
         #define __always_inline __forceinline
     #else
-        #define __always_inline inline
+        #define __always_inline static inline
     #endif
 #endif
 
