@@ -8,6 +8,7 @@
 #define PORTABLEIMPL(__type__)   __type__ STDCALL
 
 #if _WIN32
+#include <windows.h>
 #define posix__atomic_get(ptr)					InterlockedExchangeAdd((volatile LONG *)ptr, 0)
 #define posix__atomic_get64(ptr)					InterlockedExchangeAdd64((volatile LONG64 *)ptr, 0)
 #define posix__atomic_set(ptr, value)       InterlockedExchange(( LONG volatile *)ptr, (LONG)value)
@@ -35,10 +36,8 @@ struct nis_endpoint_v4 {
 #else
 #define __export__ __attribute__((visibility("default")))
 #endif
-#endif
+#endif /* !__export__ */
 
-#endif
+#endif /* NISV < 991 */
 
-
-
-#endif
+#endif /* !NIS_COMPATIBLE_H */

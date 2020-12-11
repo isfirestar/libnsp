@@ -154,7 +154,7 @@ namespace nsp {
                     T item;
                     stream_pos = item.build(stream_pos, cb);
                     if (!stream_pos) return nullptr;
-                    this->push_back(std::move(item));
+                    this->push_back(item);
                 }
                 return stream_pos;
             }
@@ -334,11 +334,11 @@ namespace nsp {
             proto_array_t() {
 				;
             }
-			
+
 			proto_array_t(const proto_array_t<T,N,proto_container> &lref ) {
 				memcpy(ay_, lref.ay_, N);
 			}
-			
+
 			proto_array_t(const T *ptr, uint32_t n) {
 				for ( uint32_t i = 0; i < N; i++ ) {
 					ay_[i] = ptr[i];
