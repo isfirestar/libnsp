@@ -18,6 +18,7 @@
 PORTABLEAPI(int) tcp_init();
 PORTABLEAPI(void) tcp_uninit();
 PORTABLEAPI(HTCPLINK) tcp_create(tcp_io_callback_t callback, const char* ipstr, uint16_t port);
+PORTABLEAPI(HTCPLINK) tcp_create2(tcp_io_callback_t callback, const char* ipstr, uint16_t port, const tst_t *tst);
 PORTABLEAPI(void) tcp_destroy(HTCPLINK link);
 PORTABLEAPI(int) tcp_connect(HTCPLINK link, const char* ipstr, uint16_t port);
 PORTABLEAPI(int) tcp_connect2(HTCPLINK link, const char* ipstr, uint16_t port);
