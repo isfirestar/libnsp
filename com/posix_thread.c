@@ -125,7 +125,17 @@ PORTABLEIMPL(int) posix__pthread_setaffinity(const posix__pthread_t *tidp, int m
 
 PORTABLEIMPL(int) posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask)
 {
-    return -1;
+    DWORD_PTR ProcessAffinityMask, SystemAffinityMask;
+
+    if (!GetProcessAffinityMask(tidp->pid_, &ProcessAffinityMask, &SystemAffinityMask)) {
+        return posix__makeerror(GetLastError());
+    }
+
+    if (mask) {
+        *mask = ProcessAffinityMask;
+    }
+
+    return 0;
 }
 
 PORTABLEIMPL(int) posix__pthread_detach(posix__pthread_t * tidp)
@@ -295,44 +305,57 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     return posix__makeerror(retval);
 }
 
-int posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask)
+PORTABLEIMPL(int) posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask)
 {
     int i;
-    cpu_set_t cpus;
+    cpu_set_t cpuset;
     int retval;
 
     if (0 == mask) {
         return -1;
     }
 
-    CPU_ZERO(&cpus);
+    CPU_ZERO(&cpuset);
 
     for (i = 0; i < 32; i++) {
         if (mask & (1 << i)) {
-            CPU_SET(i, &cpus);
+            CPU_SET(i, &cpuset);
         }
     }
 
-    retval = pthread_setaffinity_np(tidp->pid_, sizeof(cpu_set_t), &cpus);
-    return posix__makeerror(retval);
+    retval = pthread_setaffinity_np(tidp->pid_, sizeof(cpu_set_t), &cpuset);
+    if (0 != retval) {
+        return posix__makeerror(retval);
+    }
+
+    /* verify */
+    for (i = 0; i < 32; i++) {
+        if (cpumask & BITMSK[i]) {
+            if (!CPU_ISSET(i, &cpuset)) {
+                return -1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 int posix__pthread_getaffinity(const posix__pthread_t *tidp, int *mask)
 {
     int i;
-    cpu_set_t cpus;
+    cpu_set_t cpuset;
     int n;
     int retval;
 
     n = 0;
-    CPU_ZERO(&cpus);
-    retval = pthread_getaffinity_np(0, sizeof(cpu_set_t), &cpus);
+    CPU_ZERO(&cpuset);
+    retval = pthread_getaffinity_np(tidp->pid_, sizeof(cpu_set_t), &cpuset);
     if ( 0 != retval ) {
         return posix__makeerror(retval);
     }
 
     for (i = 0; i < 32; i++) {
-        if(CPU_ISSET(i, &cpus)) {
+        if(CPU_ISSET(i, &cpuset)) {
             n |= (1 << i);
         }
     }

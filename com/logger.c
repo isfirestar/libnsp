@@ -401,10 +401,13 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     va_list ap;
     struct log_async_node *node;
     char pename[MAXPATH], *p;
+    posix__systime_t currst;
 
     if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
     }
+
+    posix__localtime(&currst);
 
     /* securt check for the maximum pending amount */
     if (posix__atomic_inc(&__log_async.pending) >= MAXIMUM_LOGSAVE_COUNT) {
@@ -418,7 +421,7 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     }
     node->target = target;
     node->level = level;
-    posix__localtime(&node->timestamp);
+    memcpy(&node->timestamp, &currst, sizeof(currst));
 
     if (module) {
         posix__strcpy(node->module, cchof(node->module), module);

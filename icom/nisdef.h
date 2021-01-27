@@ -250,9 +250,7 @@ typedef struct __packet_grp packet_grp_t;
 
 /* the local version of nshost shared library */
 struct __swnet_version {
-    short major_;
-    short minor_;
-    short revision_;
+    char compile_date[128];
 } __POSIX_TYPE_ALIGNED__;
 typedef struct __swnet_version swnet_version_t;
 
