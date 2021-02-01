@@ -305,20 +305,20 @@ int posix__pthread_realtime_create(posix__pthread_t * tidp, void*(*start_rtn)(vo
     return posix__makeerror(retval);
 }
 
-PORTABLEIMPL(int) posix__pthread_setaffinity(const posix__pthread_t *tidp, int mask)
+PORTABLEIMPL(int) posix__pthread_setaffinity(const posix__pthread_t *tidp, int cpumask)
 {
     int i;
     cpu_set_t cpuset;
     int retval;
 
-    if (0 == mask) {
+    if (0 == cpumask) {
         return -1;
     }
 
     CPU_ZERO(&cpuset);
 
     for (i = 0; i < 32; i++) {
-        if (mask & (1 << i)) {
+        if (cpumask & (1 << i)) {
             CPU_SET(i, &cpuset);
         }
     }
@@ -330,7 +330,7 @@ PORTABLEIMPL(int) posix__pthread_setaffinity(const posix__pthread_t *tidp, int m
 
     /* verify */
     for (i = 0; i < 32; i++) {
-        if (cpumask & BITMSK[i]) {
+        if (cpumask & (1 << i)) {
             if (!CPU_ISSET(i, &cpuset)) {
                 return -1;
             }
