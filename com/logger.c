@@ -274,37 +274,45 @@ int log__async_init()
 }
 
 static
-void log__create_log_directory(const char *rootdir)
+void log__change_rootdir(const char *rootdir)
 {
 	size_t pos, i;
 
-    if (rootdir) {
-		posix__strcpy(__log_root_directory, cchof(__log_root_directory), rootdir);
-        pos = strlen(__log_root_directory);
-        for (i = pos - 1; i >= 0; i--) {
-            if (__log_root_directory[i] == POSIX__DIR_SYMBOL) {
-                __log_root_directory[i] = 0;
-            } else {
-                break;
-            }
+    /* cover root directory to PE path only log__init first time called */
+    if (!rootdir) {
+        if (0 == __log_root_directory[0]) {
+            posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
         }
-
-		if (posix__pmkdir(__log_root_directory) < 0) {
-			posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
-		}
-	} else {
-		posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+        return;
 	}
+
+    /* log__init2 has ability to change root directory any time */
+    posix__strcpy(__log_root_directory, cchof(__log_root_directory), rootdir);
+    pos = strlen(__log_root_directory);
+    for (i = pos - 1; i >= 0; i--) {
+        if (__log_root_directory[i] == POSIX__DIR_SYMBOL) {
+            __log_root_directory[i] = 0;
+        } else {
+            break;
+        }
+    }
+
+    if (posix__pmkdir(__log_root_directory) < 0) {
+        posix__getpedir2(__log_root_directory, sizeof(__log_root_directory));
+    }
 }
 
-static int __log__init()
+static int __log__init(const char *rootdir)
 {
     posix__atomic_initial_declare_variable(__inited__);
+
+    log__change_rootdir(rootdir);
 
     if (posix__atomic_initial_try(&__inited__)) {
         /* initial global context */
         posix__pthread_mutex_init(&__log_file_lock);
-
+        /* change root directory to specified path */
+        log__change_rootdir(rootdir);
         /* allocate the async node pool */
         if ( log__async_init() < 0 ) {
             posix__pthread_mutex_release(&__log_file_lock);
@@ -319,13 +327,12 @@ static int __log__init()
 
 int log__init()
 {
-	return log__init2(NULL);
+	return __log__init(NULL);
 }
 
 int log__init2(const char *rootdir)
 {
-    log__create_log_directory(rootdir);
-	return __log__init();
+	return __log__init(rootdir);
 }
 
 void log__write(const char *module, enum log__levels level, int target, const char *format, ...)
@@ -335,7 +342,7 @@ void log__write(const char *module, enum log__levels level, int target, const ch
     posix__systime_t currst;
     char pename[MAXPATH], *p;
 
-    if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
+    if (log__init(NULL) < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
     }
 
@@ -366,7 +373,7 @@ void log__save(const char *module, enum log__levels level, int target, const cha
     uint64_t index;
     char pename[MAXPATH], *p;
 
-    if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
+    if (log__init(NULL) < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
     }
 
