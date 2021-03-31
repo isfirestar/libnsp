@@ -4,21 +4,21 @@
 #include "compiler.h"
 #include "object.h"
 
-/* bytes size of network protocol layer */
-#define MTU       			               (1500)
+/* data-link layer restriction */
+#define ETHER_LAYER_SIZE  (14)
 
-#define IP_PROTOLCOL_LAYER_SIZE             (20)
-
-/* common application layer protocol size(include IP layer) */
-#define UDP_PROTOCOL_LAYER_SIZE             (8)
-#define TCP_PROTOCOL_LAYER_SIZE             (32)
-
-#define MAX_UDP_UNIT        (MTU - IP_PROTOLCOL_LAYER_SIZE - UDP_PROTOCOL_LAYER_SIZE)
-#define MAX_TCP_UNIT        (MTU - IP_PROTOLCOL_LAYER_SIZE - TCP_PROTOCOL_LAYER_SIZE)
-
+/* IP protocol restrict */
+#define MTU     (1500)
+#define IP_LATER_SIZE   (20)
+#define UDP_LAYER_SIZE  (8)
+#define TCP_LAYER_SIZE  (20)
+/* 1472 */
+#define MAX_UDP_UNIT        (MTU - IP_LATER_SIZE - UDP_LAYER_SIZE)
+/* 1460 */
+#define MAX_TCP_UNIT        (MTU - IP_LATER_SIZE - TCP_LAYER_SIZE)
 #define IIS_MTU             (576)
-#define IIS_MAX_UDP_UNIT    (IIS_MTU - IP_PROTOLCOL_LAYER_SIZE - UDP_PROTOCOL_LAYER_SIZE)
-#define IIS_MAX_TCP_UNIT    (IIS_MTU - IP_PROTOLCOL_LAYER_SIZE - TCP_PROTOCOL_LAYER_SIZE)
+#define IIS_MAX_UDP_UNIT    (IIS_MTU - IP_LATER_SIZE - UDP_LAYER_SIZE)
+#define IIS_MAX_TCP_UNIT    (IIS_MTU - IP_LATER_SIZE - TCP_LAYER_SIZE)
 
 /* types of nshost handle */
 typedef objhld_t HLNK;

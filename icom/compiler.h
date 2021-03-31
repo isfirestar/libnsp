@@ -27,8 +27,12 @@ _WIN64 : Defined for 64bit processor
     #endif
 #endif
 
-#if !defined STD_CALL
-#define STD_CALL __stdcall /* compatible with nshost 9.8 */
+#if !defined STD_CALL /* compatible with nshost 9.8 */
+    #if _WIN32 && _M_X64
+        #define STD_CALL __stdcall
+    #else
+        #define STD_CALL
+    #endif
 #endif
 
 #if defined NISV
