@@ -20,6 +20,11 @@
 
 /* maximum asynchronous cache */
 #define MAXIMUM_LOGSAVE_COUNT       (500)
+#define SAFE_LOGSAVE_COUNT          (100)
+#define WARNING_LOGSAVE_COUNT       (400)
+
+#define LOGSAVE_PENDING_SAFE     (0)
+#define LOGSAVE_PENDING_DANGER   (1)
 
 static const char *LOG__LEVEL_TXT[] = {
     "info", "warning", "error", "fatal", "trace"
@@ -48,6 +53,7 @@ struct log_async_node {
 
 struct log_async_context {
     int pending;
+    int warning;  /* log save pending warning */
     struct list_head idle;
     struct list_head busy;
     posix__pthread_mutex_t lock;
@@ -402,6 +408,7 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     struct log_async_node *node;
     char pename[MAXPATH], *p;
     posix__systime_t currst;
+    int pending;
 
     if (log__init() < 0 || !format || level >= kLogLevel_Maximum || level < 0) {
         return;
@@ -410,9 +417,16 @@ PORTABLEIMPL(void) log__save(const char *module, enum log__levels level, int tar
     posix__localtime(&currst);
 
     /* securt check for the maximum pending amount */
-    if (posix__atomic_inc(&__log_async.pending) >= MAXIMUM_LOGSAVE_COUNT) {
+    pending = posix__atomic_inc(&__log_async.pending);
+    if ( pending >= MAXIMUM_LOGSAVE_COUNT) {
         posix__atomic_dec(&__log_async.pending);
         return;
+    }
+
+    /* increase the warning status to @danger */
+    if (pending >= WARNING_LOGSAVE_COUNT && LOGSAVE_PENDING_SAFE == posix__atomic_get(&__log_async.warning) ) {
+        posix__atomic_set(&__log_async.warning, LOGSAVE_PENDING_DANGER);
+        posix__syslog("nshost asynchronous journal discard warning!");
     }
 
     /* hash node at index of memory block */
@@ -460,8 +474,12 @@ PORTABLEIMPL(void) log__flush()
             log__printf(node->module, node->level, node->target, &node->timestamp, node->logstr, (int) strlen(node->logstr));
             /* recycle node from busy queue to idle list */
             log__recycle_cache_node(node);
-            /* reduce the pending count */
-            posix__atomic_dec(&__log_async.pending);
+            /* reduce the pending count and deduce the warning statues to @safe*/
+            if (posix__atomic_dec(&__log_async.pending) < SAFE_LOGSAVE_COUNT && LOGSAVE_PENDING_DANGER == posix__atomic_get(&__log_async.warning) ) {
+                posix__atomic_set(&__log_async.warning, LOGSAVE_PENDING_SAFE);
+                posix__syslog("nshost asynchronous journal discard warning relieve");
+            }
         }
+
     } while (node);
 }
