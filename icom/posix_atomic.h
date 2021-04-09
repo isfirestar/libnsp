@@ -18,7 +18,7 @@
 #define posix__atomic_xchange(ptr, val)       InterlockedExchange(( LONG volatile *) ptr, (LONG)val)
 #define posix__atomic_xchange64(ptr, val)       InterlockedExchange64(( LONG64 volatile *) ptr, (LONG64)val)
 #define posix__atomic_compare_xchange(ptr, oldval,  newval) InterlockedCompareExchange( ( LONG volatile *)ptr, (LONG)newval, (LONG)oldval )
-#define posix__atomic_compare_xchange64(ptr, oldval,  newval) InterlockedCompareExchange( ( LONG64 volatile *)ptr, (LONG64)newval, (LONG64)oldval )
+#define posix__atomic_compare_xchange64(ptr, oldval,  newval) InterlockedCompareExchange64( ( LONG64 volatile *)ptr, (LONG64)newval, (LONG64)oldval )
 #define posix__atomic_ptr_xchange(ptr, val)     InterlockedExchangePointer((PVOID volatile* )tar, (PVOID)src)
 #define posix__atomic_compare_ptr_xchange(ptr, oldptr, newptr) InterlockedCompareExchangePointer((PVOID volatile*)ptr, (PVOID)newptr, (PVOID)oldptr)
 
