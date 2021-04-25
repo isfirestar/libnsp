@@ -249,6 +249,8 @@ namespace nsp {
             }
         };
 
+        typedef tcp_application_client<nsp::proto::nspdef::protocol> nsp_application_client;
+
         class udp_application_client : public obudp {
         public:
             udp_application_client() : obudp() {
