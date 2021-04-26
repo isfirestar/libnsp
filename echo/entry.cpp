@@ -20,7 +20,8 @@ int main(int argc, char **argv)
 	}
 
 	if (type == SESS_TYPE_SERVER) {
-		return 0;
+		loerror("nstest") << "nstest server did NOT support now.";
+		return 1;
 	}
 
 	if (type == SESS_TYPE_CLIENT) {
@@ -30,7 +31,7 @@ int main(int argc, char **argv)
 				throw -ENOLINK;
 			}
 		} catch (...) {
-			loerror("nstest") << "exception catched when building client shared-ptr";
+			loerror("nstest") << "exception catched when building client shared-ptr.";
 			return 1;
 		}
 
