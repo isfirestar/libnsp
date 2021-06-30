@@ -77,6 +77,8 @@ struct nis_inet_tuple_v4 {
 #define NI_SETTST       (5)
 #define NI_GETTST       (6)
 #define NI_DUPCTX       (7)	/* not used */
+#define NI_RISECTX      (8)
+#define NI_SINKCTX      (9)
 
 /* the dotted decimal notation for IPv4 or IPv6 */
 struct nis_inet_addr {

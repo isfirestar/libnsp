@@ -316,6 +316,14 @@ PORTABLEAPI(int) nis_getifmac(char *eth_name, unsigned char *pyhaddr);
  *	NI_GETTST(tst_t *)
  *		get the tcp stream template of specify object current set
  *
+ *	attributes added after version 991
+ *	NI_RISECTX(void **)
+ *	NI_SINKCTX(void)
+ *		these two attributes use to resolve the problem during using  @NI_GETCTX, take account of the follow scenario:
+ *		one thread call @NI_GETCTX and obtain the context pointer--with lockless, but another thread trigger the link close event.
+ *		in this situation, wild pointer obtained by the first thread may cause application crash.
+ *		by use @NI_RISECTX instead, framework shall automatic raise up the reference count of link and then prevent the link closed by any event.
+ *		but calling thread has responsibility to explicit invoke @NI_SINKCTX to release the reference count of this link.
  */
 PORTABLEAPI(int) nis_cntl(objhld_t link, int cmd, ...);
 
